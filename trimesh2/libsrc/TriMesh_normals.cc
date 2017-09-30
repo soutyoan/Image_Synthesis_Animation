@@ -79,7 +79,7 @@ void TriMesh::need_normals()
 	} else {
 		// Find normals of a point cloud
 		const int k = 6;
-		const vec ref(0, 0, 1);
+		const vec ref(0, 0, 1, 0);
 		KDtree kd(vertices);
 #pragma omp parallel for
 		for (int i = 0; i < nv; i++) {
@@ -103,7 +103,7 @@ void TriMesh::need_normals()
 			}
 			float e[3];
 			eigdc<float,3>(C, e);
-			normals[i] = vec(C[0][0], C[1][0], C[2][0]);
+			normals[i] = vec(C[0][0], C[1][0], C[2][0], 0.);
 			if ((normals[i] DOT ref) < 0.0f)
 				normals[i] = -normals[i];
 		}

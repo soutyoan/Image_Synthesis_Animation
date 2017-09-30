@@ -147,7 +147,7 @@ public:
 	}
 };
 
-typedef Box<3,float> box;
+typedef Box<4,float> box;
 typedef Box<2,float> box2;
 typedef Box<3,float> box3;
 typedef Box<4,float> box4;

@@ -46,7 +46,7 @@ void TriMesh::need_bsphere()
 	Miniball<3,float> mb;
 	mb.check_in(vertices.begin(), vertices.end());
 	mb.build();
-	bsphere.center = mb.center();
+	bsphere.center = vec(mb.center()[0], mb.center()[1], mb.center()[2], 1.);
 	bsphere.r = sqrt(mb.squared_radius());
 	bsphere.valid = true; 
 

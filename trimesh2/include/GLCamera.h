@@ -54,12 +54,12 @@ private:
 			 const point &scene_center, float scene_size);
 
 public:
-	GLCamera() : lastb(Mouse::NONE), lightdir(vec(0,0,1)),
+	GLCamera() : lastb(Mouse::NONE), lightdir(vec(0,0,1,0)),
 		     dospin(false), spinspeed(0),
 		     constraint_(UNCONSTRAINED), field_of_view(0.7f),
 		     surface_depth(0.0f), click_depth(0.0f)
 	{
-		lightdir[0] = lightdir[1] = 0; lightdir[2] = 1;
+		lightdir[0] = lightdir[1] = 0; lightdir[2] = 1; lightdir[3] = 0;
 		last_time = now();
 	}
 

@@ -464,13 +464,23 @@ static inline void orthogonalize(XForm<T> &xf)
 template <class S, class T>
 static inline const S operator * (const XForm<T> &xf, const S &v)
 {
+	// 4d vectors:
+	T v0 = T(v[0]), v1 = T(v[1]), v2 = T(v[2]), v3 = T(v[3]); 
+	typedef typename S::value_type Stype;
+	return S(Stype(xf[0] * v0 + xf[4] * v1 + xf[8] * v2 + xf[12] * v3),
+	         Stype(xf[1] * v0 + xf[5] * v1 + xf[9] * v2 + xf[13] * v3),
+	         Stype(xf[2] * v0 + xf[6] * v1 + xf[10] * v2 + xf[14] * v3), 
+	         Stype(xf[3] * v0 + xf[7] * v1 + xf[11] * v2 + xf[15] * v3));
+	
+	// 3d vectors * 4x4 matrices:
+	/*
 	T v0 = T(v[0]), v1 = T(v[1]), v2 = T(v[2]);
 	T h = T(1) / (xf[3] * v0 + xf[7] * v1 + xf[11] * v2 + xf[15]);
 
-	typedef typename S::value_type Stype;
 	return S(Stype(h*(xf[0] * v0 + xf[4] * v1 + xf[8] * v2 + xf[12])),
 	         Stype(h*(xf[1] * v0 + xf[5] * v1 + xf[9] * v2 + xf[13])),
 	         Stype(h*(xf[2] * v0 + xf[6] * v1 + xf[10] * v2 + xf[14])));
+	         */
 }
 
 // iostream operators

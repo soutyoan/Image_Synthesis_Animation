@@ -29,28 +29,28 @@ what is actually implemented for the conversions:
 
 namespace trimesh {
 
-class Color : public Vec<3,float> {
+class Color : public Vec<4,float> {
 public:
 	Color()
 		{}
-	Color(const Vec<3,float> &v_) : Vec<3,float>(v_)
+	Color(const Vec<4,float> &v_) : Vec<4,float>(v_)
 		{}
-	Color(const Vec<3,double> &v_) : Vec<3,float>((float)v_[0], (float)v_[1], (float)v_[2])
+	Color(const Vec<4,double> &v_) : Vec<4,float>((float)v_[0], (float)v_[1], (float)v_[2], (float)v_[3])
 		{}
-	Color(float r, float g, float b) : Vec<3,float>(r,g,b)
+	Color(float r, float g, float b) : Vec<4,float>(r,g,b, 1)
 		{}
-	Color(double r, double g, double b) : Vec<3,float>((float)r, (float)g, (float)b)
+	Color(double r, double g, double b) : Vec<4,float>((float)r, (float)g, (float)b, 1.0)
 		{}
-	explicit Color(const float *rgb) : Vec<3,float>(rgb[0], rgb[1], rgb[2])
+	explicit Color(const float *rgb) : Vec<4,float>(rgb[0], rgb[1], rgb[2], 1.0)
 		{}
-	explicit Color(const double *rgb) : Vec<3,float>((float)rgb[0], (float)rgb[1], (float)rgb[2])
+	explicit Color(const double *rgb) : Vec<4,float>((float)rgb[0], (float)rgb[1], (float)rgb[2], 1.0)
 		{}
 
 	// Implicit conversion from float would be bad, so we have an
 	// explicit constructor and an assignment statement.
-	explicit Color(float c) : Vec<3,float>(c,c,c)
+	explicit Color(float c) : Vec<4,float>(c,c,c, 1)
 		{}
-	explicit Color(double c) : Vec<3,float>((float)c, (float)c, (float)c)
+	explicit Color(double c) : Vec<4,float>((float)c, (float)c, (float)c, 1.)
 		{}
 	Color &operator = (float c)
 		{ return *this = Color(c); }

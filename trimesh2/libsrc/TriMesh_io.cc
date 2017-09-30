@@ -679,7 +679,7 @@ static bool read_vvd(FILE *f, TriMesh *mesh)
 			swap_double(v[1]);
 			swap_double(v[2]);
 		}
-		mesh->vertices[i] = point(float(v[0]), float(v[1]), float(v[2]));
+		mesh->vertices[i] = point(float(v[0]), float(v[1]), float(v[2]), 1.0);
 	}
 
 	int nfaces;
@@ -711,7 +711,7 @@ static bool read_ray(FILE *f, TriMesh *mesh)
 			if (fscanf(f, "%f %f %f", &x, &y, &z) != 3) {
 				return false;
 			}
-			mesh->vertices.push_back(point(x,y,z));
+			mesh->vertices.push_back(point(x,y,z, 1.));
 		} else if (LINE_IS("#shape_triangle")) {
 			int f1, f2, f3, m;
 			if (fscanf(f, "%d %d %d %d", &m, &f1, &f2, &f3) != 4) {
@@ -754,7 +754,7 @@ static bool read_obj(FILE *f, TriMesh *mesh)
             if (sscanf(buf+1, "%f %f %f", &x, &y, &z) != 3) {
                 return false;
             }
-            mesh->vertices.push_back(point(x,y,z));
+            mesh->vertices.push_back(point(x,y,z, 1.));
         } else if (LINE_IS("vt ") || LINE_IS("vt\t")) {
             // textures coord
             float u, v;
@@ -769,7 +769,7 @@ static bool read_obj(FILE *f, TriMesh *mesh)
             if (sscanf(buf+2, "%f %f %f", &x, &y, &z) != 3) {
                 return false;
             }
-            mesh->normals.push_back(vec(x,y,z));
+            mesh->normals.push_back(vec(x,y,z,1.));
         } else if (LINE_IS("f ") || LINE_IS("f\t") ||
                    LINE_IS("t ") || LINE_IS("t\t")) {
             thisface.clear();
@@ -884,9 +884,9 @@ static bool read_stl(FILE *f, TriMesh *mesh)
 				swap_float(fbuf[j]);
 		}
 		int v = mesh->vertices.size();
-		mesh->vertices.push_back(point(fbuf[3], fbuf[4], fbuf[5]));
-		mesh->vertices.push_back(point(fbuf[6], fbuf[7], fbuf[8]));
-		mesh->vertices.push_back(point(fbuf[9], fbuf[10], fbuf[11]));
+		mesh->vertices.push_back(point(fbuf[3], fbuf[4], fbuf[5], 1.));
+		mesh->vertices.push_back(point(fbuf[6], fbuf[7], fbuf[8], 1.));
+		mesh->vertices.push_back(point(fbuf[9], fbuf[10], fbuf[11], 1.));
 		mesh->faces.push_back(TriMesh::Face(v, v+1, v+2));
 		unsigned char att[2];
 		COND_READ(true, att, 2);
@@ -932,12 +932,16 @@ static bool read_verts_bin(FILE *f, TriMesh *mesh, bool &need_swap,
 
 	int i = old_nverts;
 	memcpy(&mesh->vertices[i][0], &buf[vert_pos], vert_size);
-	if (have_norm)
+	mesh->vertices[i][3] = 1.0;
+	if (have_norm) {
 		memcpy(&mesh->normals[i][0], &buf[vert_norm], norm_size);
+		mesh->normals[i][3] = 0.0;
+	}
 	if (have_color && float_color)
 		memcpy(&mesh->colors[i][0], &buf[vert_color], color_size);
 	if (have_color && !float_color)
 		mesh->colors[i] = Color(&buf[vert_color]);
+	if (have_color) mesh->colors[i][3] = 1.0;
 	if (have_conf)
 		memcpy(&mesh->confidences[i], &buf[vert_conf], conf_size);
 
@@ -966,12 +970,16 @@ static bool read_verts_bin(FILE *f, TriMesh *mesh, bool &need_swap,
 	while (++i < new_nverts) {
 		COND_READ(true, buf[0], vert_len);
 		memcpy(&mesh->vertices[i][0], &buf[vert_pos], vert_size);
-		if (have_norm)
+		mesh->vertices[i][3] = 1.0; 
+		if (have_norm) {
 			memcpy(&mesh->normals[i][0], &buf[vert_norm], norm_size);
+			mesh->normals[i][3] = 0.0;
+		}
 		if (have_color && float_color)
 			memcpy(&mesh->colors[i][0], &buf[vert_color], color_size);
 		if (have_color && !float_color)
 			mesh->colors[i] = Color(&buf[vert_color]);
+		if (have_color) mesh->colors[i][3] = 1.0;
 		if (have_conf)
 			memcpy(&mesh->confidences[i], &buf[vert_conf], conf_size);
 
@@ -1045,6 +1053,7 @@ static bool read_verts_asc(FILE *f, TriMesh *mesh,
 					      &mesh->vertices[i][1],
 					      &mesh->vertices[i][2]) != 3)
 					return false;
+				else mesh->vertices[i][3] = 1.0;
 				j += 2;
 			} else if (j == vert_norm) {
 				if (fscanf(f, "%f %f %f",
@@ -1052,6 +1061,7 @@ static bool read_verts_asc(FILE *f, TriMesh *mesh,
 					      &mesh->normals[i][1],
 					      &mesh->normals[i][2]) != 3)
 					return false;
+				else mesh->normals[i][3] = 0.0;
 				j += 2;
 			} else if (j == vert_color && float_color) {
 				float r, g, b;

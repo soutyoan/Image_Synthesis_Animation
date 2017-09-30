@@ -133,7 +133,7 @@ public:
 	Vec(const T &x, const T &y)
 		{ VEC_STATIC_CHECK(D == 2); v[0] = x; v[1] = y; }
 	Vec(const T &x, const T &y, const T &z)
-		{ VEC_STATIC_CHECK(D == 3); v[0] = x; v[1] = y; v[2] = z; }
+		{ VEC_STATIC_CHECK(D == 3); v[0] = x; v[1] = y; v[2] = z;}
 	Vec(const T &x, const T &y, const T &z, const T &w)
 		{ VEC_STATIC_CHECK(D == 4); v[0] = x; v[1] = y; v[2] = z; v[3] = w; }
 
@@ -417,8 +417,8 @@ public:
 
 
 // Shorthands for particular flavors of Vecs
-typedef Vec<3,float> vec;
-typedef Vec<3,float> point;
+typedef Vec<4,float> vec;
+typedef Vec<4,float> point;
 typedef Vec<2,float> vec2;
 typedef Vec<3,float> vec3;
 typedef Vec<4,float> vec4;
@@ -483,12 +483,13 @@ static inline const T operator ^ (const Vec<D,T> &v1, const Vec<D,T> &v2)
 
 
 // Cross product - only in 3 dimensions
+// Assume 4th component is 0 (vectors)
 template <class T>
-static inline const Vec<3,T> operator % (const Vec<3,T> &v1, const Vec<3,T> &v2)
+static inline const Vec<4,T> operator % (const Vec<4,T> &v1, const Vec<4,T> &v2)
 {
-	return Vec<3,T>(v1[1]*v2[2] - v1[2]*v2[1],
+	return Vec<4,T>(v1[1]*v2[2] - v1[2]*v2[1],
 			v1[2]*v2[0] - v1[0]*v2[2],
-			v1[0]*v2[1] - v1[1]*v2[0]);
+			v1[0]*v2[1] - v1[1]*v2[0], 0.0);
 }
 #define CROSS %
 

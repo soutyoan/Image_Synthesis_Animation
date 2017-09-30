@@ -272,7 +272,7 @@ static void compute_ICPmatrix(const vector<PtPair> &pairs,
 {
 	size_t n = pairs.size();
 
-	centroid = point(0,0,0);
+	centroid = point(0,0,0, 1);
 	for (size_t i = 0; i < n; i++)
 		centroid += pairs[i].p2;
 	centroid /= float(n);

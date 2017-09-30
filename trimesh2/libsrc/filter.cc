@@ -263,7 +263,7 @@ void pca_rotate(TriMesh *mesh)
 	eigdc<float,3>(C, e);
 
 	// Sorted in order from smallest to largest, so grab third column
-	vec first(C[0][2], C[1][2], C[2][2]);
+	vec first(C[0][2], C[1][2], C[2][2], 0.0);
 	int npos = 0;
 	int nv = mesh->vertices.size();
 	for (int i = 0; i < nv; i++)
@@ -272,7 +272,7 @@ void pca_rotate(TriMesh *mesh)
 	if (npos < nv/2)
 		first = -first;
 
-	vec second(C[0][1], C[1][1], C[2][1]);
+	vec second(C[0][1], C[1][1], C[2][1], 0.0);
 	npos = 0;
 	for (int i = 0; i < nv; i++)
 		if ((mesh->vertices[i] DOT second) > 0.0f)
@@ -306,7 +306,7 @@ void pca_snap(TriMesh *mesh)
 	eigdc<float,3>(C, e);
 
 	// Sorted in order from smallest to largest, so grab third column
-	vec first(C[0][2], C[1][2], C[2][2]);
+	vec first(C[0][2], C[1][2], C[2][2], 0.0);
 	int npos = 0;
 	int nv = mesh->vertices.size();
 	for (int i = 0; i < nv; i++)
@@ -332,7 +332,7 @@ void pca_snap(TriMesh *mesh)
 		}
 	}
 
-	vec second(C[0][1], C[1][1], C[2][1]);
+	vec second(C[0][1], C[1][1], C[2][1], 0.0);
 	npos = 0;
 	for (int i = 0; i < nv; i++)
 		if ((mesh->vertices[i] DOT second) > 0.0f)

@@ -67,13 +67,13 @@ static inline GLint myGluUnProject(GLdouble winX, GLdouble winY, GLdouble winZ,
 	GLdouble* objX, GLdouble* objY, GLdouble* objZ)
 {
 	xform xf = inv(xform(proj) * xform(model));
-	Vec<3,double> v = xf * Vec<3,double>(
+	Vec<4,double> v = xf * Vec<4,double>(
 		(winX - view[0]) / view[2] * 2.0 - 1.0,
 		(winY - view[1]) / view[3] * 2.0 - 1.0,
-		winZ * 2.0 - 1.0);
-	*objX = v[0];
-	*objY = v[1];
-	*objZ = v[2];
+		winZ * 2.0 - 1.0, 1.0);
+	*objX = v[0] / v[3];
+	*objY = v[1] / v[3];
+	*objZ = v[2] / v[3];
 	return GL_TRUE;
 }
 
@@ -124,7 +124,7 @@ bool GLCamera::read_depth(int x, int y, point &p) const
 		if (d > 0.0001f && d < 0.9999f) {
 			GLdouble X, Y, Z;
 			myGluUnProject(xx, yy, d, M, P, V, &X, &Y, &Z);
-			p = point((float)X, (float)Y, (float)Z);
+			p = point((float)X, (float)Y, (float)Z, 1.);
 			return true;
 		}
 	}
@@ -147,7 +147,7 @@ vec GLCamera::mouse2tb(float x, float y)
 	float r2 = x*x + y*y;
 	float t = 0.5f * sqr(TRACKBALL_R);
 
-	vec pos(x, y, 0);
+	vec pos(x, y, 0, 1.);
 	if (r2 < t)
 		pos[2] = sqrt(2*t - r2);
 	else
@@ -294,7 +294,7 @@ void GLCamera::mouse_click(int mousex, int mousey,
 	myGluUnProject((xmin+xmax)/2, (ymin+ymax)/2, 1,
 		       M, P, V,
 		       &sx, &sy, &sz);
-	spincenter = vec(float(sx), float(sy), float(sz));
+	spincenter = vec(float(sx), float(sy), float(sz), 1.);
 	normalize(spincenter);
 	if (read_depth((xmin+xmax)/2, (ymin+ymax)/2, surface_point))
 		spincenter *=  DEPTH_FUDGE * surface_point[2] / spincenter[2];
