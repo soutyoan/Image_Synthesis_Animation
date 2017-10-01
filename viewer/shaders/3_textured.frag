@@ -10,7 +10,7 @@ uniform sampler2D shadowMap;
 in vec4 eyeVector;
 in vec4 lightVector;
 in vec4 vertColor;
-in vec3 vertNormal;
+in vec4 vertNormal;
 in vec2 textCoords;
 in vec4 lightSpace;
 
@@ -18,5 +18,5 @@ out vec4 fragColor;
 
 void main( void )
 {
-   fragColor = vec4(vertColor);
+   fragColor = vertColor;
 }

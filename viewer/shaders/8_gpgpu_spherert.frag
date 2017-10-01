@@ -11,7 +11,7 @@ uniform bool transparent;
 uniform float shininess;
 uniform float eta;
 
-in vec3 position;
+in vec4 position;
 
 out vec4 fragColor;
 
@@ -30,8 +30,8 @@ bool raySphereIntersect(in vec3 start, in vec3 direction, out vec3 newPoint) {
 
 void main(void)
 {
-    // Step 1: I need pixel coordinates. Division by w
-    vec4 worldPos = vec4(position, 1.0);
+    // Step 1: I need pixel coordinates. Division by w?
+    vec4 worldPos = position;
     worldPos.z = 1; // near clipping plane
     worldPos = persp_inverse * worldPos;
     worldPos /= worldPos.w;

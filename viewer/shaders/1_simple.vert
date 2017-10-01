@@ -5,17 +5,18 @@ uniform mat4 perspective;
 uniform mat3 normalMatrix;
 uniform bool noColor;
 
-in vec3 vertex;
-in vec3 normal;
-in vec3 color;
+in vec4 vertex;
+in vec4 normal;
+in vec4 color;
 
-out vec3 vertColor;
-out vec3 vertNormal;
+out vec4 vertColor;
+out vec4 vertNormal;
 
 void main( void )
 {
-    if (noColor) vertColor = vec3(0.4, 0.2, 0.6);
+    if (noColor) vertColor = vec4(0.4, 0.2, 0.6, 1.0);
     else vertColor = color;
-    vertNormal = normalize(normalMatrix * normal);
-    gl_Position = perspective * matrix * vec4(vertex, 1.0);
+    vertNormal.xyz = normalize(normalMatrix * normal.xyz);
+    vertNormal.w = 0.0;
+    gl_Position = perspective * matrix * vertex;
 }

@@ -26,17 +26,17 @@ struct hitinfo_t {
 
 layout (std430, binding = 1) buffer Vertices
 {
-    float vertices[];
+    vec4 vertices[];
 };
 
 layout (std430, binding = 2) buffer Normals
 {
-    float normals[];
+    vec4 normals[];
 };
 
 layout (std430, binding = 3) buffer Colors
 {
-    float colors[];
+    vec4 colors[];
 };
 
 layout (std430, binding = 4) buffer Meshes
@@ -44,30 +44,30 @@ layout (std430, binding = 4) buffer Meshes
     int indices[];
 };
 
-bool intersectBoundingBox(vec3 origin, vec3 dir) {
+bool intersectBoundingBox(vec4 origin, vec4 dir) {
 	// TODO
     return false;
 }
 
-bool intersectTriangle(vec3 origin, vec3 dir, int ptr, out vec4 dist) 
+bool intersectTriangle(vec4 origin, vec4 dir, int ptr, out vec4 dist) 
 {
 	// TODO
     return false;
 }
 
-vec3 interpolateNormal(hitinfo_t h)
+vec4 interpolateNormal(hitinfo_t h)
 {
 	// TODO
-    return vec3(1);
+    return vec4(1);
 }
 
-vec3 interpolateColor(hitinfo_t h)
+vec4 interpolateColor(hitinfo_t h)
 {
 	// TODO
 	return vec3(1);
 }
 
-bool isIntersected(vec3 origin, vec3 dir, out hitinfo_t h)
+bool isIntersected(vec4 origin, vec4 dir, out hitinfo_t h)
 {
     vec4 dist; // stores distance + barycentric coord
 	bool hit = false;
@@ -85,10 +85,10 @@ bool isIntersected(vec3 origin, vec3 dir, out hitinfo_t h)
 const int MAX_TRACE = 1;
 
 
-vec3 trace(vec3 origin, vec3 dir)
+vec4 trace(vec4 origin, vec4 dir)
 {
 	// TODO: trace a ray in the scene, see what it intersects, bounce around
-    return vec3(1);
+    return vec4(1);
 }
 
 layout (local_size_x = 8, local_size_y = 8) in;
@@ -109,9 +109,9 @@ void main(void) {
     worldPos.w = 0;
     worldPos = normalize(worldPos);
     // Step 2: ray direction:
-    vec3 dir = normalize((mat_inverse * worldPos).xyz);
-    vec3 eye = (mat_inverse * vec4(0, 0, 0, 1)).xyz;
-    vec3 color = trace(eye, dir);
+    vec4 dir = normalize((mat_inverse * worldPos));
+    vec4 eye = (mat_inverse * vec4(0, 0, 0, 1));
+    vec4 color = trace(eye, dir);
 
-    imageStore(framebuffer, pix, vec4(color.rgb, 1.0));
+    imageStore(framebuffer, pix, color);
 }

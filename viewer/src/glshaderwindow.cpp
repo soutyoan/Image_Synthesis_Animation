@@ -342,13 +342,13 @@ void glShaderWindow::bindSceneToProgram()
             if (gpgpu_colors == 0) gpgpu_colors = new trimesh::point[4];
             if (gpgpu_texcoords == 0) gpgpu_texcoords = new trimesh::vec2[4];
             if (gpgpu_indices == 0) gpgpu_indices = new int[6];
-            gpgpu_vertices[0] = trimesh::point(-1, -1, 0);
-            gpgpu_vertices[1] = trimesh::point(-1, 1, 0);
-            gpgpu_vertices[2] = trimesh::point(1, -1, 0);
-            gpgpu_vertices[3] = trimesh::point(1, 1, 0);
+            gpgpu_vertices[0] = trimesh::point(-1, -1, 0, 1);
+            gpgpu_vertices[1] = trimesh::point(-1, 1, 0, 1);
+            gpgpu_vertices[2] = trimesh::point(1, -1, 0, 1);
+            gpgpu_vertices[3] = trimesh::point(1, 1, 0, 1);
             for (int i = 0; i < 4; i++) {
-                gpgpu_normals[i] = trimesh::point(0, 0, -1);
-                gpgpu_colors[i] = trimesh::point(0, 0, 1);
+                gpgpu_normals[i] = trimesh::point(0, 0, -1, 0);
+                gpgpu_colors[i] = trimesh::point(0, 0, 1, 1);
             }
             gpgpu_texcoords[0] = trimesh::vec2(0, 0);
             gpgpu_texcoords[1] = trimesh::vec2(0, 1);
@@ -394,20 +394,20 @@ void glShaderWindow::bindSceneToProgram()
     m_program->bind();
     // Enable the "vertex" attribute to bind it to our vertex buffer
     m_vertexBuffer.bind();
-    m_program->setAttributeBuffer( "vertex", GL_FLOAT, 0, 3 );
+    m_program->setAttributeBuffer( "vertex", GL_FLOAT, 0, 4 );
     m_program->enableAttributeArray( "vertex" );
 
     // Enable the "color" attribute to bind it to our colors buffer
     if (modelMesh->colors.size() > 0) {
         m_colorBuffer.bind();
-        m_program->setAttributeBuffer( "color", GL_FLOAT, 0, 3 );
+        m_program->setAttributeBuffer( "color", GL_FLOAT, 0, 4 );
         m_program->enableAttributeArray( "color" );
         m_program->setUniformValue("noColor", false);
     } else {
         m_program->setUniformValue("noColor", true);
     }
     m_normalBuffer.bind();
-    m_program->setAttributeBuffer( "normal", GL_FLOAT, 0, 3 );
+    m_program->setAttributeBuffer( "normal", GL_FLOAT, 0, 4 );
     m_program->enableAttributeArray( "normal" );
 
     if ((modelMesh->texcoords.size() > 0) || isGPGPU){
@@ -419,15 +419,15 @@ void glShaderWindow::bindSceneToProgram()
     shadowMapGenerationProgram->bind();
     // Enable the "vertex" attribute to bind it to our vertex buffer
     m_vertexBuffer.bind();
-    shadowMapGenerationProgram->setAttributeBuffer( "vertex", GL_FLOAT, 0, 3 );
+    shadowMapGenerationProgram->setAttributeBuffer( "vertex", GL_FLOAT, 0, 4 );
     shadowMapGenerationProgram->enableAttributeArray( "vertex" );
     if (modelMesh->colors.size() > 0) {
         m_colorBuffer.bind();
-        shadowMapGenerationProgram->setAttributeBuffer( "color", GL_FLOAT, 0, 3 );
+        shadowMapGenerationProgram->setAttributeBuffer( "color", GL_FLOAT, 0, 4 );
         shadowMapGenerationProgram->enableAttributeArray( "color" );
     }
     m_normalBuffer.bind();
-    shadowMapGenerationProgram->setAttributeBuffer( "normal", GL_FLOAT, 0, 3 );
+    shadowMapGenerationProgram->setAttributeBuffer( "normal", GL_FLOAT, 0, 4 );
     shadowMapGenerationProgram->enableAttributeArray( "normal" );
     if (modelMesh->texcoords.size() > 0) {
         m_texcoordBuffer.bind();
@@ -457,11 +457,11 @@ void glShaderWindow::bindSceneToProgram()
     for (int i = 0; i < numR; i++) {
         for (int j = 0; j < numTh; j++) {
             int p = i + j * numR;
-            g_normals[p] = trimesh::point(0, 1, 0);
-            g_colors[p] = trimesh::point(0.6, 0.85, 0.9);
+            g_normals[p] = trimesh::point(0, 1, 0, 0);
+            g_colors[p] = trimesh::point(0.6, 0.85, 0.9, 1);
             float theta = (float)j * 2 * M_PI / numTh;
             float rad =  5.0 * radius * (float) i / numR;
-            g_vertices[p] = center + trimesh::point(rad * cos(theta), - groundDistance * radius, rad * sin(theta));
+            g_vertices[p] = center + trimesh::point(rad * cos(theta), - groundDistance * radius, rad * sin(theta), 0);
             rad =  5.0 * (float) i / numR;
             g_texcoords[p] = trimesh::vec2(rad * cos(theta), rad * sin(theta));
         }
@@ -471,7 +471,7 @@ void glShaderWindow::bindSceneToProgram()
     ground_vertexBuffer.allocate(g_vertices, g_numPoints * sizeof(trimesh::point));
     ground_normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     ground_normalBuffer.bind();
-    ground_normalBuffer.allocate(g_normals, g_numPoints * sizeof(trimesh::point));
+    ground_normalBuffer.allocate(g_normals, g_numPoints * sizeof(trimesh::vec));
     ground_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     ground_colorBuffer.bind();
     ground_colorBuffer.allocate(g_colors, g_numPoints * sizeof(trimesh::point));
@@ -498,13 +498,13 @@ void glShaderWindow::bindSceneToProgram()
 
     ground_program->bind();
     ground_vertexBuffer.bind();
-    ground_program->setAttributeBuffer( "vertex", GL_FLOAT, 0, 3 );
+    ground_program->setAttributeBuffer( "vertex", GL_FLOAT, 0, 4 );
     ground_program->enableAttributeArray( "vertex" );
     ground_colorBuffer.bind();
-    ground_program->setAttributeBuffer( "color", GL_FLOAT, 0, 3 );
+    ground_program->setAttributeBuffer( "color", GL_FLOAT, 0, 4 );
     ground_program->enableAttributeArray( "color" );
     ground_normalBuffer.bind();
-    ground_program->setAttributeBuffer( "normal", GL_FLOAT, 0, 3 );
+    ground_program->setAttributeBuffer( "normal", GL_FLOAT, 0, 4 );
     ground_program->enableAttributeArray( "normal" );
     ground_program->setUniformValue("noColor", false);
     ground_texcoordBuffer.bind();
@@ -514,14 +514,14 @@ void glShaderWindow::bindSceneToProgram()
     // Also bind the ground to the shadow mapping program:
     shadowMapGenerationProgram->bind();
     ground_vertexBuffer.bind();
-    shadowMapGenerationProgram->setAttributeBuffer( "vertex", GL_FLOAT, 0, 3 );
+    shadowMapGenerationProgram->setAttributeBuffer( "vertex", GL_FLOAT, 0, 4 );
     shadowMapGenerationProgram->enableAttributeArray( "vertex" );
     shadowMapGenerationProgram->release();
     ground_colorBuffer.bind();
-    shadowMapGenerationProgram->setAttributeBuffer( "color", GL_FLOAT, 0, 3 );
+    shadowMapGenerationProgram->setAttributeBuffer( "color", GL_FLOAT, 0, 4 );
     shadowMapGenerationProgram->enableAttributeArray( "color" );
     ground_normalBuffer.bind();
-    shadowMapGenerationProgram->setAttributeBuffer( "normal", GL_FLOAT, 0, 3 );
+    shadowMapGenerationProgram->setAttributeBuffer( "normal", GL_FLOAT, 0, 4 );
     shadowMapGenerationProgram->enableAttributeArray( "normal" );
     ground_texcoordBuffer.bind();
     shadowMapGenerationProgram->setAttributeBuffer( "texcoords", GL_FLOAT, 0, 2 );

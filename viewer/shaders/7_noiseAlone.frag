@@ -56,7 +56,7 @@ uniform float radius; // object size.
 /*
  * Both 2D and 3D texture coordinates are defined, for testing purposes.
  */
-in vec3 vertPos;
+in vec4 vertPos;
 in vec4 vertColor;
 
 out vec4 fragColor;

@@ -6,21 +6,26 @@ uniform mat3 normalMatrix;
 uniform bool noColor;
 uniform vec3 lightPosition;
 
-in vec3 vertex;
-in vec3 normal;
-in vec3 color;
+in vec4 vertex;
+in vec4 normal;
+in vec4 color;
+in vec2 texcoords;
 
 out vec4 eyeVector;
 out vec4 lightVector;
 out vec4 lightSpace;
 out vec4 vertColor;
-out vec3 vertNormal;
+out vec4 vertNormal;
+out vec2 textCoords;
 
 void main( void )
 {
     if (noColor) vertColor = vec4(0.2, 0.6, 0.7, 1.0 );
-    else vertColor = vec4(color, 1.0);
-    vertNormal = normalize(normalMatrix * normal);
+    else vertColor = color;
+    vertNormal.xyz = normalize(normalMatrix * normal.xyz);
+    vertNormal.w = 0.0;
+    textCoords = texcoords;
 
-    gl_Position = perspective * matrix * vec4(vertex, 1.0);
+
+    gl_Position = perspective * matrix * vertex;
 }
