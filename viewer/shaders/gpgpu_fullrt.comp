@@ -64,7 +64,7 @@ vec4 interpolateNormal(hitinfo_t h)
 vec4 interpolateColor(hitinfo_t h)
 {
 	// TODO
-	return vec3(1);
+	return vec4(1);
 }
 
 bool isIntersected(vec4 origin, vec4 dir, out hitinfo_t h)
