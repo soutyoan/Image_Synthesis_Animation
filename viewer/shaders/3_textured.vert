@@ -6,11 +6,13 @@ uniform mat3 normalMatrix;
 uniform bool noColor;
 uniform vec3 lightPosition;
 
+// World coordinates
 in vec4 vertex;
 in vec4 normal;
 in vec4 color;
 in vec2 texcoords;
 
+// Camera-space coordinates
 out vec4 eyeVector;
 out vec4 lightVector;
 out vec4 lightSpace;
@@ -26,6 +28,7 @@ void main( void )
     vertNormal.w = 0.0;
     textCoords = texcoords;
 
+    // TODO: compute eyeVector, lightVector. 
 
     gl_Position = perspective * matrix * vertex;
 }
