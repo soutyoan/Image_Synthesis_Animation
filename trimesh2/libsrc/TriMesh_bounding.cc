@@ -43,7 +43,7 @@ void TriMesh::need_bsphere()
 
 	dprintf("Computing bounding sphere... ");
 
-	Miniball<3,float> mb;
+	Miniball<4,float> mb;
 	mb.check_in(vertices.begin(), vertices.end());
 	mb.build();
 	bsphere.center = vec(mb.center()[0], mb.center()[1], mb.center()[2], 1.);
