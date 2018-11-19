@@ -22,7 +22,9 @@ float cos_angle(vec4 vectA, vec4 vectB)
 }
 
 float F( float cos_theta )
-{
+{   if ((pow(eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
+        return 1.0;
+    }
     float ci = sqrt(pow(eta, 2) - (1 - pow(cos_theta, 2)));
     float Fs = pow(abs((cos_theta - ci) / (cos_theta + ci)), 2);
     float Fp = pow(abs((pow(eta, 2) * cos_theta - ci) / (pow(eta, 2) * cos_theta + ci)), 2);
