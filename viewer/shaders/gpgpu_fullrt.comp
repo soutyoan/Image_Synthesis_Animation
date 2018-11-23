@@ -15,7 +15,7 @@ uniform float radius;
 uniform float groundDistance;
 uniform vec3 center;
 
-#define MAX_SCENE_BOUNDS    15
+#define MAX_SCENE_BOUNDS    5
 #define EPS                 0.01
 
 
@@ -140,8 +140,8 @@ vec4 interpolateNormal(hitinfo_t h)
 vec4 interpolateColor(hitinfo_t h)
 {
     if (h.hit_vptr == -1) {
-        return vec4(0.8, 0, 0, 1);
-        return texture2D(colorTexture, h.t.zx);
+        //return vec4(0.8, 0, 0, 1);
+        return texture2D(colorTexture, h.t.xz);
     }
 	else if (h.hit_vptr>=0) {
         vec4 c0 = colors[indices[h.hit_vptr]];
@@ -187,12 +187,14 @@ float cos_angle(vec4 vectA, vec4 vectB)
 }
 
 float F( float cos_theta )
-{   if ((pow(eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
+{
+    float inv_eta = 1 / eta;
+    if ((pow(inv_eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
         return 1.0;
     }
-    float ci = sqrt(pow(eta, 2) - (1 - pow(cos_theta, 2)));
+    float ci = sqrt(pow(inv_eta, 2) - (1 - pow(cos_theta, 2)));
     float Fs = pow(abs((cos_theta - ci) / (cos_theta + ci)), 2);
-    float Fp = pow(abs((pow(eta, 2) * cos_theta - ci) / (pow(eta, 2) * cos_theta + ci)), 2);
+    float Fp = pow(abs((pow(inv_eta, 2) * cos_theta - ci) / (pow(inv_eta, 2) * cos_theta + ci)), 2);
 
     return (Fs + Fp) / 2;
 }
@@ -224,7 +226,7 @@ vec4 trace(vec4 origin, vec4 dir)
     int nb_bounds = 0;
     vec4 current_origin = vec4(origin.xyzw);
     vec4 current_dir = vec4(dir.xyzw);
-    vec4 result = vec4(1);
+    vec4 result = vec4(0,0,0,1);
     // hit either the plane or a triangle
     while (nb_bounds < MAX_SCENE_BOUNDS && isIntersected(current_origin, current_dir, h)) {
         intersections[nb_bounds].origin = vec4(current_origin);
@@ -232,6 +234,9 @@ vec4 trace(vec4 origin, vec4 dir)
         intersections[nb_bounds].point_hit = vec4(current_origin);
         vec4 vertNormal = interpolateNormal(h);
         vec4 vertColor = interpolateColor(h);
+        if (h.hit_vptr==-1) {
+            vertColor = texture2D(colorTexture, dir.xz);
+        }
         intersections[nb_bounds].normal = vec4(vertNormal);
         intersections[nb_bounds].color = vec4(vertColor);
         vec4 vertEye = normalize(origin - current_origin);
@@ -244,17 +249,15 @@ vec4 trace(vec4 origin, vec4 dir)
     }
     float current_Fresnel = 1.0;
     for (int s=nb_bounds-1; s>=0; s--) {
-        // if (s>1) {
-        //     return vec4(1,0,0,1);
-        // }
-        // return vec4(0,1,0,1);
 
         vec4 vertEye = normalize(intersections[s].origin - intersections[s].point_hit);
         bool only_ambiant = isIntersected(intersections[s].point_hit, intersections[s].dir, h);
         vec4 auxDir = normalize(reflect(intersections[s].point_hit - intersections[s].origin, intersections[s].normal));
-        float cos_theta = dot(intersections[s].normal, auxDir);
-        current_Fresnel *= F(cos_theta);
-        result *= phongModel(-intersections[s].dir, intersections[s].normal, vertEye, intersections[s].color, lightIntensity, false) * result;
+        float cos_theta = dot(intersections[s].normal, intersections[s].dir);
+
+        current_Fresnel = F(cos_theta);
+        result = phongModel(-intersections[s].dir, intersections[s].normal, vertEye, intersections[s].color, lightIntensity, only_ambiant) + current_Fresnel * result ;
+
     }
 
     return result;
