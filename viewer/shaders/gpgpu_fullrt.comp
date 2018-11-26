@@ -15,13 +15,8 @@ uniform float radius;
 uniform float groundDistance;
 uniform vec3 center;
 
-<<<<<<< HEAD
-#define MAX_SCENE_BOUNDS    10
-#define EPS                 0.001
-=======
 #define MAX_SCENE_BOUNDS    1
-#define EPS                 0.01
->>>>>>> 23da286941b551a6da0ddec553880fc4b63ecc85
+#define EPS                 0.001
 
 
 struct hitinfo_t {
