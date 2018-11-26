@@ -1,0 +1,6 @@
+Makefile
+*.stash
+*.a
+Makefile
+*Makefile*
+*/Makefile*
