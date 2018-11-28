@@ -243,10 +243,10 @@ vec4 trace(vec4 origin, vec4 dir)
         vec4 vertLight = normalize(current_origin - vec4(lightPosition.xyz, 1));
         current_dir = -vertLight;
         intersections[nb_bounds].dir = vec4(current_dir);
-        nb_bounds ++;
         if (dot(intersections[nb_bounds].normal, intersections[nb_bounds].dir)<0) {
             break;
         }
+        nb_bounds ++;
 
     }
     float current_Fresnel = 1.0;
