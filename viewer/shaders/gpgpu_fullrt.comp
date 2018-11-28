@@ -140,8 +140,8 @@ vec4 interpolateNormal(hitinfo_t h)
 vec4 interpolateColor(hitinfo_t h)
 {
     if (h.hit_vptr == -1) {
-        //return vec4(0.8, 0, 0, 1);
-        return texture2D(colorTexture, h.t.xz);
+        return vec4(0.2, 0.6, 0.7, 1);
+        // return texture2D(colorTexture, h.t.xz);
     }
 	else if (h.hit_vptr>=0) {
         vec4 c0 = colors[indices[h.hit_vptr]];
@@ -234,9 +234,6 @@ vec4 trace(vec4 origin, vec4 dir)
         intersections[nb_bounds].point_hit = vec4(current_origin);
         vec4 vertNormal = interpolateNormal(h);
         vec4 vertColor = interpolateColor(h);
-        if (h.hit_vptr==-1) {
-            vertColor = texture2D(colorTexture, dir.xz);
-        }
         intersections[nb_bounds].normal = vec4(vertNormal);
         intersections[nb_bounds].color = vec4(vertColor);
         vec4 vertEye = normalize(origin - current_origin);

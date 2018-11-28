@@ -26,7 +26,7 @@ void main( void )
     vertNormal.w = 0.0;
 
     vec4 position = matrix * vertex;
-    lightVector = normalize(position / position.w - matrix * vec4(lightPosition, 1));
+    lightVector = normalize(position / position.w + matrix * (vec4(lightPosition, 1) - vertex / vertex.w));
 
     eyeVector = normalize(vec4(0, 0, 0, 1) - position / position.w);
 
