@@ -47,6 +47,7 @@
 #include <QtGui/QPainter>
 #include <QDebug>
 #include <time.h>
+#include <unistd.h>
 
 //! [1]
 OpenGLWindow::OpenGLWindow(QWindow *parent)
@@ -76,7 +77,7 @@ void OpenGLWindow::initialize()
 {
 }
 
-void OpenGLWindow::render()
+void OpenGLWindow::render(int dilatation, int shift_x, int shift_y)
 {
     if (!m_device)
         m_device = new QOpenGLPaintDevice;
@@ -144,12 +145,17 @@ void OpenGLWindow::renderNow()
         initialize();
     }
 
-    render();
+    int dilatation = 3;
+    for (int shift_x = 0; shift_x < dilatation; shift_x++){
+        for (int shift_y = 0; shift_y < dilatation; shift_y++){
+            render(dilatation, shift_x, shift_y);
 
-    m_context->swapBuffers(this);
+            m_context->swapBuffers(this);
 
-    if (m_animating)
-        renderLater();
+            if (m_animating)
+                renderLater();
+            }
+        }
 }
 //! [4]
 

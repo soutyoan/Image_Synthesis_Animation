@@ -66,7 +66,7 @@ public:
     ~OpenGLWindow();
 
     virtual void render(QPainter *painter);
-    virtual void render();
+    virtual void render(int dilatation, int shift_x, int shift_y);
 
     virtual void initialize();
 
@@ -89,4 +89,3 @@ private:
 
 };
 //! [1]
-
