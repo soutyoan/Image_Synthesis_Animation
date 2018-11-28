@@ -1052,7 +1052,7 @@ static int nextPower2(int x) {
 
 
 
-void glShaderWindow::render()
+void glShaderWindow::render(int dilatation, int shift_x, int shift_y)
 {
     QVector3D lightPosition = m_matrix[1] * (m_center + lightDistance * modelMesh->bsphere.r * QVector3D(0.5, 0.5, 1));
 
@@ -1069,7 +1069,7 @@ void glShaderWindow::render()
     if (hasComputeShaders) {
         // We bind the texture generated to texture unit 2 (0 is for the texture, 1 for the env map)
 #ifndef __APPLE__
-               glActiveTexture(GL_TEXTURE2);
+        glActiveTexture(GL_TEXTURE2);
         compute_program->bind();
 		computeResult->bind(2);
         // Send parameters to compute program:
@@ -1089,9 +1089,12 @@ void glShaderWindow::render()
         compute_program->setUniformValue("eta", eta);
         compute_program->setUniformValue("framebuffer", 2);
         compute_program->setUniformValue("colorTexture", 0);
+        compute_program->setUniformValue("pixelSize", dilatation);
+        compute_program->setUniformValue("shift_x", shift_x);
+        compute_program->setUniformValue("shift_y", shift_y);
 		glBindImageTexture(2, computeResult->textureId(), 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-        int worksize_x = nextPower2(width());
-        int worksize_y = nextPower2(height());
+        int worksize_x = nextPower2(width()/dilatation);
+        int worksize_y = nextPower2(height()/dilatation);
         glDispatchCompute(worksize_x / compute_groupsize_x, worksize_y / compute_groupsize_y, 1);
         glBindImageTexture(2, 0, 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);

@@ -14,6 +14,9 @@ uniform vec3 bbmax;
 uniform float radius;
 uniform float groundDistance;
 uniform vec3 center;
+uniform int pixelSize;
+uniform int shift_x;
+uniform int shift_y;
 
 #define MAX_SCENE_BOUNDS    1
 #define EPS                 0.001
@@ -274,21 +277,17 @@ vec4 trace(vec4 origin, vec4 dir)
 layout (local_size_x = 8, local_size_y = 8) in;
 
 void main(void) {
-    ivec2 pix = ivec2(gl_GlobalInvocationID.xy);
-
-    // if (pix.x == 0){
-    //     vec4 color = vec4(1, 0, 0, 1);
-    //     imageStore(framebuffer, pix, color);
-    //     return ;
-    // }
-
+    ivec2 pix = ivec2(gl_GlobalInvocationID.xy) * pixelSize + ivec2(shift_x, shift_y);
     ivec2 size = imageSize(framebuffer);
+
     if (pix.x >= size.x || pix.y >= size.y) {
         return;
     }
+
     vec2 pos = pix / (size - vec2(0.5,0.5));
+
     // pos in [0,1]^2 Need it in [-1,1]^2:
-    pos = 2 * pos - vec2(1.,1.);
+    pos = (2 * pos - vec2(1.,1.));
 
     // Step 1: I need pixel coordinates.
     vec4 worldPos = vec4(pos.x, pos.y, 1.0, 1.0);
