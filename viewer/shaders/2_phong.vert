@@ -6,6 +6,8 @@ uniform mat3 normalMatrix;
 uniform bool noColor;
 uniform vec3 lightPosition;
 
+
+
 // World coordinates
 in vec4 vertex;
 in vec4 normal;
@@ -29,6 +31,17 @@ void main( void )
     lightVector = normalize(matrix * (vec4(lightPosition, 1) - vertex / vertex.w));
 
     eyeVector = normalize(vec4(0, 0, 0, 1) - position / position.w);
+
+
+    // Computation of light space coordinates
+    mat4 biasMatrix = mat4(
+                            0.5, 0.0, 0.0, 0.0,
+                            0.0, 0.5, 0.0, 0.0,
+                            0.0, 0.0, 0.5, 0.0,
+                            0.5, 0.5, 0.5, 1.0
+                            );
+    lightSpace = biasMatrix * perspective * matrix  * vertex;
+
 
     gl_Position = perspective * matrix * vertex;
 }

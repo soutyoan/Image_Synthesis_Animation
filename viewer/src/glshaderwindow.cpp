@@ -957,7 +957,7 @@ void glShaderWindow::mousePressEvent(QMouseEvent *e)
     lastMousePosition = (2.0/m_screenSize) * (QVector2D(e->localPos()) - QVector2D(0.5 * width(), 0.5*height()));
     mouseToTrackball(lastMousePosition, lastTBPosition);
     mouseButton = e->button();
-    // On met le shader de phong (le 2_phong)
+    // On met le shader de phong (le 2_phong)matrix
     QString shader2 = "2_phong";
     setShader(shader2);
 }
@@ -1061,6 +1061,10 @@ void glShaderWindow::render()
     QMatrix4x4 mat_inverse = m_matrix[0];
     QMatrix4x4 persp_inverse = m_perspective;
 
+    lightCoordMatrix.setToIdentity();
+    lightPerspective.setToIdentity();
+
+    lightCoordMatrix.lookAt(lightPosition, m_center, QVector3D(0, 1, 0));
     if (isGPGPU || hasComputeShaders) {
         bool invertible;
         mat_inverse = mat_inverse.inverted(&invertible);
@@ -1109,8 +1113,6 @@ void glShaderWindow::render()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // set up camera position in light source:
         // TODO_shadowMapping: you must initialize these two matrices.
-        lightCoordMatrix.setToIdentity();
-        lightPerspective.setToIdentity();
 
         shadowMapGenerationProgram->setUniformValue("matrix", lightCoordMatrix);
         shadowMapGenerationProgram->setUniformValue("perspective", lightPerspective);

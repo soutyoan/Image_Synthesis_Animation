@@ -14,6 +14,8 @@ in vec4 vertColor;
 in vec4 vertNormal;
 in vec4 lightSpace;
 
+#define EPS 0.001;
+
 out vec4 fragColor;
 
 float cos_angle(vec4 vectA, vec4 vectB)
@@ -56,6 +58,11 @@ void main( void )
      vec4 eyeVectorN = normalize(eyeVector);
 
      vec4 Ca = ka * lightIntensity * vertColor;
+
+     // boolean value for shadow mapping : comparison bet. z_shadow and z_computed
+     float z_shadow = texture(shadowMap, lightSpace.xy).z;
+     float z_computed = lightSpace.z;
+     bool needShadowMap = (z_computed == z_shadow);
      vec4 Cd = kd * lightIntensity * vertColor * max(dot(vertNormalN, lightVectorN), 0);
 
      vec4 halfVector = normalize(eyeVectorN + lightVectorN);
@@ -72,5 +79,8 @@ void main( void )
         Cs = (F(cos_theta_d) * D(alpha, cos_theta_h) * G1(alpha, cos_theta_i) * G1(alpha, cos_theta_o) / (4 * cos_theta_i * cos_theta_o)) * vertColor;
      }
 
-     fragColor = Ca + Cd + Cs;
+     fragColor = Ca;
+     if (needShadowMap) {
+         fragColor += Cd + Cs;
+     }
 }
