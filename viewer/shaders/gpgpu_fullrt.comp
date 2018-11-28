@@ -15,7 +15,7 @@ uniform float radius;
 uniform float groundDistance;
 uniform vec3 center;
 
-#define MAX_SCENE_BOUNDS    5
+#define MAX_SCENE_BOUNDS    10
 #define EPS                 0.001
 
 
@@ -188,7 +188,7 @@ float cos_angle(vec4 vectA, vec4 vectB)
 
 float F( float cos_theta )
 {
-    float inv_eta = eta;
+    float inv_eta = 5/eta;
     if ((pow(inv_eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
         return 1.0;
     }
@@ -258,11 +258,12 @@ vec4 trace(vec4 origin, vec4 dir)
         float cos_theta = dot(intersections[s].normal, auxDir);
 
         current_Fresnel *= F(cos_theta);
-        if (F(cos_theta) > 1 ){
-            result = vec4(0,1,0,1);
-        }
-        result *= current_Fresnel;
-        result+=  phongModel(-intersections[s].dir, intersections[s].normal, vertEye, intersections[s].color, lightIntensity, only_ambiant);
+        // if (F(cos_theta) > 1 ){
+        //     result = vec4(0,1,0,1);
+        // }
+        float currentEta = eta / 5;
+        result *= current_Fresnel * currentEta;
+        result +=  (1-currentEta) * phongModel(-intersections[s].dir, intersections[s].normal, vertEye, intersections[s].color, lightIntensity, only_ambiant);
 
     }
 
