@@ -18,7 +18,7 @@ uniform int pixelSize;
 uniform int shift_x;
 uniform int shift_y;
 
-#define MAX_SCENE_BOUNDS    1
+#define MAX_SCENE_BOUNDS    5
 #define EPS                 0.001
 
 
@@ -143,8 +143,8 @@ vec4 interpolateNormal(hitinfo_t h)
 vec4 interpolateColor(hitinfo_t h)
 {
     if (h.hit_vptr == -1) {
-        //return vec4(0.8, 0, 0, 1);
-        return texture2D(colorTexture, h.t.xz);
+        return vec4(0.2, 0.6, 0.7, 1);
+        // return texture2D(colorTexture, h.t.xz);
     }
 	else if (h.hit_vptr>=0) {
         vec4 c0 = colors[indices[h.hit_vptr]];
@@ -191,7 +191,7 @@ float cos_angle(vec4 vectA, vec4 vectB)
 
 float F( float cos_theta )
 {
-    float inv_eta = 1/eta;
+    float inv_eta = eta;
     if ((pow(inv_eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
         return 1.0;
     }
@@ -237,16 +237,13 @@ vec4 trace(vec4 origin, vec4 dir)
         intersections[nb_bounds].point_hit = vec4(current_origin);
         vec4 vertNormal = interpolateNormal(h);
         vec4 vertColor = interpolateColor(h);
-        if (h.hit_vptr==-1) {
-            vertColor = texture2D(colorTexture, dir.xz);
-        }
         intersections[nb_bounds].normal = vec4(vertNormal);
         intersections[nb_bounds].color = vec4(vertColor);
         vec4 vertEye = normalize(origin - current_origin);
         vec4 vertLight = normalize(current_origin - vec4(lightPosition.xyz, 1));
         current_dir = -vertLight;
         intersections[nb_bounds].dir = vec4(current_dir);
-        if (dot(intersections[nb_bounds].normal, intersections[nb_bounds].dir)<0) {
+        if (dot(intersections[nb_bounds].normal, intersections[nb_bounds].dir)<=0) {
             break;
         }
         nb_bounds ++;
@@ -267,7 +264,8 @@ vec4 trace(vec4 origin, vec4 dir)
         if (F(cos_theta) > 1 ){
             result = vec4(0,1,0,1);
         }
-        result = phongModel(-intersections[s].dir, intersections[s].normal, vertEye, intersections[s].color, lightIntensity, only_ambiant) + current_Fresnel * result ;
+        result *= current_Fresnel;
+        result+=  phongModel(-intersections[s].dir, intersections[s].normal, vertEye, intersections[s].color, lightIntensity, only_ambiant);
 
     }
 
