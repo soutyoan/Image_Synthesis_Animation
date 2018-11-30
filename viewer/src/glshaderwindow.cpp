@@ -1126,9 +1126,10 @@ int get_indices_rendu_alternance(GLint* indices, int* shifts, int render_number)
             shifts[1] = 0;
             return 9;
         case 1:
-            for (int i = 0; i < 4; i++){
-                indices[i] = i;
-            }
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 3;
+            indices[3] = 4;
             shifts[0] = 1;
             shifts[1] = 1;
             return 4;
@@ -1144,10 +1145,10 @@ int get_indices_rendu_alternance(GLint* indices, int* shifts, int render_number)
             shifts[1] = 1;
             return 2;
         case 4:
-            indices[0] = 1;
-            indices[1] = 0;
-            shifts[0] = 0;
-            shifts[1] = 3;
+            indices[0] = 0;
+            indices[1] = 1;
+            shifts[0] = 1;
+            shifts[1] = 0;
             return 2;
         case 5:
             indices[0] = 0;
@@ -1178,7 +1179,6 @@ int get_indices_rendu_alternance(GLint* indices, int* shifts, int render_number)
 void glShaderWindow::render()
 {
     int dilatation = 3;
-    std::cerr  << index_rendu << "\n";
     QVector3D lightPosition = m_matrix[1] * (m_center + lightDistance * modelMesh->bsphere.r * QVector3D(0.5, 0.5, 1));
 
     QMatrix4x4 lightCoordMatrix;
@@ -1329,5 +1329,5 @@ void glShaderWindow::render()
         ground_vao.release();
         ground_program->release();
     }
-    index_rendu ++; 
+    index_rendu ++;
 }

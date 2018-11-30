@@ -82,7 +82,6 @@ void OpenGLWindow::initialize()
 void OpenGLWindow::render()
 {
     index_rendu ++;
-    std::cerr  << index_rendu << "\n";
     if (!m_device)
         m_device = new QOpenGLPaintDevice;
 
@@ -128,11 +127,15 @@ void OpenGLWindow::exposeEvent(QExposeEvent *event)
 
 void OpenGLWindow::renderAlternance(){
 
-    std::cerr << "ici \n";
+    if (index_rendu > 8){
+        return;
+    }
 
     render();
 
     m_context->swapBuffers(this);
+
+    QTimer::singleShot(0, this, SLOT(renderAlternance()));
 }
 
 //! [4]
