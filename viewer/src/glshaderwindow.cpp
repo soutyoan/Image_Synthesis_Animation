@@ -650,6 +650,7 @@ void glShaderWindow::setShader(const QString& shader)
     QString fragmentShader;
     QString computeShader;
     isGPGPU = shader.contains("gpgpu", Qt::CaseInsensitive);
+    isFullRt = shader.contains("fullrt", Qt::CaseInsensitive);
     foreach (const QString &str, shaders) {
         QString suffix = str.right(str.size() - str.lastIndexOf("."));
         if (m_vertShaderSuffix.filter(suffix).size() > 0) {
@@ -957,9 +958,12 @@ void glShaderWindow::mousePressEvent(QMouseEvent *e)
     lastMousePosition = (2.0/m_screenSize) * (QVector2D(e->localPos()) - QVector2D(0.5 * width(), 0.5*height()));
     mouseToTrackball(lastMousePosition, lastTBPosition);
     mouseButton = e->button();
-    // On met le shader de phong (le 2_phong)matrix
-    QString shader2 = "2_phong";
-    setShader(shader2);
+    if (isFullRt){
+        // On met le shader de phong (le 2_phong)matrix
+        QString shader2 = "2_phong";
+        setShader(shader2);
+        isFullRt = true; // We override isFullRt because we want to stay in the fullRt case
+    }
 }
 
 void glShaderWindow::wheelEvent(QWheelEvent * ev)
@@ -1026,8 +1030,10 @@ void glShaderWindow::mouseReleaseEvent(QMouseEvent *e)
 {
     mouseButton = Qt::NoButton;
     // On remet le bon shader (le gpgpu_full)
-    QString shader2 = "gpgpu_fullrt";
-    setShader(shader2);
+    if (isFullRt){
+        QString shader2 = "gpgpu_fullrt";
+        setShader(shader2);
+    }
 }
 
 void glShaderWindow::timerEvent(QTimerEvent *e)

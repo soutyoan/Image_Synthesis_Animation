@@ -18,7 +18,7 @@ uniform int pixelSize;
 uniform int shift_x;
 uniform int shift_y;
 
-#define MAX_SCENE_BOUNDS    1
+#define MAX_SCENE_BOUNDS    3
 #define EPS                 0.001
 
 
@@ -244,11 +244,12 @@ vec4 trace(vec4 origin, vec4 dir)
         current_dir = -vertLight;
         intersections[nb_bounds].dir = vec4(current_dir);
         if (dot(intersections[nb_bounds].normal, intersections[nb_bounds].dir)<=0) {
+            // return vec4(1, 0, 0, 1);
             break;
         }
         nb_bounds ++;
-
     }
+    
     float current_Fresnel = 1.0;
     for (int s=nb_bounds-1; s>=0; s--) {
 
