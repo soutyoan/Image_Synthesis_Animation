@@ -143,8 +143,8 @@ vec4 interpolateNormal(hitinfo_t h)
 vec4 interpolateColor(hitinfo_t h)
 {
     if (h.hit_vptr == -1) {
-        return vec4(0.2, 0.6, 0.7, 1);
-        // return texture2D(colorTexture, h.t.xz);
+        // return vec4(0.2, 0.6, 0.7, 1);
+        return texture2D(colorTexture, h.t.xz);
     }
 	else if (h.hit_vptr>=0) {
         vec4 c0 = colors[indices[h.hit_vptr]];
@@ -249,7 +249,7 @@ vec4 trace(vec4 origin, vec4 dir)
         }
         nb_bounds ++;
     }
-    
+
     float current_Fresnel = 1.0;
     for (int s=nb_bounds-1; s>=0; s--) {
 
