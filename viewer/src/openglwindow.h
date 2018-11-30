@@ -66,7 +66,7 @@ public:
     ~OpenGLWindow();
 
     virtual void render(QPainter *painter);
-    virtual void render(int dilatation, int shift_x, int shift_y);
+    virtual void render(int dilatation, int number_render);
 
     virtual void initialize();
 
@@ -83,6 +83,7 @@ protected:
 private:
     bool m_update_pending;
     bool m_animating;
+    int index_rendu=0; 
 
     QOpenGLContext *m_context;
     QOpenGLPaintDevice *m_device;

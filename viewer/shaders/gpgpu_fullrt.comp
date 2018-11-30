@@ -17,6 +17,8 @@ uniform vec3 center;
 uniform int pixelSize;
 uniform int shift_x;
 uniform int shift_y;
+uniform int indices_alternance[9];
+uniform int take_indices; // Number of indices to take from indices_alternance
 
 #define MAX_SCENE_BOUNDS    2
 #define EPS                 0.001
@@ -290,5 +292,8 @@ void main(void) {
     vec4 eye = (mat_inverse * vec4(0, 0, 0, 1));
     vec4 color = trace(eye, dir);
 
-    imageStore(framebuffer, pix, color);
+    for (int i = 0; i < take_indices; i++){
+        ivec2 pix2set = ivec2(pix.x + (int)(indices_alternance[i]/3), pix.y + indices_alternance[i]%3);
+        imageStore(framebuffer, pix2set, color);
+    }
 }
