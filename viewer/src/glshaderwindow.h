@@ -24,7 +24,7 @@ public:
     ~glShaderWindow();
 
     void initialize();
-    void render();
+    void render(int dilatation, int shift_x, int shift_y);
     void resize(int x, int y);
     void setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap);
     inline const QString& getWorkingDirectory() { return workingDirectory;};
@@ -71,6 +71,9 @@ private:
 
     // Are we using GPGPU?
     bool isGPGPU;
+    // Are we using FullRt shader? 
+    bool isFullRt;
+
     // Are we using compute shaders?
     bool hasComputeShaders;
     // Model we are displaying:

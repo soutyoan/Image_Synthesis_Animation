@@ -14,14 +14,25 @@ uniform vec3 bbmax;
 uniform float radius;
 uniform float groundDistance;
 uniform vec3 center;
+uniform int pixelSize;
+uniform int shift_x;
+uniform int shift_y;
 
-#define MAX_SCENE_BOUNDS    10.0
-#define EPS                 0.01
+#define MAX_SCENE_BOUNDS    2
+#define EPS                 0.001
 
 
 struct hitinfo_t {
     vec4 t;
     int hit_vptr;
+};
+
+struct intersectionItem {
+    vec4 origin;
+    vec4 dir;
+    vec4 point_hit;
+    vec4 normal;
+    vec4 color;
 };
 
 float max3 (vec3 v) {
@@ -63,13 +74,13 @@ bool intersectBoundingBox(vec4 origin, vec4 dir) {
 
 bool intersectPlane(vec4 origin, vec4 dir, out vec4 dist)
 {
-    vec4 Q = vec4(0, groundDistance, 0, 1);
+    vec4 Q = vec4(0, -groundDistance, 0, 1);
     vec4 normal_plane = vec4(0, 1, 0, 0);
     float lambda_plane = 0.0;
     if (dot(dir, normal_plane)!=0) {
-        if (-dot((Q - origin).xyz, normal_plane.xyz) / dot(normalize(dir.xyz), normal_plane.xyz) > 0) {
-            lambda_plane = -dot((Q - origin).xyz, normal_plane.xyz) / dot(normalize(dir).xyz, normal_plane.xyz);
-            dist.xyz = origin.xyz + lambda_plane * dir.xyz;
+        float lambda_plane = dot((Q - origin).xyz, normal_plane.xyz) / dot(normalize(dir).xyz, normal_plane.xyz);
+        if (lambda_plane >= EPS) {
+            dist.xyz = dir.xyz;
             dist.w = lambda_plane;
             return true;
         }
@@ -82,11 +93,7 @@ bool intersectTriangle(vec4 origin, vec4 dir, int ptr, out vec4 dist)
 	vec3 V0 = vertices[indices[ptr]].xyz;
     vec3 V1 = vertices[indices[ptr + 1]].xyz;
     vec3 V2 = vertices[indices[ptr + 2]].xyz;
-    vec3 e1 = V1 - V0;// bool hit_plane = intersectPlane(origin, dir, dist_plane);
-    // if (hit_plane) {
-    //     h.hit_vptr = -1;
-    //     h.t.w = dist_plane.w;
-    // }
+    vec3 e1 = V1 - V0;
     vec3 e2 = V2 - V0;
     vec3 t = origin.xyz - V0;
     vec3 u = normalize(dir.xyz);
@@ -97,7 +104,7 @@ bool intersectTriangle(vec4 origin, vec4 dir, int ptr, out vec4 dist)
     } else {
         vec3 sol = 1 / (dot(p, e1)) * vec3(dot(q, e2), dot(p, t), dot(q, u));
         float lambda = sol[0];
-        if (lambda <EPS) {
+        if (lambda <= EPS) {
             return false;
         }
         float alpha = sol[1];
@@ -115,11 +122,7 @@ bool intersectTriangle(vec4 origin, vec4 dir, int ptr, out vec4 dist)
         dist[1] = beta;
         dist[2] = 1 - alpha - beta;
         dist[3] = lambda;
-        return true;// bool hit_plane = intersectPlane(origin, dir, dist_plane);
-    // if (hit_plane) {
-    //     h.hit_vptr = -1;
-    //     h.t.w = dist_plane.w;
-    // }
+        return true;
         }
 }
 
@@ -132,23 +135,15 @@ vec4 interpolateNormal(hitinfo_t h)
         vec4 n0 = normals[indices[h.hit_vptr]];
         vec4 n1 = normals[indices[h.hit_vptr+1]];
         vec4 n2 = normals[indices[h.hit_vptr+2]];
-        return h.t.x * n1 + h.t.y * n2 + h.t.z * n0;
+        return normalize(h.t.x * n1 + h.t.y * n2 + h.t.z * n0);
     }
     return vec4(1);
-}// bool hit_plane = intersectPlane(origin, dir, dist_plane);
-    // if (hit_plane) {
-    //     h.hit_vptr = -1;
-    //     h.t.w = dist_plane.w;
-    // }
-// bool hit_plane = intersectPlane(origin, dir, dist_plane);
-    // if (hit_plane) {
-    //     h.hit_vptr = -1;
-    //     h.t.w = dist_plane.w;
-    // }
+}
+
 vec4 interpolateColor(hitinfo_t h)
 {
     if (h.hit_vptr == -1) {
-        return vec4(1,0,0,1);
+        // return vec4(0.2, 0.6, 0.7, 1);
         return texture2D(colorTexture, h.t.xz);
     }
 	else if (h.hit_vptr>=0) {
@@ -164,7 +159,7 @@ vec4 interpolateColor(hitinfo_t h)
 bool isIntersected(vec4 origin, vec4 dir, out hitinfo_t h)
 {
     vec4 dist; // stores barycentric coord + lambda distance
-    h.t.w = radius * MAX_SCENE_BOUNDS;
+    h.t.w = 10000;
     vec4 dist_plane; // store points coordinates + lambda value for plane
 	bool hit = intersectPlane(origin, dir, dist_plane);
     if (hit) {
@@ -176,8 +171,8 @@ bool isIntersected(vec4 origin, vec4 dir, out hitinfo_t h)
 	if(intersectBoundingBox(origin, dir)) {
 		for(int j = 0; j < indices.length(); j += 3) {
 			if(intersectTriangle(origin, dir, j, dist)) {
+                hit = true;
                 if (h.t.w > dist.w) {
-                    hit = true;
                     h.t = dist;
                     h.hit_vptr = j;
                 }
@@ -195,21 +190,28 @@ float cos_angle(vec4 vectA, vec4 vectB)
 }
 
 float F( float cos_theta )
-{   if ((pow(eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
+{
+    float inv_eta = 5/eta;
+    if ((pow(inv_eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
         return 1.0;
     }
-    float ci = sqrt(pow(eta, 2) - (1 - pow(cos_theta, 2)));
+    float ci = sqrt(pow(inv_eta, 2) - (1 - pow(cos_theta, 2)));
     float Fs = pow(abs((cos_theta - ci) / (cos_theta + ci)), 2);
-    float Fp = pow(abs((pow(eta, 2) * cos_theta - ci) / (pow(eta, 2) * cos_theta + ci)), 2);
+    float Fp = pow(abs((pow(inv_eta, 2) * cos_theta - ci) / (pow(inv_eta, 2) * cos_theta + ci)), 2);
 
     return (Fs + Fp) / 2;
 }
 
-vec4 phongModel(vec4 vertLight, vec4 vertNormal, vec4 vertEye, float lightIntensity, vec4 vertColor) {
+vec4 phongModel(vec4 vertLight, vec4 vertNormal, vec4 vertEye, vec4 vertColor, float lightIntensity, bool only_ambiant) {
+    // Assuming that the following vectors are already normalized :
+    // vertLight, vertNormal, vertEye
     float ka = 0.2;
-    float kd = 0.5;
     vec4 Ca = ka * lightIntensity * vertColor;
+    if (only_ambiant) {
+        return Ca;
+    }
 
+    float kd = 0.5;
     vec4 Cd = kd * lightIntensity * vertColor * max(dot(vertNormal, -vertLight), 0);
 
     vec4 halfVector = normalize(vertEye - vertLight);
@@ -219,41 +221,63 @@ vec4 phongModel(vec4 vertLight, vec4 vertNormal, vec4 vertEye, float lightIntens
     return Ca + Cd + Cs;
 }
 
+
 vec4 trace(vec4 origin, vec4 dir)
 {
     hitinfo_t h;
+    intersectionItem intersections[int(MAX_SCENE_BOUNDS)];
+    int nb_bounds = 0;
+    vec4 current_origin = vec4(origin.xyzw);
+    vec4 current_dir = vec4(dir.xyzw);
+    vec4 result = vec4(0,0,0,1);
     // hit either the plane or a triangle
-    if (isIntersected(origin, dir, h)) {
-        vec4 intersection = origin + h.t.w * dir;
-        vec4 newDir = normalize(vec4(lightPosition, 1) - intersection);
-        vec4 vertNormal = normalize(interpolateNormal(h));
+    while (nb_bounds < MAX_SCENE_BOUNDS && isIntersected(current_origin, current_dir, h)) {
+        intersections[nb_bounds].origin = vec4(current_origin);
+        current_origin += h.t.w * current_dir;
+        intersections[nb_bounds].point_hit = vec4(current_origin);
+        vec4 vertNormal = interpolateNormal(h);
         vec4 vertColor = interpolateColor(h);
-        vec4 vertEye = normalize(origin - intersection);
-        vec4 vertLight = normalize(-newDir);
-        float ka = 0.2;
-        float kd = 0.5;
-        vec4 dist;
-        int ptr;
-        hitinfo_t new_h;
-        if (isIntersected(intersection, newDir, new_h)) {
-            return ka * lightIntensity * vertColor;
+        intersections[nb_bounds].normal = vec4(vertNormal);
+        vec4 vertEye = normalize(origin - current_origin);
+        vec4 vertLight = normalize(current_origin - vec4(lightPosition.xyz, 1));
+        hitinfo_t h_light;
+        bool only_ambiant = isIntersected(current_origin, -vertLight, h_light);
+        intersections[nb_bounds].color = phongModel(vertLight, vertNormal, vertEye, vertColor, lightIntensity, only_ambiant);
+        intersections[nb_bounds].dir = reflect(current_dir, vertNormal);
+        if (dot(intersections[nb_bounds].normal, intersections[nb_bounds].dir)<=0) {
+            break;
         }
-        return phongModel(vertLight, vertNormal, vertEye, lightIntensity, vertColor);
+        current_dir = vec4(intersections[nb_bounds].dir);
+        nb_bounds ++;
     }
-    return vec4(1);
+
+    float current_Fresnel = 1.0;
+    for (int s=nb_bounds-1; s>=0; s--) {
+        float cos_theta = dot(intersections[s].normal, intersections[s].dir);
+        current_Fresnel *= F(cos_theta);
+        float currentEta = eta/5;
+        result *= current_Fresnel * currentEta;
+        result +=  (1-currentEta) * intersections[s].color;
+
+    }
+
+    return result;
 }
 
 layout (local_size_x = 8, local_size_y = 8) in;
 
 void main(void) {
-    ivec2 pix = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 pix = ivec2(gl_GlobalInvocationID.xy) * pixelSize + ivec2(shift_x, shift_y);
     ivec2 size = imageSize(framebuffer);
+
     if (pix.x >= size.x || pix.y >= size.y) {
         return;
     }
+
     vec2 pos = pix / (size - vec2(0.5,0.5));
+
     // pos in [0,1]^2 Need it in [-1,1]^2:
-    pos = 2 * pos - vec2(1.,1.);
+    pos = (2 * pos - vec2(1.,1.));
 
     // Step 1: I need pixel coordinates.
     vec4 worldPos = vec4(pos.x, pos.y, 1.0, 1.0);

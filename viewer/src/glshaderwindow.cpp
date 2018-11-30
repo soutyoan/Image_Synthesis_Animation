@@ -27,7 +27,7 @@ glShaderWindow::glShaderWindow(QWindow *parent)
       gpgpu_vertices(0), gpgpu_normals(0), gpgpu_texcoords(0), gpgpu_colors(0), gpgpu_indices(0),
       environmentMap(0), texture(0), permTexture(0), pixels(0), mouseButton(Qt::NoButton), auxWidget(0),
       isGPGPU(false), hasComputeShaders(false), blinnPhong(true), transparent(true), eta(1.5), lightIntensity(1.0f), shininess(50.0f), lightDistance(5.0f), groundDistance(0.78),
-      shadowMap_fboId(0), shadowMap_rboId(0), shadowMap_textureId(0), fullScreenSnapshots(false), computeResult(0), 
+      shadowMap_fboId(0), shadowMap_rboId(0), shadowMap_textureId(0), fullScreenSnapshots(false), computeResult(0),
       m_indexBuffer(QOpenGLBuffer::IndexBuffer), ground_indexBuffer(QOpenGLBuffer::IndexBuffer)
 {
     // Default values you might want to tinker with
@@ -305,7 +305,7 @@ QWidget *glShaderWindow::makeAuxWindow()
     return auxWidget;
 }
 
-void glShaderWindow::createSSBO() 
+void glShaderWindow::createSSBO()
 {
 #ifndef __APPLE__
 	glGenBuffers(4, ssbo);
@@ -650,6 +650,7 @@ void glShaderWindow::setShader(const QString& shader)
     QString fragmentShader;
     QString computeShader;
     isGPGPU = shader.contains("gpgpu", Qt::CaseInsensitive);
+    isFullRt = shader.contains("fullrt", Qt::CaseInsensitive);
     foreach (const QString &str, shaders) {
         QString suffix = str.right(str.size() - str.lastIndexOf("."));
         if (m_vertShaderSuffix.filter(suffix).size() > 0) {
@@ -706,7 +707,7 @@ void glShaderWindow::loadTexturesForShaders() {
         computeResult = 0;
     }
 	// Load textures as required by the shader.
-	if ((m_program->uniformLocation("colorTexture") != -1) || (ground_program->uniformLocation("colorTexture") != -1)) {
+	if ((m_program->uniformLocation("colorTexture") != -1) || (ground_program->uniformLocation("colorTexture") != -1) || (compute_program->uniformLocation("colorTexture") != -1)) {
 		glActiveTexture(GL_TEXTURE0);
         // the shader wants a texture. We load one.
         texture = new QOpenGLTexture(QImage(textureName));
@@ -755,7 +756,7 @@ void glShaderWindow::loadTexturesForShaders() {
             computeResult->allocateStorage();
             computeResult->bind(2);
         }
-    } else if ((ground_program->uniformLocation("shadowMap") != -1) 
+    } else if ((ground_program->uniformLocation("shadowMap") != -1)
     		|| (m_program->uniformLocation("shadowMap") != -1) ){
     	// without Qt functions this time
 		glActiveTexture(GL_TEXTURE2);
@@ -795,7 +796,7 @@ void glShaderWindow::loadTexturesForShaders() {
         glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, shadowMap_textureId);
-	}    
+	}
     m_program->release();
 }
 
@@ -957,6 +958,12 @@ void glShaderWindow::mousePressEvent(QMouseEvent *e)
     lastMousePosition = (2.0/m_screenSize) * (QVector2D(e->localPos()) - QVector2D(0.5 * width(), 0.5*height()));
     mouseToTrackball(lastMousePosition, lastTBPosition);
     mouseButton = e->button();
+    if (isFullRt){
+        // On met le shader de phong (le 2_phong)matrix
+        QString shader2 = "2_phong";
+        setShader(shader2);
+        isFullRt = true; // We override isFullRt because we want to stay in the fullRt case
+    }
 }
 
 void glShaderWindow::wheelEvent(QWheelEvent * ev)
@@ -994,9 +1001,9 @@ void glShaderWindow::mouseMoveEvent(QMouseEvent *e)
         float rotAngle = (180.0/M_PI) * rotAxis.length() /(lastTBPosition.length() * currTBPosition.length()) ;
         rotAxis.normalize();
         QQuaternion rotation = QQuaternion::fromAxisAndAngle(rotAxis, rotAngle);
-        m_matrix[matrixMoving].translate(m_center); 
+        m_matrix[matrixMoving].translate(m_center);
         m_matrix[matrixMoving].rotate(rotation);
-        m_matrix[matrixMoving].translate(- m_center); 
+        m_matrix[matrixMoving].translate(- m_center);
         break;
     }
     case Qt::RightButton: {
@@ -1022,6 +1029,11 @@ void glShaderWindow::mouseMoveEvent(QMouseEvent *e)
 void glShaderWindow::mouseReleaseEvent(QMouseEvent *e)
 {
     mouseButton = Qt::NoButton;
+    // On remet le bon shader (le gpgpu_full)
+    if (isFullRt){
+        QString shader2 = "gpgpu_fullrt";
+        setShader(shader2);
+    }
 }
 
 void glShaderWindow::timerEvent(QTimerEvent *e)
@@ -1046,7 +1058,7 @@ static int nextPower2(int x) {
 
 
 
-void glShaderWindow::render()
+void glShaderWindow::render(int dilatation, int shift_x, int shift_y)
 {
     QVector3D lightPosition = m_matrix[1] * (m_center + lightDistance * modelMesh->bsphere.r * QVector3D(0.5, 0.5, 1));
 
@@ -1055,15 +1067,19 @@ void glShaderWindow::render()
     QMatrix4x4 mat_inverse = m_matrix[0];
     QMatrix4x4 persp_inverse = m_perspective;
 
+    lightCoordMatrix.setToIdentity();
+    lightPerspective.setToIdentity();
+
+    lightCoordMatrix.lookAt(lightPosition, m_center, QVector3D(0, 1, 0));
     if (isGPGPU || hasComputeShaders) {
         bool invertible;
         mat_inverse = mat_inverse.inverted(&invertible);
         persp_inverse = persp_inverse.inverted(&invertible);
-    } 
+    }
     if (hasComputeShaders) {
         // We bind the texture generated to texture unit 2 (0 is for the texture, 1 for the env map)
 #ifndef __APPLE__
-               glActiveTexture(GL_TEXTURE2);
+        glActiveTexture(GL_TEXTURE2);
         compute_program->bind();
 		computeResult->bind(2);
         // Send parameters to compute program:
@@ -1083,11 +1099,14 @@ void glShaderWindow::render()
         compute_program->setUniformValue("eta", eta);
         compute_program->setUniformValue("framebuffer", 2);
         compute_program->setUniformValue("colorTexture", 0);
+        compute_program->setUniformValue("pixelSize", dilatation);
+        compute_program->setUniformValue("shift_x", shift_x);
+        compute_program->setUniformValue("shift_y", shift_y);
 		glBindImageTexture(2, computeResult->textureId(), 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-        int worksize_x = nextPower2(width());
-        int worksize_y = nextPower2(height());
+        int worksize_x = nextPower2(width()/dilatation);
+        int worksize_y = nextPower2(height()/dilatation);
         glDispatchCompute(worksize_x / compute_groupsize_x, worksize_y / compute_groupsize_y, 1);
-        glBindImageTexture(2, 0, 0, false, 0, GL_READ_ONLY, GL_RGBA32F); 
+        glBindImageTexture(2, 0, 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         compute_program->release();
 #endif
@@ -1103,8 +1122,6 @@ void glShaderWindow::render()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // set up camera position in light source:
         // TODO_shadowMapping: you must initialize these two matrices.
-        lightCoordMatrix.setToIdentity();
-        lightPerspective.setToIdentity();
 
         shadowMapGenerationProgram->setUniformValue("matrix", lightCoordMatrix);
         shadowMapGenerationProgram->setUniformValue("perspective", lightPerspective);
