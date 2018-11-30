@@ -1058,7 +1058,7 @@ static int nextPower2(int x) {
 }
 
 
-int get_indices_rendu_alternance(int* indices, int* shifts, int render_number){
+int get_indices_rendu_alternance(GLint* indices, int* shifts, int render_number){
     /*
     Recuperer les indices de rendu en alternanace.
 
@@ -1175,8 +1175,10 @@ int get_indices_rendu_alternance(int* indices, int* shifts, int render_number){
 }
 
 
-void glShaderWindow::render(int dilatation, int render_number)
+void glShaderWindow::render()
 {
+    int dilatation = 3;
+    std::cerr  << index_rendu << "\n";
     QVector3D lightPosition = m_matrix[1] * (m_center + lightDistance * modelMesh->bsphere.r * QVector3D(0.5, 0.5, 1));
 
     QMatrix4x4 lightCoordMatrix;
@@ -1218,11 +1220,11 @@ void glShaderWindow::render(int dilatation, int render_number)
         compute_program->setUniformValue("colorTexture", 0);
         compute_program->setUniformValue("pixelSize", dilatation);
         int* shift = (int*)malloc(2 * sizeof(int));
-        int* alternance_indices = (int*)malloc(9 * sizeof(int));
-        int number_indices_to_take = get_indices_rendu_alternance(shift, alternance_indices, render_number);
+        GLint* alternance_indices = (int*)malloc(9 * sizeof(int));
+        int number_indices_to_take = get_indices_rendu_alternance(alternance_indices, shift, index_rendu);
         compute_program->setUniformValue("shift_x", shift[0]);
         compute_program->setUniformValue("shift_y", shift[1]);
-        compute_program->setUniformValue("indices_alternance", *alternance_indices);
+        compute_program->setUniformValueArray("indices_alternance", alternance_indices, 9);
         compute_program->setUniformValue("take_indices", number_indices_to_take);
 		glBindImageTexture(2, computeResult->textureId(), 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
         int worksize_x = nextPower2(width()/dilatation);
@@ -1231,6 +1233,8 @@ void glShaderWindow::render(int dilatation, int render_number)
         glBindImageTexture(2, 0, 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         compute_program->release();
+        free(shift);
+        free(alternance_indices);
 #endif
 	} else if ((ground_program->uniformLocation("shadowMap") != -1) || (m_program->uniformLocation("shadowMap") != -1) ){
 		glActiveTexture(GL_TEXTURE2);
@@ -1325,4 +1329,5 @@ void glShaderWindow::render(int dilatation, int render_number)
         ground_vao.release();
         ground_program->release();
     }
+    index_rendu ++; 
 }

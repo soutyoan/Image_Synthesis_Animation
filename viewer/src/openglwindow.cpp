@@ -45,9 +45,11 @@
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLPaintDevice>
 #include <QtGui/QPainter>
+#include <QTimer>
 #include <QDebug>
 #include <time.h>
 #include <unistd.h>
+#include <iostream>
 
 //! [1]
 OpenGLWindow::OpenGLWindow(QWindow *parent)
@@ -77,9 +79,10 @@ void OpenGLWindow::initialize()
 {
 }
 
-void OpenGLWindow::render(int dilatation, int number_render)
+void OpenGLWindow::render()
 {
     index_rendu ++;
+    std::cerr  << index_rendu << "\n";
     if (!m_device)
         m_device = new QOpenGLPaintDevice;
 
@@ -122,6 +125,16 @@ void OpenGLWindow::exposeEvent(QExposeEvent *event)
 }
 //! [3]
 
+
+void OpenGLWindow::renderAlternance(){
+
+    std::cerr << "ici \n";
+
+    render();
+
+    m_context->swapBuffers(this);
+}
+
 //! [4]
 void OpenGLWindow::renderNow()
 {
@@ -148,16 +161,14 @@ void OpenGLWindow::renderNow()
         initialize();
     }
 
-    int dilatation = 3;
-
-    render(dilatation, 0);
+    render();
 
     m_context->swapBuffers(this);
 
     if (m_animating)
         renderLater();
 
-    QTimer::singleShot(0, this, SLOT(render(dilatation, index_rendu)));
+    QTimer::singleShot(0, this, SLOT(renderAlternance()));
 }
 //! [4]
 

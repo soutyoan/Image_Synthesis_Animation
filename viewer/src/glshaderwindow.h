@@ -24,7 +24,7 @@ public:
     ~glShaderWindow();
 
     void initialize();
-    void render(int dilatation, int number_render);
+    void render();
     void resize(int x, int y);
     void setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap);
     inline const QString& getWorkingDirectory() { return workingDirectory;};

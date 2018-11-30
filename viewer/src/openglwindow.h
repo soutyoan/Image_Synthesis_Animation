@@ -65,10 +65,10 @@ public:
     explicit OpenGLWindow(QWindow *parent = 0);
     ~OpenGLWindow();
 
-    virtual void render(QPainter *painter);
-    virtual void render(int dilatation, int number_render);
-
     virtual void initialize();
+
+    virtual void render(QPainter *painter);
+    virtual void render();
 
     void setAnimating(bool animating);
 
@@ -76,14 +76,16 @@ public slots:
     void renderLater();
     void renderNow();
 
+    void renderAlternance();
+
 protected:
     bool event(QEvent *event);
     void exposeEvent(QExposeEvent *event);
+    int index_rendu=0;
 
 private:
     bool m_update_pending;
     bool m_animating;
-    int index_rendu=0; 
 
     QOpenGLContext *m_context;
     QOpenGLPaintDevice *m_device;
