@@ -146,9 +146,12 @@ void OpenGLWindow::renderNow()
     }
 
     int dilatation = 3;
+    int indexes[9] = {4, 0, 2, 6, 8, 1, 3, 5, 7};
+    
     for (int shift_x = 0; shift_x < dilatation; shift_x++){
         for (int shift_y = 0; shift_y < dilatation; shift_y++){
-            render(dilatation, shift_x, shift_y);
+
+            render(dilatation, (int)(indexes[shift_x * dilatation + shift_y]/3.0), indexes[shift_x * dilatation + shift_y]%3);
 
             m_context->swapBuffers(this);
 

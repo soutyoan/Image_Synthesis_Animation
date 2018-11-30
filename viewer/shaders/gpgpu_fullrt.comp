@@ -143,7 +143,7 @@ vec4 interpolateNormal(hitinfo_t h)
 vec4 interpolateColor(hitinfo_t h)
 {
     if (h.hit_vptr == -1) {
-        //return vec4(0.2, 0.6, 0.7, 1);
+        // return vec4(0.2, 0.6, 0.7, 1);
         return texture2D(colorTexture, h.t.xz);
     }
 	else if (h.hit_vptr>=0) {
