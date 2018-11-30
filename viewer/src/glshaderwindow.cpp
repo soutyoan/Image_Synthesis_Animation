@@ -1058,9 +1058,127 @@ static int nextPower2(int x) {
 }
 
 
+int get_indices_rendu_alternance(GLint* indices, int* shifts, int render_number){
+    /*
+    Recuperer les indices de rendu en alternanace.
 
-void glShaderWindow::render(int dilatation, int shift_x, int shift_y)
+    param :  indices : valeur de retour des indices
+             shifts : valeur de retour des shifts
+             render_number : l'index de rendu
+
+    return :
+        le nombre d'indices à prendre dans la liste d'indices
+
+    Parcours de la matrice :
+
+    premier rendu :
+        [0 0 0]
+        [0 0 0]
+        [0 0 0]
+
+    deuxieme rendu :
+        [0 0 0]
+        [0 4 4]
+        [0 4 4]
+
+    troisieme rendu :
+        [0 0 0]
+        [0 4 4]
+        [0 4 8]
+
+    quatrieme rendu :
+        [0 1 1]
+        [0 4 4]
+        [0 4 8]
+
+    cinquieme rendu :
+        [0 1 1]
+        [3 4 4]
+        [3 4 8]
+
+    sixieme rendu :
+        [0 1 1]
+        [3 4 4]
+        [3 7 8]
+
+    septieme rendu :
+        [0 1 2]
+        [3 4 4]
+        [3 7 8]
+
+    huitieme rendu :
+        [0 1 2]
+        [3 4 4]
+        [6 7 8]
+
+    neuvieme-dernier rendu :
+        [0 1 2]
+        [3 4 5]
+        [6 7 8]
+
+    */
+    switch (render_number){
+        case 0:
+            for (int i = 0; i < 9; i++){
+                indices[i] = i;
+            }
+            shifts[0] = 0;
+            shifts[1] = 0;
+            return 9;
+        case 1:
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 3;
+            indices[3] = 4;
+            shifts[0] = 1;
+            shifts[1] = 1;
+            return 4;
+        case 2:
+            indices[0] = 0;
+            shifts[0] = 2;
+            shifts[1] = 2;
+            return 1;
+        case 3:
+            indices[0] = 0;
+            indices[1] = 1;
+            shifts[0] = 0;
+            shifts[1] = 1;
+            return 2;
+        case 4:
+            indices[0] = 0;
+            indices[1] = 1;
+            shifts[0] = 1;
+            shifts[1] = 0;
+            return 2;
+        case 5:
+            indices[0] = 0;
+            shifts[0] = 2;
+            shifts[1] = 1;
+            return 1;
+        case 6:
+            indices[0] = 0;
+            shifts[0] = 0;
+            shifts[1] = 2;
+            return 1;
+        case 7:
+            indices[0] = 0;
+            shifts[0] = 2;
+            shifts[1] = 0;
+            return 1;
+        case 8:
+            indices[0] = 0;
+            shifts[0] = 1;
+            shifts[1] = 2;
+            return 1;
+        default:
+            return -1;
+    }
+}
+
+
+void glShaderWindow::render()
 {
+    int dilatation = 3;
     QVector3D lightPosition = m_matrix[1] * (m_center + lightDistance * modelMesh->bsphere.r * QVector3D(0.5, 0.5, 1));
 
     QMatrix4x4 lightCoordMatrix;
@@ -1101,8 +1219,13 @@ void glShaderWindow::render(int dilatation, int shift_x, int shift_y)
         compute_program->setUniformValue("framebuffer", 2);
         compute_program->setUniformValue("colorTexture", 0);
         compute_program->setUniformValue("pixelSize", dilatation);
-        compute_program->setUniformValue("shift_x", shift_x);
-        compute_program->setUniformValue("shift_y", shift_y);
+        int* shift = (int*)malloc(2 * sizeof(int));
+        GLint* alternance_indices = (int*)malloc(9 * sizeof(int));
+        int number_indices_to_take = get_indices_rendu_alternance(alternance_indices, shift, index_rendu);
+        compute_program->setUniformValue("shift_x", shift[0]);
+        compute_program->setUniformValue("shift_y", shift[1]);
+        compute_program->setUniformValueArray("indices_alternance", alternance_indices, 9);
+        compute_program->setUniformValue("take_indices", number_indices_to_take);
 		glBindImageTexture(2, computeResult->textureId(), 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
         int worksize_x = nextPower2(width()/dilatation);
         int worksize_y = nextPower2(height()/dilatation);
@@ -1110,6 +1233,8 @@ void glShaderWindow::render(int dilatation, int shift_x, int shift_y)
         glBindImageTexture(2, 0, 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         compute_program->release();
+        free(shift);
+        free(alternance_indices);
 #endif
 	} else if ((ground_program->uniformLocation("shadowMap") != -1) || (m_program->uniformLocation("shadowMap") != -1) ){
 		glActiveTexture(GL_TEXTURE2);
@@ -1204,4 +1329,5 @@ void glShaderWindow::render(int dilatation, int shift_x, int shift_y)
         ground_vao.release();
         ground_program->release();
     }
+    index_rendu ++;
 }

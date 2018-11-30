@@ -45,9 +45,11 @@
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLPaintDevice>
 #include <QtGui/QPainter>
+#include <QTimer>
 #include <QDebug>
 #include <time.h>
 #include <unistd.h>
+#include <iostream>
 
 //! [1]
 OpenGLWindow::OpenGLWindow(QWindow *parent)
@@ -77,8 +79,9 @@ void OpenGLWindow::initialize()
 {
 }
 
-void OpenGLWindow::render(int dilatation, int shift_x, int shift_y)
+void OpenGLWindow::render()
 {
+    index_rendu ++;
     if (!m_device)
         m_device = new QOpenGLPaintDevice;
 
@@ -121,9 +124,25 @@ void OpenGLWindow::exposeEvent(QExposeEvent *event)
 }
 //! [3]
 
+
+void OpenGLWindow::renderAlternance(){
+
+    if (index_rendu > 8){
+        return;
+    }
+
+    render();
+
+    m_context->swapBuffers(this);
+
+    QTimer::singleShot(0, this, SLOT(renderAlternance()));
+}
+
 //! [4]
 void OpenGLWindow::renderNow()
 {
+    index_rendu = 0;
+
     if (!isExposed())
         return;
 
@@ -145,20 +164,14 @@ void OpenGLWindow::renderNow()
         initialize();
     }
 
-    int dilatation = 3;
-    int indexes[9] = {4, 0, 2, 6, 8, 1, 3, 5, 7};
-    
-    for (int shift_x = 0; shift_x < dilatation; shift_x++){
-        for (int shift_y = 0; shift_y < dilatation; shift_y++){
+    render();
 
-            render(dilatation, (int)(indexes[shift_x * dilatation + shift_y]/3.0), indexes[shift_x * dilatation + shift_y]%3);
+    m_context->swapBuffers(this);
 
-            m_context->swapBuffers(this);
+    if (m_animating)
+        renderLater();
 
-            if (m_animating)
-                renderLater();
-            }
-        }
+    QTimer::singleShot(0, this, SLOT(renderAlternance()));
 }
 //! [4]
 
