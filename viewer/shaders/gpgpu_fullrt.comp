@@ -18,7 +18,7 @@ uniform int pixelSize;
 uniform int shift_x;
 uniform int shift_y;
 
-#define MAX_SCENE_BOUNDS    3
+#define MAX_SCENE_BOUNDS    2
 #define EPS                 0.001
 
 
@@ -80,7 +80,7 @@ bool intersectPlane(vec4 origin, vec4 dir, out vec4 dist)
     if (dot(dir, normal_plane)!=0) {
         float lambda_plane = dot((Q - origin).xyz, normal_plane.xyz) / dot(normalize(dir).xyz, normal_plane.xyz);
         if (lambda_plane >= EPS) {
-            dist.xyz = origin.xyz + lambda_plane * dir.xyz;
+            dist.xyz = dir.xyz;
             dist.w = lambda_plane;
             return true;
         }
@@ -143,8 +143,8 @@ vec4 interpolateNormal(hitinfo_t h)
 vec4 interpolateColor(hitinfo_t h)
 {
     if (h.hit_vptr == -1) {
-        return vec4(0.2, 0.6, 0.7, 1);
-        // return texture2D(colorTexture, h.t.xz);
+        //return vec4(0.2, 0.6, 0.7, 1);
+        return texture2D(colorTexture, h.t.xz);
     }
 	else if (h.hit_vptr>=0) {
         vec4 c0 = colors[indices[h.hit_vptr]];
@@ -238,36 +238,26 @@ vec4 trace(vec4 origin, vec4 dir)
         vec4 vertNormal = interpolateNormal(h);
         vec4 vertColor = interpolateColor(h);
         intersections[nb_bounds].normal = vec4(vertNormal);
-        intersections[nb_bounds].color = vec4(vertColor);
         vec4 vertEye = normalize(origin - current_origin);
         vec4 vertLight = normalize(current_origin - vec4(lightPosition.xyz, 1));
-        current_dir = -vertLight;
-        intersections[nb_bounds].dir = vec4(current_dir);
+        hitinfo_t h_light;
+        bool only_ambiant = isIntersected(current_origin, -vertLight, h_light);
+        intersections[nb_bounds].color = phongModel(vertLight, vertNormal, vertEye, vertColor, lightIntensity, only_ambiant);
+        intersections[nb_bounds].dir = reflect(current_dir, vertNormal);
         if (dot(intersections[nb_bounds].normal, intersections[nb_bounds].dir)<=0) {
-            // return vec4(1, 0, 0, 1);
             break;
         }
+        current_dir = vec4(intersections[nb_bounds].dir);
         nb_bounds ++;
     }
-    
+
     float current_Fresnel = 1.0;
     for (int s=nb_bounds-1; s>=0; s--) {
-
-        vec4 vertEye = normalize(intersections[s].origin - intersections[s].point_hit);
-        bool only_ambiant = (dot(intersections[s].normal, intersections[s].dir) > 0) && isIntersected(intersections[s].point_hit, intersections[s].dir, h);
-        vec4 auxDir = vec4(intersections[s].dir.xyzw);
-        // if (s<nb_bounds-1) {
-        //     auxDir = intersections[s+1].dir;
-        // }
-        float cos_theta = dot(intersections[s].normal, auxDir);
-
+        float cos_theta = dot(intersections[s].normal, intersections[s].dir);
         current_Fresnel *= F(cos_theta);
-        // if (F(cos_theta) > 1 ){
-        //     result = vec4(0,1,0,1);
-        // }
-        float currentEta = eta / 5;
+        float currentEta = eta/5;
         result *= current_Fresnel * currentEta;
-        result +=  (1-currentEta) * phongModel(-intersections[s].dir, intersections[s].normal, vertEye, intersections[s].color, lightIntensity, only_ambiant);
+        result +=  (1-currentEta) * intersections[s].color;
 
     }
 
