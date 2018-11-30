@@ -707,7 +707,7 @@ void glShaderWindow::loadTexturesForShaders() {
         computeResult = 0;
     }
 	// Load textures as required by the shader.
-	if ((m_program->uniformLocation("colorTexture") != -1) || (ground_program->uniformLocation("colorTexture") != -1)) {
+	if ((m_program->uniformLocation("colorTexture") != -1) || (ground_program->uniformLocation("colorTexture") != -1) || (compute_program->uniformLocation("colorTexture") != -1)) {
 		glActiveTexture(GL_TEXTURE0);
         // the shader wants a texture. We load one.
         texture = new QOpenGLTexture(QImage(textureName));
@@ -1033,25 +1033,6 @@ void glShaderWindow::mouseReleaseEvent(QMouseEvent *e)
     if (isFullRt){
         QString shader2 = "gpgpu_fullrt";
         setShader(shader2);
-
-        if (!textureName.isNull()) {
-            if (texture) {
-                texture->release();
-                texture->destroy();
-                delete texture;
-                texture = 0;
-            }
-			glActiveTexture(GL_TEXTURE0);
-			// the shader wants a texture. We load one.
-			texture = new QOpenGLTexture(QImage(textureName));
-			if (texture) {
-				texture->setWrapMode(QOpenGLTexture::Repeat);
-				texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-				texture->setMagnificationFilter(QOpenGLTexture::Linear);
-				texture->bind(0);
-            }
-        }
-        renderNow();
     }
 }
 
