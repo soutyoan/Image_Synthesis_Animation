@@ -63,14 +63,16 @@ void main( void )
      float z_shadow = texture(shadowMap, lightSpace.xy).z;
      float z_computed = lightSpace.z;
      bool needShadowMap = (z_computed == z_shadow);
+
+     // diffuse coefficient
      vec4 Cd = kd * lightIntensity * vertColor * max(dot(vertNormalN, lightVectorN), 0);
-
      vec4 halfVector = normalize(eyeVectorN + lightVectorN);
-
      float cos_theta_d = cos_angle(halfVector, lightVectorN);
 
+     // specular coefficient
      vec4 Cs =  F(cos_theta_d) * lightIntensity * pow(max(dot(vertNormalN, halfVector), 0), shininess) * vertColor;
 
+     // Cook-Torrance model computation
      if (!blinnPhong){
         float alpha = shininess / 200;
         float cos_theta_h = cos_angle(halfVector, vertNormalN);

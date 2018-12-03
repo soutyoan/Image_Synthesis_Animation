@@ -1070,7 +1070,6 @@ void glShaderWindow::render(int dilatation, int shift_x, int shift_y)
     lightCoordMatrix.setToIdentity();
     lightPerspective.setToIdentity();
 
-    lightCoordMatrix.lookAt(lightPosition, m_center, QVector3D(0, 1, 0));
     if (isGPGPU || hasComputeShaders) {
         bool invertible;
         mat_inverse = mat_inverse.inverted(&invertible);
@@ -1122,7 +1121,8 @@ void glShaderWindow::render(int dilatation, int shift_x, int shift_y)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // set up camera position in light source:
         // TODO_shadowMapping: you must initialize these two matrices.
-
+        lightCoordMatrix = lookAt(lightPosition, m_center, QVector3D(0, 1.0, 0));
+        lightPerspective = m_perspective.perspective(45, (float)width()/height(), 0.1 * radius, 20 * radius);
         shadowMapGenerationProgram->setUniformValue("matrix", lightCoordMatrix);
         shadowMapGenerationProgram->setUniformValue("perspective", lightPerspective);
         // Draw the entire scene:

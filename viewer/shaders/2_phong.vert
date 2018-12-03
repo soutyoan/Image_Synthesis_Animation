@@ -1,6 +1,7 @@
 #version 410
 
 uniform mat4 matrix;
+uniform mat4 lightMatrix;
 uniform mat4 perspective;
 uniform mat3 normalMatrix;
 uniform bool noColor;
@@ -40,7 +41,7 @@ void main( void )
                             0.0, 0.0, 0.5, 0.0,
                             0.5, 0.5, 0.5, 1.0
                             );
-    lightSpace = biasMatrix * perspective * matrix  * vertex;
+    lightSpace = perspective * biasMatrix * matrix  * vertex;
 
 
     gl_Position = perspective * matrix * vertex;
