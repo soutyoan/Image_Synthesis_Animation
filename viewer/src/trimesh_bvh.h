@@ -10,7 +10,7 @@
 class TriMesh_bvh : public trimesh::TriMesh {
 
 private:
-    BVHNode Root;
+    BVHNode *Root;
 
 public:
 
@@ -21,6 +21,7 @@ public:
 
     std::vector<trimesh::point*> get_all_bbmin();
     std::vector<trimesh::point*> get_all_bbmax();
+    std::vector<trimesh::point*> get_all_indices();
 
 };
 

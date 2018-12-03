@@ -25,6 +25,11 @@ void TriMesh_bvh::build(const vector<trimesh::point*>  &objects){
     build_recursive(0, objects.size(), rootNode, 0, objectsCopy);
 
     Root = rootNode; // Save the root Node
+
+    for (uint i = 0; i < objectsCopy.size(); i++){
+        vertices[i] = *objectsCopy[i]; // We save the vertices
+    }
+
 }
 
 /*** 3 sort functions ***/
@@ -93,14 +98,21 @@ void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node
 
 /** Get the bbmin boxes **/
 std::vector<trimesh::point*> TriMesh_bvh::get_all_bbmin(){
-    std::vector<trimesh::points*> *bbmin = new std::vector<trimesh::points*>();
-    Root.get_all_bbmin(bbmin);
-    return bbmin;
+    std::vector<trimesh::point*> *bbmin = new std::vector<trimesh::point*>();
+    Root->get_all_bbmin(bbmin);
+    return *bbmin;
 }
 
 /** Get the bbmin boxes **/
 std::vector<trimesh::point*> TriMesh_bvh::get_all_bbmax(){
-    std::vector<trimesh::points*>> bbmax = new std::vector<trimesh::points*>();
-    Root.get_all_bbmax(bbmax);
-    return bbmax;
+    std::vector<trimesh::point*> *bbmax = new std::vector<trimesh::point*>();
+    Root->get_all_bbmax(bbmax);
+    return *bbmax;
+}
+
+/** Get the indices boxes **/
+std::vector<trimesh::point*> TriMesh_bvh::get_all_indices(){
+    std::vector<trimesh::point*> *indices = new std::vector<trimesh::point*>();
+    Root->get_all_indices(indices);
+    return *indices;
 }

@@ -15,7 +15,7 @@ void BVHNode::makeNode(unsigned int left_index_, BVHNode *left_node, BVHNode *ri
 }
 
 void BVHNode::get_all_bbmin(std::vector<trimesh::point*> *bbmin){
-    bbmin->push_back(this->bbox.min);
+    bbmin->push_back(&this->bbox.min);
     if (!leaf){
         left_node->get_all_bbmin(bbmin);
         right_node->get_all_bbmin(bbmin);
@@ -23,9 +23,18 @@ void BVHNode::get_all_bbmin(std::vector<trimesh::point*> *bbmin){
 }
 
 void BVHNode::get_all_bbmax(std::vector<trimesh::point*> *bbmax){
-    bbmax->push_back(this->bbox.max);
+    bbmax->push_back(&this->bbox.max);
     if (!leaf){
-        left_node->get_all_bbmin(bbmax);
-        right_node->get_all_bbmin(bbmax);
+        left_node->get_all_bbmax(bbmax);
+        right_node->get_all_bbmax(bbmax);
+    }
+}
+
+void BVHNode::get_all_indices(std::vector<trimesh::point*> *indices){
+    trimesh::point p(index, index+n_objs, 0, 0);
+    indices->push_back(&p);
+    if (!leaf){
+        left_node->get_all_indices(indices);
+        right_node->get_all_indices(indices);
     }
 }

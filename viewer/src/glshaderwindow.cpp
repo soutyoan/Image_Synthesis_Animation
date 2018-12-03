@@ -308,7 +308,7 @@ QWidget *glShaderWindow::makeAuxWindow()
 void glShaderWindow::createSSBO()
 {
 #ifndef __APPLE__
-	glGenBuffers(6, ssbo);
+	glGenBuffers(7, ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[0]);
     // TODO: test if 4 float alignment works better
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->vertices.size() * sizeof(trimesh::point), &(modelMesh->vertices.front()), GL_STATIC_READ);
@@ -323,10 +323,13 @@ void glShaderWindow::createSSBO()
     // Ajout des informations pour l'arbre des bbmin et des bbmax
     std::vector<trimesh::point*> bbmin = modelMesh->get_all_bbmin();
     std::vector<trimesh::point*> bbmax = modelMesh->get_all_bbmax();
+    std::vector<trimesh::point*> indices = modelMesh->get_all_indices();
     glBufferData(GL_SHADER_STORAGE_BUFFER, bbmin.size() * sizeof(trimesh::point), &(bbmin.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, bbmax.size() * sizeof(trimesh::point), &(bbmax.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[5]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(trimesh::point), &(indices.front()), GL_STATIC_READ);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[6]);
 
 
     compute_program->bind();
@@ -336,6 +339,7 @@ void glShaderWindow::createSSBO()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo[3]);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo[4]);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, ssbo[5]);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, ssbo[6]);
 #endif
 }
 

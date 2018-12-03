@@ -32,8 +32,9 @@ class BVHNode {
             return bbox;
         };
 
-        void get_all_bbmin(std::vector<trimesh::point*> bbmin);
-        void get_all_bbmax(std::vector<trimesh::point*> bbmax);
+        void get_all_bbmin(std::vector<trimesh::point*> *bbmin);
+        void get_all_bbmax(std::vector<trimesh::point*> *bbmax);
+        void get_all_indices(std::vector<trimesh::point*> *indices);
 };
 
 #endif
