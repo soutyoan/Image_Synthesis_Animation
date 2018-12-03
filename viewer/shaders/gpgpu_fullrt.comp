@@ -82,6 +82,41 @@ bool intersectBoundingBox(vec4 origin, vec4 dir) {
     return out_val > in_val;
 }
 
+vec2 intersectBoudingBoxSpecial(vec4 origin, vec4 dir, vec3 _bbmin, vec3 _bbmax, int direction){
+    vec3 tmin = (origin.xyz - _bbmin.xyz) / dir.xyz;
+    vec3 tmax = (origin.xyz - _bbmax.xyz) / dir.xyz;
+
+    float in_val = max3(vec3(min(tmin.x, tmax.x), min(tmin.y, tmax.y), min(tmin.z, tmax.z)));
+    float out_val = min3(vec3(max(tmin.x, tmax.x), max(tmin.y, tmax.y), max(tmin.z, tmax.z)));
+
+    if (out_val <= in_val){
+        return vec2(10000, 10000); // Dans le cas où on ne touche rien.
+    }
+
+    return vec2(tmin[direction], tmax[direction])
+}
+
+// Récupérer les index des intersections.
+vec2 getIndexIntersection(vec4 origin, vec4 dir, int index_debut, int index_fin, int direction){
+
+    vec2 inter1 = intersectBoudingBoxSpecial(origin, dir, Vec_Bbmin[index_debut], Vec_Bbmax[index_debut], direction);
+    vec2 inter2 = intersectBoudingBoxSpecial(origin, dir, Vec_Bbmin[int((index_debut + index_fin)/2)],
+        Vec_Bbmax[int((index_debut + index_fin)/2)], direction);
+
+    if ((inter1[0] != -1) && (inter1[2] != -1)){
+
+    }
+
+    if ((inter2[0] != -1) && (inter2[2] != -1)){
+
+    }
+
+
+    if (new_index > index_fin){
+        return vec2(index_debut, index_fin);
+    }
+}
+
 bool intersectPlane(vec4 origin, vec4 dir, out vec4 dist)
 {
     vec4 Q = vec4(0, -groundDistance, 0, 1);
