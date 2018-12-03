@@ -3,6 +3,7 @@
 
 #include "openglwindow.h"
 #include "TriMesh.h"
+#include "trimesh_bvh.h"
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QMatrix4x4>
@@ -71,7 +72,7 @@ private:
 
     // Are we using GPGPU?
     bool isGPGPU;
-    // Are we using FullRt shader? 
+    // Are we using FullRt shader?
     bool isFullRt;
 
     // Are we using compute shaders?

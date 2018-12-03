@@ -4,7 +4,7 @@
 #include "Box.h"
 
 class BVHNode {
-    
+
     private:
         box bbox;
         bool leaf;
@@ -16,7 +16,7 @@ class BVHNode {
         BVHNode right_node; // If this node is a parent : right child node.
 
     public:
-        void setAABB(box &bbox_);
+        void setBox(box &bbox_);
         // Set the current Node as a Leaf
         void makeLeaf(unsigned int index_, unsigned int n_objs_);
         // Set current Node as a parent Node
