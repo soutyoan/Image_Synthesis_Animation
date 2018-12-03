@@ -1,6 +1,9 @@
 #ifndef TRIMESH_H
 #define TRIMESH_H
 
+#include "bvhnode.h"
+#include "Box.h"
+
 class TriMesh_bvh : public TriMesh {
 
 public:
