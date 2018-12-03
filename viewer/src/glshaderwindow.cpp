@@ -308,7 +308,7 @@ QWidget *glShaderWindow::makeAuxWindow()
 void glShaderWindow::createSSBO()
 {
 #ifndef __APPLE__
-	glGenBuffers(4, ssbo);
+	glGenBuffers(6, ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[0]);
     // TODO: test if 4 float alignment works better
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->vertices.size() * sizeof(trimesh::point), &(modelMesh->vertices.front()), GL_STATIC_READ);
@@ -319,11 +319,23 @@ void glShaderWindow::createSSBO()
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[3]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->faces.size() * 3 * sizeof(int), &(modelMesh->faces.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+    // Ajout des informations pour l'arbre des bbmin et des bbmax
+    std::vector<trimesh::point*> bbmin = modelMesh->get_all_bbmin();
+    std::vector<trimesh::point*> bbmax = modelMesh->get_all_bbmax();
+    glBufferData(GL_SHADER_STORAGE_BUFFER, bbmin.size() * sizeof(trimesh::point), &(bbmin.front()), GL_STATIC_READ);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, bbmax.size() * sizeof(trimesh::point), &(bbmax.front()), GL_STATIC_READ);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[5]);
+
+
     compute_program->bind();
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo[0]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo[1]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo[2]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo[3]);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo[4]);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, ssbo[5]);
 #endif
 }
 
@@ -556,7 +568,8 @@ void glShaderWindow::openScene()
         m_vao.release();
     }
 
-    modelMesh = trimesh::TriMesh::read(qPrintable(modelName));
+    trimesh::TriMesh *readMesh = trimesh::TriMesh::read(qPrintable(modelName));
+    modelMesh = (TriMesh_bvh*)readMesh;
     if (!modelMesh) {
         QMessageBox::warning(0, tr("qViewer"),
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
@@ -566,6 +579,11 @@ void glShaderWindow::openScene()
     modelMesh->need_bbox();
     modelMesh->need_normals();
     modelMesh->need_faces();
+    std::vector<trimesh::point*> allPoints;
+    for (int i = 0; i < modelMesh->vertices.size(); i++){
+        allPoints.push_back(&modelMesh->vertices[i]);
+    }
+    modelMesh->build(allPoints); // Bounding volume hierarchy
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
             modelMesh->bsphere.center[2]);

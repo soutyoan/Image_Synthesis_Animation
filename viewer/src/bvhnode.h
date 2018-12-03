@@ -31,6 +31,9 @@ class BVHNode {
         trimesh::box &getAABB() {
             return bbox;
         };
+        
+        void get_all_bbmin(std::vector<trimesh::point*> bbmin);
+        void get_all_bbmax(std::vector<trimesh::point*> bbmax);
 };
 
 #endif

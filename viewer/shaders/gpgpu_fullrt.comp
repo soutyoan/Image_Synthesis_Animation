@@ -63,6 +63,16 @@ layout (std430, binding = 4) buffer Meshes
     int indices[];
 };
 
+layout (std430, binding = 5) buffer Vec_Bbmin
+{
+    vec3 vec_bbmin = [];
+}
+
+layout (std430, binding = 5) buffer Vec_Bbmax
+{
+    vec3 vec_bbmax = [];
+}
+
 bool intersectBoundingBox(vec4 origin, vec4 dir) {
 	vec3 tmin = (origin.xyz - bbmin.xyz) / dir.xyz;
     vec3 tmax = (origin.xyz - bbmax.xyz) / dir.xyz;
