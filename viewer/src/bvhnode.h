@@ -1,7 +1,7 @@
 #ifndef BVHNODE_H
 #define BVHNODE_H
 
-#include "Box.h"
+#include "TriMesh.h"
 
 class BVHNode {
 
@@ -12,8 +12,8 @@ class BVHNode {
         unsigned int index;
         // if leaf == false: index to left child node,
         // else if leaf == true: index to first Intersectable in Objsvector
-        BVHNode left_node; // If this node is a parent : left child node.
-        BVHNode right_node; // If this node is a parent : right child node.
+        BVHNode *left_node; // If this node is a parent : left child node.
+        BVHNode *right_node; // If this node is a parent : right child node.
 
     public:
         void setBox(box &bbox_);
