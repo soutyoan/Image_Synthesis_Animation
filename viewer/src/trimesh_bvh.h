@@ -1,17 +1,21 @@
-#ifndef TRIMESH_H
-#define TRIMESH_H
+#ifndef TRIMESH_BVH_H
+#define TRIMESH_BVH_H
 
+#include "TriMesh.h"
 #include "bvhnode.h"
-#include "Box.h"
+#include <iostream>     // std::cout
+#include <algorithm>    // std::sort
+#include <vector>       // std::vector
 
-class TriMesh_bvh : public TriMesh {
+class TriMesh_bvh : public trimesh::TriMesh {
 
 public:
-    void build(const std::vector<Intersectable*>  &objects);
-    void build_recursive(int left_index, int right_index, BVHNode *node, int depth);
 
-    void sort(vector<Point*>  &objects, int left_index, int right_index, int coordinate, vector<Point*>  &objects); 
+    void build(const std::vector<trimesh::point*>  &objects);
+    void build_recursive(int left_index, int right_index, BVHNode *node, int depth, std::vector<trimesh::point*>  &objects);
 
-}
+    void sortInDirection(std::vector<trimesh::point*>  &objects, int left_index, int right_index, int coordinate);
+
+};
 
 #endif

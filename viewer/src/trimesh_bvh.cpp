@@ -1,56 +1,53 @@
 #include "trimesh_bvh.h"
-#include <iostream>     // std::cout
-#include <algorithm>    // std::sort
-#include <vector>       // std::vector
 
 using namespace std;
 
 const int THRESHOLD = 100;
 
-void Trimesh_bvh::build(const vector<Point*>  &objects){
-    vector<Intersectable*> objectsCopy; // Copy the vector
+void TriMesh_bvh::build(const vector<trimesh::point*>  &objects){
+    vector<trimesh::point*> objectsCopy; // Copy the vector
     vector<BVHNode*> nodes; // New node vector
 
     // Create the root node
-    BVHNode rootNode;
+    BVHNode *rootNode;
 
     // Creating the world box.
-    box worldBox;
+    trimesh::box worldBox;
 
     // Iterate over the objects in intersectable
-    for (int i = 0; i < objects.size(); i++){
+    for (uint i = 0; i < objects.size(); i++){
         worldBox += objects[i]; // We enlarge the box to have the point in it.
-        objectsCopy.push_back(Point(objects[i])); // We copy the point before pushing it
+        objectsCopy.push_back(objects[i]); // We copy the point before pushing it
     }
 
-    rootNode.setBox(worldBox);
+    rootNode->setBox(worldBox);
 
     build_recursive(0, objects.size(), rootNode, 0, objectsCopy);
 }
 
 /*** 3 sort functions ***/
-bool sortX(Point* A, Point* B){ return (A->x < B->x); }
-bool sortY(Point* A, Point* B){ return (A->y < B->y); }
-bool sortZ(Point* A, Point* B){ return (A->z < B->z); }
+bool sortX(trimesh::point* A, trimesh::point* B){ return (A[0] < B[0]); }
+bool sortY(trimesh::point* A, trimesh::point* B){ return (A[1] < B[1]); }
+bool sortZ(trimesh::point* A, trimesh::point* B){ return (A[2] < B[2]); }
 
-void sort(vector<Point*>  &objects, int left_index, int right_index, int coordinate){
+void TriMesh_bvh::sortInDirection(vector<trimesh::point*>  &objects, int left_index, int right_index, int coordinate){
     switch(coordinate){
         case 0:
-            sort (objects.begin() + left_index, myvector.begin()+right_index, sortX);
+            sort (objects.begin() + left_index, objects.begin()+right_index, sortX);
             break;
         case 1:
-            sort (objects.begin() + left_index, myvector.begin()+right_index, sortY);
+            sort (objects.begin() + left_index, objects.begin()+right_index, sortY);
             break;
         case 2:
-            sort (objects.begin() + left_index, myvector.begin()+right_index, sortZ);
+            sort (objects.begin() + left_index, objects.begin()+right_index, sortZ);
             break;
     }
 }
 
-void build_recursive(int left_index, int right_index, BVHNode *node, int depth, vector<Point*>  &objects){
+void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node, int depth, vector<trimesh::point*>  &objects){
     if (right_index - left_index < THRESHOLD){ // Maybe put a maximal depth
         // Initiate current node as a leaf
-        node.makeLeaf(left_index, right_index - left_index);
+        node->makeLeaf(left_index, right_index - left_index);
     } else {
         // Ways to split :
         // Depth % 3 == 0 : we split in x
@@ -58,21 +55,21 @@ void build_recursive(int left_index, int right_index, BVHNode *node, int depth, 
         // Depth %3 == 2 : We split in z
 
         // We need to sort on the right way
-        sort(objects, left_index, right_index, depth%3);
+        sortInDirection(objects, left_index, right_index, depth%3);
 
         // Split intersectables to left and right
         int split_index = (int)((left_index + right_index)/2);
 
         // Creation of the two boxes
-        box box_left;
-        box right_box;
+        trimesh::box box_left;
+        trimesh::box box_right;
 
         // Creation of the two nodes
         BVHNode* left_node;
         BVHNode* right_node;
 
         // Set child nodes to parent nodes
-        node.makeNode(left_index, left_node, right_node);
+        node->makeNode(left_index, left_node, right_node, 3);
 
         for (int i = left_index; i < split_index; i++){ // [left_index, split_index[
             box_left += objects[i];
@@ -82,12 +79,12 @@ void build_recursive(int left_index, int right_index, BVHNode *node, int depth, 
         }
 
         // Set the boxes
-        left_node.setBox(box_left);
-        right_node.setBox(box_right);
+        left_node->setBox(box_left);
+        right_node->setBox(box_right);
 
         // Build recursive
-        build_recursive(left_index, split_index, left_node, depth+1);
-        build_recursive(split_index, right_index, right_node, depth+1);
+        build_recursive(left_index, split_index, left_node, depth+1, objects);
+        build_recursive(split_index, right_index, right_node, depth+1, objects);
 
     }
 }

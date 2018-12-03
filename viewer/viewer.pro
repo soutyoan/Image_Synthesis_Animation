@@ -13,18 +13,18 @@ macx {
 }
 
 SOURCES +=  \
+            src/bvhnode.cpp \
+            src/trimesh_bvh.cpp \
             src/main.cpp \
             src/openglwindow.cpp \
-            src/glshaderwindow.cpp # \
-            # src/trimesh_bvh.cpp \
-            # src/bvh_node.cpp
+            src/glshaderwindow.cpp \
 
 HEADERS  += \
+            src/bvhnode.h \
+            src/trimesh_bvh.h\
             src/openglwindow.h \
             src/glshaderwindow.h \
-            src/perlinNoise.h # \
-            # src/trimesh_bvh.h \
-            # src/bvh_node.h
+            src/perlinNoise.h \
 
 # trimesh library for loading objects.
 # Reference/source: http://gfx.cs.princeton.edu/proj/trimesh2/

@@ -16,8 +16,9 @@ Class for triangle meshes.
 #include "Color.h"
 #include <vector>
 #include <string>
+
 #ifndef M_PIf
-# define M_PIf 3.1415927f
+#define M_PIf 3.1415927f
 #endif
 
 

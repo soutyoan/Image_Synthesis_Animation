@@ -6,7 +6,7 @@
 class BVHNode {
 
     private:
-        box bbox;
+        trimesh::box bbox;
         bool leaf;
         unsigned int n_objs;
         unsigned int index;
@@ -16,11 +16,11 @@ class BVHNode {
         BVHNode *right_node; // If this node is a parent : right child node.
 
     public:
-        void setBox(box &bbox_);
+        void setBox(trimesh::box &bbox_);
         // Set the current Node as a Leaf
         void makeLeaf(unsigned int index_, unsigned int n_objs_);
         // Set current Node as a parent Node
-        void makeNode(unsigned int left_index_, BVHNode left_node, BVHNode right_node, unsigned int n_objs);// n_objs in makeNode is for debug purposes only, and may be omitted later on
+        void makeNode(unsigned int left_index_, BVHNode *left_node, BVHNode *right_node, unsigned int n_objs);// n_objs in makeNode is for debug purposes only, and may be omitted later on
         bool isLeaf() {
             return leaf;
         }
@@ -28,7 +28,7 @@ class BVHNode {
             return index;
         }
         unsigned int getNObjs() { return n_objs; }
-        box &getAABB() {
+        trimesh::box &getAABB() {
             return bbox;
         };
 };
