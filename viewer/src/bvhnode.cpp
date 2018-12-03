@@ -4,11 +4,11 @@ void BVHNode::setBox(trimesh::box &bbox_){
     this->bbox = bbox;
 }
 
-void BVHNode::makeLeaf(unsigned int index_, unsigned int n_objs_){
+void BVHNode::makeLeaf(int index_, int n_objs_){
     leaf = true;
 }
 
-void BVHNode::makeNode(unsigned int left_index_, BVHNode *left_node, BVHNode *right_node, unsigned int n_objs){
+void BVHNode::makeNode(int left_index_, BVHNode *left_node, BVHNode *right_node, int n_objs){
     index = left_index_;
     this->left_node = left_node;
     this->right_node = right_node;
@@ -37,4 +37,9 @@ void BVHNode::get_all_indices(std::vector<trimesh::point*> *indices){
         left_node->get_all_indices(indices);
         right_node->get_all_indices(indices);
     }
+}
+
+BVHNode::~BVHNode(){
+    delete left_node;
+    delete right_node;
 }

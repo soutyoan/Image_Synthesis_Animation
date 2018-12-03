@@ -65,17 +65,17 @@ layout (std430, binding = 4) buffer Meshes
 
 layout (std430, binding = 5) buffer Vec_Bbmin
 {
-    vec4 vec_bbmin = [];
-}
+    vec4 vec_bbmin[];
+};
 
 layout (std430, binding = 6) buffer Vec_Bbmax
 {
-    vec4 vec_bbmax = [];
-}
+    vec4 vec_bbmax[];
+};
 
 layout (std430, binding = 7) buffer IndicesTree{
-    vec4 vec_indicesTree = [];
-}
+    vec4 vec_indicesTree[];
+};
 
 bool intersectBoundingBox(vec4 origin, vec4 dir) {
 	vec3 tmin = (origin.xyz - bbmin.xyz) / dir.xyz;
@@ -97,7 +97,7 @@ float intersectBoudingBoxSpecial(vec4 origin, vec4 dir, vec4 _bbmin, vec4 _bbmax
         return 1000000; // Dans le cas où on ne touche rien.
     }
 
-    return t_min[direction];
+    return tmin[direction];
 }
 
 // Récupérer les index des intersections.
@@ -107,9 +107,9 @@ int getIndexIntersection(vec4 origin, vec4 dir, int index_debut, int index_fin, 
         return index_debut;
     }
 
-    float inter1 = intersectBoudingBoxSpecial(origin, dir, Vec_Bbmin[index_debut], Vec_Bbmax[index_debut], direction);
-    float inter2 = intersectBoudingBoxSpecial(origin, dir, Vec_Bbmin[int((index_debut + index_fin)/2)],
-        Vec_Bbmax[int((index_debut + index_fin)/2)], direction);
+    float inter1 = intersectBoudingBoxSpecial(origin, dir, vec_bbmin[index_debut], vec_bbmax[index_debut], direction);
+    float inter2 = intersectBoudingBoxSpecial(origin, dir, vec_bbmin[int((index_debut + index_fin)/2)],
+        vec_bbmax[int((index_debut + index_fin)/2)], direction);
 
     if (inter1 < inter2){
         return getIndexIntersection(origin, dir, index_debut+1, int((index_debut + index_fin)/2), direction + 1);
@@ -217,8 +217,9 @@ bool isIntersected(vec4 origin, vec4 dir, out hitinfo_t h)
 
     // check the intersection with plane
 	if(intersectBoundingBox(origin, dir)) {
-        vec2 intersectBBIndices = getIndexIntersection(origin, dir, 0, vec_bbmax.length(), 0);
-		for(int j = intersectBBIndices[0]*3; j < intersectBBIndices[1]*3; j += 3) {
+        int intersectBBIndices = getIndexIntersection(origin, dir, 0, int(vec_bbmax.length()), 0);
+		for(int j = int(vec_indicesTree[intersectBBIndices][0] * 3);
+                j < int(vec_indicesTree[intersectBBIndices][1] * 3); j += 3) {
 			if(intersectTriangle(origin, dir, j, dist)) {
                 hit = true;
                 if (h.t.w > dist.w) {

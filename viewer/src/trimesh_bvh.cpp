@@ -9,20 +9,20 @@ void TriMesh_bvh::build(const vector<trimesh::point*>  &objects){
     vector<BVHNode*> nodes; // New node vector
 
     // Create the root node
-    BVHNode *rootNode;
+    BVHNode *rootNode = new BVHNode();
 
     // Creating the world box.
     trimesh::box worldBox;
 
     // Iterate over the objects in intersectable
     for (uint i = 0; i < objects.size(); i++){
-        worldBox += objects[i]; // We enlarge the box to have the point in it.
+        worldBox += *objects[i]; // We enlarge the box to have the point in it.
         objectsCopy.push_back(objects[i]); // We copy the point before pushing it
     }
 
     rootNode->setBox(worldBox);
 
-    build_recursive(0, objects.size(), rootNode, 0, objectsCopy);
+    build_recursive(0, (int)objects.size(), rootNode, 0, objectsCopy);
 
     Root = rootNode; // Save the root Node
 
@@ -72,8 +72,8 @@ void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node
         trimesh::box box_right;
 
         // Creation of the two nodes
-        BVHNode* left_node;
-        BVHNode* right_node;
+        BVHNode* left_node = new BVHNode();
+        BVHNode* right_node = new BVHNode();
 
         // Set child nodes to parent nodes
         node->makeNode(left_index, left_node, right_node, 3);
