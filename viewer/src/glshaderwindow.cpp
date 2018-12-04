@@ -583,11 +583,7 @@ void glShaderWindow::openScene()
     modelMesh->need_bbox();
     modelMesh->need_normals();
     modelMesh->need_faces();
-    std::vector<trimesh::point*> allPoints;
-    for (int i = 0; i < modelMesh->vertices.size(); i++){
-        allPoints.push_back(&modelMesh->vertices[i]);
-    }
-    modelMesh->build(allPoints); // Bounding volume hierarchy
+    modelMesh->build(); // Bounding volume hierarchy
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
             modelMesh->bsphere.center[2]);

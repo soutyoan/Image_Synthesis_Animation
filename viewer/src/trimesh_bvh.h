@@ -7,6 +7,14 @@
 #include <algorithm>    // std::sort
 #include <vector>       // std::vector
 
+struct SortPoints{
+    int numero; 
+    trimesh::point p;
+    trimesh::point n;
+    trimesh::Color c;
+    trimesh::TriMesh::Face f;
+};
+
 class TriMesh_bvh : public trimesh::TriMesh {
 
 private:
@@ -14,10 +22,10 @@ private:
 
 public:
 
-    void build(const std::vector<trimesh::point*>  &objects);
-    void build_recursive(int left_index, int right_index, BVHNode *node, int depth, std::vector<trimesh::point*>  &objects);
+    void build();
+    void build_recursive(int left_index, int right_index, BVHNode *node, int depth);
 
-    void sortInDirection(std::vector<trimesh::point*>  &objects, int left_index, int right_index, int coordinate);
+    void sortInDirection(int left_index, int right_index, int coordinate);
 
     std::vector<trimesh::point*> get_all_bbmin();
     std::vector<trimesh::point*> get_all_bbmax();
