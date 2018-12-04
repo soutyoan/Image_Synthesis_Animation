@@ -318,19 +318,19 @@ void glShaderWindow::createSSBO()
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->colors.size() * sizeof(trimesh::Color), &(modelMesh->colors.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[3]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->faces.size() * 3 * sizeof(int), &(modelMesh->faces.front()), GL_STATIC_READ);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // Ajout des informations pour l'arbre des bbmin et des bbmax
     std::vector<trimesh::point*> bbmin = modelMesh->get_all_bbmin();
     std::vector<trimesh::point*> bbmax = modelMesh->get_all_bbmax();
-    std::vector<trimesh::point*> indices = modelMesh->get_all_indices();
+    std::vector<int> indices = modelMesh->get_all_indices();
     glBufferData(GL_SHADER_STORAGE_BUFFER, bbmin.size() * sizeof(trimesh::point), &(bbmin.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, bbmax.size() * sizeof(trimesh::point), &(bbmax.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[5]);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(trimesh::point), &(indices.front()), GL_STATIC_READ);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(int), &(indices.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[6]);
 
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     compute_program->bind();
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo[0]);
@@ -583,7 +583,11 @@ void glShaderWindow::openScene()
     modelMesh->need_bbox();
     modelMesh->need_normals();
     modelMesh->need_faces();
-    modelMesh->build(); // Bounding volume hierarchy
+    vector<int> *indices_faces = new vector<int>();
+    for (int i = 0; i < modelMesh->faces.size(); i ++){
+        indices_faces->push_back(i);
+    }
+    modelMesh->build(indices_faces); // Bounding volume hierarchy
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
             modelMesh->bsphere.center[2]);

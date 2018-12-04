@@ -7,29 +7,24 @@
 #include <algorithm>    // std::sort
 #include <vector>       // std::vector
 
-struct SortPoints{
-    int numero; 
-    trimesh::point p;
-    trimesh::point n;
-    trimesh::Color c;
-    trimesh::TriMesh::Face f;
-};
+using namespace std;
 
 class TriMesh_bvh : public trimesh::TriMesh {
 
 private:
     BVHNode *Root;
+    vector<int> *_indices_faces;
 
 public:
 
-    void build();
-    void build_recursive(int left_index, int right_index, BVHNode *node, int depth);
+    void build(vector<int> *indices_faces);
+    void build_recursive(int left_index, int right_index, BVHNode *node, int depth, vector<int> *indices_faces);
 
-    void sortInDirection(int left_index, int right_index, int coordinate);
+    void sortInDirection(int left_index, int right_index, int coordinate, vector<int> *indices_faces);
 
-    std::vector<trimesh::point*> get_all_bbmin();
-    std::vector<trimesh::point*> get_all_bbmax();
-    std::vector<trimesh::point*> get_all_indices();
+    vector<trimesh::point*> get_all_bbmin();
+    vector<trimesh::point*> get_all_bbmax();
+    vector<int> get_all_indices();
 
 };
 
