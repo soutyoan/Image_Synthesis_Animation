@@ -321,11 +321,19 @@ void glShaderWindow::createSSBO()
 
     // Ajout des informations pour l'arbre des bbmin et des bbmax
     std::vector<trimesh::point*> bbmin = modelMesh->get_all_bbmin();
+    std::vector<trimesh::point> bbminNoPointer;
+    for (int i = 0; i < bbmin.size(); i++){
+        bbminNoPointer.push_back(&bbmin.at(i));
+    }
     std::vector<trimesh::point*> bbmax = modelMesh->get_all_bbmax();
+    std::vector<trimesh::point> bbmaxNoPointer;
+    for (int i = 0; i < bbmin.size(); i++){
+        bbmaxNoPointer.push_back(&bbmax.at(i));
+    }
     std::vector<int> indices = modelMesh->get_all_indices();
-    glBufferData(GL_SHADER_STORAGE_BUFFER, bbmin.size() * sizeof(trimesh::point), &(bbmin.front()), GL_STATIC_READ);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, bbminNoPointer.size() * sizeof(trimesh::point), &(bbminNoPointer.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, bbmax.size() * sizeof(trimesh::point), &(bbmax.front()), GL_STATIC_READ);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, bbmaxNoPointer.size() * sizeof(trimesh::point), &(bbmaxNoPointer.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[5]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, indices.size() * sizeof(int), &(indices.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[6]);

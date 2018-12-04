@@ -20,6 +20,7 @@ uniform int shift_y;
 
 #define MAX_SCENE_BOUNDS    2
 #define EPS                 0.001
+#define THRESHOLD  128
 
 
 struct hitinfo_t {
@@ -86,46 +87,50 @@ bool intersectBoundingBox(vec4 origin, vec4 dir) {
     return out_val > in_val;
 }
 
-float intersectBoudingBoxSpecial(vec4 origin, vec4 dir, vec4 _bbmin, vec4 _bbmax, int direction){
-    vec3 tmin = (origin.xyz - _bbmin.xyz) / dir.xyz;
-    vec3 tmax = (origin.xyz - _bbmax.xyz) / dir.xyz;
-
-    float in_val = max3(vec3(min(tmin.x, tmax.x), min(tmin.y, tmax.y), min(tmin.z, tmax.z)));
-    float out_val = min3(vec3(max(tmin.x, tmax.x), max(tmin.y, tmax.y), max(tmin.z, tmax.z)));
-
-    if (out_val <= in_val){
-        return 1000000; // Dans le cas où on ne touche rien.
-    }
-
-    return tmin[direction];
-}
-
-// Récupérer les index des intersections.
-int getIndexIntersection(vec4 origin, vec4 dir, int index_debut, int index_fin, int direction){
-
-    if (index_debut == index_fin){
-        return index_debut;
-    }
-
-    float inter1 = intersectBoudingBoxSpecial(origin, dir, vec_bbmin[index_debut], vec_bbmax[index_debut], direction);
-    float inter2 = intersectBoudingBoxSpecial(origin, dir, vec_bbmin[int((index_debut + index_fin)/2)],
-        vec_bbmax[int((index_debut + index_fin)/2)], direction);
-
-    if (inter1 < inter2){
-        return getIndexIntersection(origin, dir, index_debut+1, int((index_debut + index_fin)/2), direction + 1);
-    } else if (inter2 > inter1){
-        return getIndexIntersection(origin, dir, int((index_debut + index_fin)/2), index_fin, direction + 1);
-    }
-
-    return index_debut;
-}
+// float intersectBoudingBoxSpecial(vec4 origin, vec4 dir, vec4 _bbmin, vec4 _bbmax, int direction){
+//     vec3 tmin = (origin.xyz - _bbmin.xyz) / dir.xyz;
+//     vec3 tmax = (origin.xyz - _bbmax.xyz) / dir.xyz;
+//
+//     float in_val = max3(vec3(min(tmin.x, tmax.x), min(tmin.y, tmax.y), min(tmin.z, tmax.z)));
+//     float out_val = min3(vec3(max(tmin.x, tmax.x), max(tmin.y, tmax.y), max(tmin.z, tmax.z)));
+//
+//     if (out_val <= in_val){
+//         return 1000000; // Dans le cas où on ne touche rien.
+//     }
+//
+//     return tmin[direction];
+// }
+//
+// // Récupérer les index des intersections.
+// int getIndexIntersection(vec4 origin, vec4 dir, int index_debut, int index_fin, int direction){
+//
+//     while (index_debut < index_fin - THRESHOLD){
+//
+//         float inter1 = intersectBoudingBoxSpecial(origin, dir, vec_bbmin[index_debut], vec_bbmax[index_debut], direction);
+//         float inter2 = intersectBoudingBoxSpecial(origin, dir, vec_bbmin[int((index_debut + index_fin)/2)],
+//             vec_bbmax[int((index_debut + index_fin)/2)], direction);
+//
+//         if (inter1 < inter2){
+//             index_debut = index_debut+1;
+//             index_fin = int((index_debut + index_fin)/2);
+//         } else if (inter2 > inter1){
+//             index_debut = int((index_debut + index_fin)/2);
+//         } else {
+//             return index_debut;
+//         }
+//
+//         direction = direction + 1;
+//     }
+//
+//     return index_debut;
+// }
 
 bool intersectPlane(vec4 origin, vec4 dir, out vec4 dist)
 {
     vec4 Q = vec4(0, -groundDistance, 0, 1);
     vec4 normal_plane = vec4(0, 1, 0, 0);
     float lambda_plane = 0.0;
-    if (dot(dir, normal_plane)!=0) {
+    if (dot(dir, normal_plane) != 0) {
         float lambda_plane = dot((Q - origin).xyz, normal_plane.xyz) / dot(normalize(dir).xyz, normal_plane.xyz);
         if (lambda_plane >= EPS) {
             dist.xyz = dir.xyz;
@@ -217,11 +222,12 @@ bool isIntersected(vec4 origin, vec4 dir, out hitinfo_t h)
 
     // check the intersection with plane
 	if(intersectBoundingBox(origin, dir)) {
-        int intersectBBIndices = getIndexIntersection(origin, dir, 0, int(vec_bbmax.length()), 0);
-		for(int j = vec_indicesTree[intersectBBIndices];
-                j < vec_indicesTree[intersectBBIndices]; j += 1) {
-            int index_face = indices[j] * 3;
-			if(intersectTriangle(origin, dir, j index_face, dist)) {
+        // int intersectBBIndices = getIndexIntersection(origin, dir, 0, int(vec_bbmax.length()), 0);
+		// for(int j = 0;
+        //         j < vec_indicesTree.length(); j += 1) {
+        for(int j = 0; j < indices.length(); j += 3) {
+            int index_face = j;
+			if(intersectTriangle(origin, dir, index_face, dist)) {
                 hit = true;
                 if (h.t.w > dist.w) {
                     h.t = dist;

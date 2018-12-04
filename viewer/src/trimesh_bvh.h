@@ -26,6 +26,8 @@ public:
     vector<trimesh::point*> get_all_bbmax();
     vector<int> get_all_indices();
 
+    ~TriMesh_bvh(); 
+
 };
 
 #endif

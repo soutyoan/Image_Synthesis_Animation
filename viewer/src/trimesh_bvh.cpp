@@ -115,3 +115,8 @@ std::vector<int> TriMesh_bvh::get_all_indices(){
     std::vector<trimesh::point*> *indices = new std::vector<trimesh::point*>();
     return *_indices_faces;
 }
+
+TriMesh_bvh::~TriMesh_bvh(){
+    delete Root;
+    delete _indices_faces; 
+}
