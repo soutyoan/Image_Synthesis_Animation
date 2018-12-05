@@ -1,6 +1,7 @@
 #version 410
 
 uniform mat4 matrix;
+uniform mat4 lightMatrix;
 uniform mat4 perspective;
 uniform mat3 normalMatrix;
 uniform bool noColor;
@@ -34,13 +35,8 @@ void main( void )
 
 
     // Computation of light space coordinates
-    mat4 biasMatrix = mat4(
-                            0.5, 0.0, 0.0, 0.0,
-                            0.0, 0.5, 0.0, 0.0,
-                            0.0, 0.0, 0.5, 0.0,
-                            0.5, 0.5, 0.5, 1.0
-                            );
-    lightSpace = biasMatrix * perspective * matrix  * vertex;
+    lightSpace = perspective * lightMatrix  * vertex;
+
 
 
     gl_Position = perspective * matrix * vertex;

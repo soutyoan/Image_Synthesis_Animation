@@ -2,6 +2,7 @@
 
 uniform mat4 matrix;
 uniform mat4 perspective;
+uniform mat4 lightMatrix;
 uniform mat3 normalMatrix;
 uniform bool noColor;
 uniform vec3 lightPosition;
@@ -28,7 +29,14 @@ void main( void )
     vertNormal.w = 0.0;
     textCoords = texcoords;
 
-    // TODO: compute eyeVector, lightVector. 
+    // TODO: compute eyeVector, lightVector.
+    vec4 position = matrix * vertex;
+    lightVector = normalize(matrix * (vec4(lightPosition, 1) - vertex / vertex.w));
+
+    eyeVector = normalize(vec4(0, 0, 0, 1) - position / position.w);
+
+    lightSpace = perspective * lightMatrix  * vertex;
+    lightSpace /= lightSpace.w;
 
     gl_Position = perspective * matrix * vertex;
 }

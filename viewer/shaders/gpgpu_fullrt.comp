@@ -20,7 +20,7 @@ uniform int shift_y;
 uniform int indices_alternance[9];
 uniform int take_indices; // Number of indices to take from indices_alternance
 
-#define MAX_SCENE_BOUNDS    2
+#define MAX_SCENE_BOUNDS    5
 #define EPS                 0.001
 
 
@@ -82,7 +82,7 @@ bool intersectPlane(vec4 origin, vec4 dir, out vec4 dist)
     if (dot(dir, normal_plane)!=0) {
         float lambda_plane = dot((Q - origin).xyz, normal_plane.xyz) / dot(normalize(dir).xyz, normal_plane.xyz);
         if (lambda_plane >= EPS) {
-            dist.xyz = dir.xyz;
+            dist.xyz = origin.xyz + lambda_plane * dir.xyz;
             dist.w = lambda_plane;
             return true;
         }
@@ -145,8 +145,8 @@ vec4 interpolateNormal(hitinfo_t h)
 vec4 interpolateColor(hitinfo_t h)
 {
     if (h.hit_vptr == -1) {
-        // return vec4(0.2, 0.6, 0.7, 1);
-        return texture2D(colorTexture, h.t.xz);
+        return vec4(0.2, 0.6, 0.7, 1);
+        //return texture2D(colorTexture, h.t.xz);
     }
 	else if (h.hit_vptr>=0) {
         vec4 c0 = colors[indices[h.hit_vptr]];

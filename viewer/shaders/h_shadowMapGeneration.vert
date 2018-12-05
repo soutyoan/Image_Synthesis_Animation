@@ -14,4 +14,3 @@ void main(){
 	vec4 vertNormal = normal;
 	gl_Position = perspective * matrix * vertex;
 }
-
