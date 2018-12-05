@@ -1189,6 +1189,11 @@ void glShaderWindow::render()
     lightCoordMatrix.setToIdentity();
     lightPerspective.setToIdentity();
 
+    lightCoordMatrix.lookAt(lightPosition, m_center, QVector3D(0, 1.0, 0));
+    lightPerspective = m_perspective;
+
+    //std::cerr<<lightCoordMatrix(0, 0);
+
     if (isGPGPU || hasComputeShaders) {
         bool invertible;
         mat_inverse = mat_inverse.inverted(&invertible);
@@ -1247,8 +1252,6 @@ void glShaderWindow::render()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // set up camera position in light source:
         // TODO_shadowMapping: you must initialize these two matrices.
-        lightCoordMatrix = lookAt(lightPosition, m_center, QVector3D(0, 1.0, 0));
-        lightPerspective = m_perspective.perspective(45, (float)width()/height(), 0.1 * radius, 20 * radius);
         shadowMapGenerationProgram->setUniformValue("matrix", lightCoordMatrix);
         shadowMapGenerationProgram->setUniformValue("perspective", lightPerspective);
         // Draw the entire scene:
@@ -1279,11 +1282,12 @@ void glShaderWindow::render()
     } else {
         m_program->setUniformValue("matrix", m_matrix[0]);
         m_program->setUniformValue("perspective", m_perspective);
-        m_program->setUniformValue("lightMatrix", m_matrix[1]);
+        m_program->setUniformValue("lightMatrix", lightCoordMatrix);
         m_program->setUniformValue("normalMatrix", m_matrix[0].normalMatrix());
     }
     m_program->setUniformValue("lightPosition", lightPosition);
     m_program->setUniformValue("lightIntensity", 1.0f);
+    m_program->setUniformValue("lightMatrix", lightCoordMatrix);
     m_program->setUniformValue("blinnPhong", blinnPhong);
     m_program->setUniformValue("transparent", transparent);
     m_program->setUniformValue("lightIntensity", lightIntensity);
@@ -1297,6 +1301,8 @@ void glShaderWindow::render()
     if (m_program->uniformLocation("shadowMap") != -1) {
         m_program->setUniformValue("shadowMap", 2);
         // TODO_shadowMapping: send the right transform here
+        shadowMapGenerationProgram->setUniformValue("matrix", lightCoordMatrix);
+        shadowMapGenerationProgram->setUniformValue("perspective", lightPerspective);
     }
 
     m_vao.bind();
@@ -1309,7 +1315,7 @@ void glShaderWindow::render()
         ground_program->bind();
         ground_program->setUniformValue("lightPosition", lightPosition);
         ground_program->setUniformValue("matrix", m_matrix[0]);
-        ground_program->setUniformValue("lightMatrix", m_matrix[1]);
+        ground_program->setUniformValue("lightMatrix", lightCoordMatrix);
         ground_program->setUniformValue("perspective", m_perspective);
         ground_program->setUniformValue("normalMatrix", m_matrix[0].normalMatrix());
         ground_program->setUniformValue("lightIntensity", 1.0f);
@@ -1323,6 +1329,8 @@ void glShaderWindow::render()
         if (ground_program->uniformLocation("shadowMap") != -1) {
             ground_program->setUniformValue("shadowMap", 2);
             // TODO_shadowMapping: send the right transform here
+            shadowMapGenerationProgram->setUniformValue("matrix", lightCoordMatrix);
+            shadowMapGenerationProgram->setUniformValue("perspective", lightPerspective);
         }
         ground_vao.bind();
         glDrawElements(GL_TRIANGLES, g_numIndices, GL_UNSIGNED_INT, 0);

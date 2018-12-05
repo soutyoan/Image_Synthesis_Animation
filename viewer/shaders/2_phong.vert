@@ -35,13 +35,8 @@ void main( void )
 
 
     // Computation of light space coordinates
-    mat4 biasMatrix = mat4(
-                            0.5, 0.0, 0.0, 0.0,
-                            0.0, 0.5, 0.0, 0.0,
-                            0.0, 0.0, 0.5, 0.0,
-                            0.5, 0.5, 0.5, 1.0
-                            );
-    lightSpace = perspective * biasMatrix * matrix  * vertex;
+    lightSpace = perspective * lightMatrix  * vertex;
+
 
 
     gl_Position = perspective * matrix * vertex;

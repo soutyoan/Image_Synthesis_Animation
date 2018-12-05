@@ -7,6 +7,7 @@ uniform bool blinnPhong;
 uniform float shininess;
 uniform float eta;
 uniform sampler2D shadowMap;
+uniform mat4 lightMatrix;
 
 in vec4 eyeVector;
 in vec4 lightVector;
@@ -14,7 +15,7 @@ in vec4 vertColor;
 in vec4 vertNormal;
 in vec4 lightSpace;
 
-#define EPS 0.001;
+#define EPS 0.00001
 
 out vec4 fragColor;
 
@@ -24,12 +25,14 @@ float cos_angle(vec4 vectA, vec4 vectB)
 }
 
 float F( float cos_theta )
-{   if ((pow(eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
+{
+    float inv_eta = 5/eta;
+    if ((pow(inv_eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
         return 1.0;
     }
-    float ci = sqrt(pow(eta, 2) - (1 - pow(cos_theta, 2)));
+    float ci = sqrt(pow(inv_eta, 2) - (1 - pow(cos_theta, 2)));
     float Fs = pow(abs((cos_theta - ci) / (cos_theta + ci)), 2);
-    float Fp = pow(abs((pow(eta, 2) * cos_theta - ci) / (pow(eta, 2) * cos_theta + ci)), 2);
+    float Fp = pow(abs((pow(inv_eta, 2) * cos_theta - ci) / (pow(inv_eta, 2) * cos_theta + ci)), 2);
 
     return (Fs + Fp) / 2;
 }
@@ -60,9 +63,9 @@ void main( void )
      vec4 Ca = ka * lightIntensity * vertColor;
 
      // boolean value for shadow mapping : comparison bet. z_shadow and z_computed
-     float z_shadow = texture(shadowMap, lightSpace.xy).z;
-     float z_computed = lightSpace.z;
-     bool needShadowMap = (z_computed == z_shadow);
+     vec4 coordlight = lightSpace / lightSpace.w;
+     float z_shadow = texture2D(shadowMap, 0.5+0.5*coordlight.xy).r;
+     float z_computed = 0.5 + 0.5*coordlight.z;
 
      // diffuse coefficient
      vec4 Cd = kd * lightIntensity * vertColor * max(dot(vertNormalN, lightVectorN), 0);
@@ -81,8 +84,12 @@ void main( void )
         Cs = (F(cos_theta_d) * D(alpha, cos_theta_h) * G1(alpha, cos_theta_i) * G1(alpha, cos_theta_o) / (4 * cos_theta_i * cos_theta_o)) * vertColor;
      }
 
-     fragColor = Ca;
-     if (needShadowMap) {
-         fragColor += Cd + Cs;
+     if (z_shadow < z_computed - EPS) {
+         // in shadow
+         fragColor = Ca;
+     } else {
+         // should not happen in theory
+         fragColor = Ca + Cd + Cs;
      }
+
 }
