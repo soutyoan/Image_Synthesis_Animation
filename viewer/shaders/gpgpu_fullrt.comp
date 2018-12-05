@@ -74,7 +74,8 @@ layout (std430, binding = 6) buffer Vec_Bbmax
     vec4 vec_bbmax[];
 };
 
-layout (std430, binding = 7) buffer IndicesTree{
+layout (std430, binding = 7) buffer IndicesTree
+{
     int vec_indicesTree[];
 };
 
