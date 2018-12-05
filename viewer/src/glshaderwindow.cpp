@@ -301,6 +301,8 @@ QWidget *glShaderWindow::makeAuxWindow()
     outer->addLayout(hboxEta);
     outer->addWidget(etaSlider);
 
+    // TODO : Max scene bounds slider
+
     auxWidget->setLayout(outer);
     return auxWidget;
 }

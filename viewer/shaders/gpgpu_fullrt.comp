@@ -258,7 +258,7 @@ vec4 trace(vec4 origin, vec4 dir)
         float cos_theta = dot(intersections[s].normal, intersections[s].dir);
         current_Fresnel *= F(cos_theta);
         float currentEta = eta/5;
-        result *= current_Fresnel * currentEta;
+        result *= current_Fresnel; // * currentEta;
         result +=  (1-currentEta) * intersections[s].color;
 
     }
