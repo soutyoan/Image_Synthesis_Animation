@@ -10,7 +10,7 @@ The goal is to make a render as realistic and fast as possible.
 - [x] TP2 
 - [x] TP3
 - [x] Intéractivité
-- [ ] Shadow Mapping
+- [x] Shadow Mapping
 - [ ] Bounding Volume Hierarchy (see bvh branch)
 - [x] Rendu en alternance
 - [ ] Caustiques
