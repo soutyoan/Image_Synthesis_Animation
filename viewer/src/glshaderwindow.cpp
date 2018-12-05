@@ -27,7 +27,7 @@ glShaderWindow::glShaderWindow(QWindow *parent)
       gpgpu_vertices(0), gpgpu_normals(0), gpgpu_texcoords(0), gpgpu_colors(0), gpgpu_indices(0),
       environmentMap(0), texture(0), permTexture(0), pixels(0), mouseButton(Qt::NoButton), auxWidget(0),
       isGPGPU(false), hasComputeShaders(false), blinnPhong(true), transparent(true), eta(1.5), lightIntensity(1.0f), shininess(50.0f), lightDistance(5.0f), groundDistance(0.78),
-      shadowMap_fboId(0), shadowMap_rboId(0), shadowMap_textureId(0), fullScreenSnapshots(false), computeResult(0),
+      maxBounds(1), shadowMap_fboId(0), shadowMap_rboId(0), shadowMap_textureId(0), fullScreenSnapshots(false), computeResult(0),
       m_indexBuffer(QOpenGLBuffer::IndexBuffer), ground_indexBuffer(QOpenGLBuffer::IndexBuffer)
 {
     // Default values you might want to tinker with
@@ -212,6 +212,12 @@ void glShaderWindow::updateEta(int etaSliderValue)
     renderNow();
 }
 
+void glShaderWindow::updateMaxBounds(int maxBoundsSliderValue)
+{
+    maxBounds = maxBoundsSliderValue;
+    renderNow();
+}
+
 QWidget *glShaderWindow::makeAuxWindow()
 {
     if (auxWidget)
@@ -302,6 +308,22 @@ QWidget *glShaderWindow::makeAuxWindow()
     outer->addWidget(etaSlider);
 
     // TODO : Max scene bounds slider
+    QSlider *maxBoundsSlider = new QSlider(Qt::Horizontal);
+    maxBoundsSlider->setTickPosition(QSlider::TicksBelow);
+    maxBoundsSlider->setTickInterval(1);
+    maxBoundsSlider->setMinimum(0);
+    maxBoundsSlider->setMaximum(20);
+    maxBoundsSlider->setSliderPosition(maxBounds);
+    connect(maxBoundsSlider,SIGNAL(valueChanged(int)),this,SLOT(updateMaxBounds(int)));
+    QLabel* maxBoundsLabel = new QLabel("Number of maximal bounded rays =");
+    QLabel* maxBoundsLabelValue = new QLabel();
+    maxBoundsLabelValue->setNum(maxBounds);
+    connect(maxBoundsSlider,SIGNAL(valueChanged(int)),maxBoundsLabelValue,SLOT(setNum(int)));
+    QHBoxLayout *hboxMaxBounds= new QHBoxLayout;
+    hboxEta->addWidget(maxBoundsLabel);
+    hboxEta->addWidget(maxBoundsLabelValue);
+    outer->addLayout(hboxMaxBounds);
+    outer->addWidget(maxBoundsSlider);
 
     auxWidget->setLayout(outer);
     return auxWidget;
@@ -1222,6 +1244,7 @@ void glShaderWindow::render()
         compute_program->setUniformValue("lightIntensity", lightIntensity);
         compute_program->setUniformValue("shininess", shininess);
         compute_program->setUniformValue("eta", eta);
+        compute_program->setUniformValue("maxBounds", maxBounds);
         compute_program->setUniformValue("framebuffer", 2);
         compute_program->setUniformValue("colorTexture", 0);
         compute_program->setUniformValue("pixelSize", dilatation);
@@ -1295,6 +1318,7 @@ void glShaderWindow::render()
     m_program->setUniformValue("lightIntensity", lightIntensity);
     m_program->setUniformValue("shininess", shininess);
     m_program->setUniformValue("eta", eta);
+    m_program->setUniformValue("maxBounds", maxBounds);
     m_program->setUniformValue("radius", modelMesh->bsphere.r);
 	if (m_program->uniformLocation("colorTexture") != -1) m_program->setUniformValue("colorTexture", 0);
     if (m_program->uniformLocation("envMap") != -1)  m_program->setUniformValue("envMap", 1);
@@ -1326,6 +1350,7 @@ void glShaderWindow::render()
         ground_program->setUniformValue("lightIntensity", lightIntensity);
         ground_program->setUniformValue("shininess", shininess);
         ground_program->setUniformValue("eta", eta);
+        ground_program->setUniformValue("maxBounds", maxBounds);
         ground_program->setUniformValue("radius", modelMesh->bsphere.r);
 		if (ground_program->uniformLocation("colorTexture") != -1) ground_program->setUniformValue("colorTexture", 0);
         if (ground_program->uniformLocation("shadowMap") != -1) {

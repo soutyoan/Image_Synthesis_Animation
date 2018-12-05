@@ -19,6 +19,7 @@ uniform int shift_x;
 uniform int shift_y;
 uniform int indices_alternance[9];
 uniform int take_indices; // Number of indices to take from indices_alternance
+uniform int maxBounds; // Number of maximal bounded rays
 
 #define MAX_SCENE_BOUNDS    5
 #define EPS                 0.001
@@ -227,13 +228,13 @@ vec4 phongModel(vec4 vertLight, vec4 vertNormal, vec4 vertEye, vec4 vertColor, f
 vec4 trace(vec4 origin, vec4 dir)
 {
     hitinfo_t h;
-    intersectionItem intersections[int(MAX_SCENE_BOUNDS)];
+    intersectionItem intersections[int(maxBounds)];
     int nb_bounds = 0;
     vec4 current_origin = vec4(origin.xyzw);
     vec4 current_dir = vec4(dir.xyzw);
     vec4 result = vec4(0,0,0,1);
     // hit either the plane or a triangle
-    while (nb_bounds < MAX_SCENE_BOUNDS && isIntersected(current_origin, current_dir, h)) {
+    while (nb_bounds < maxBounds && isIntersected(current_origin, current_dir, h)) {
         intersections[nb_bounds].origin = vec4(current_origin);
         current_origin += h.t.w * current_dir;
         intersections[nb_bounds].point_hit = vec4(current_origin);
