@@ -9,6 +9,12 @@
 
 using namespace std;
 
+struct bvh{
+    trimesh::point bbmin;
+    trimesh::point bbmax;
+    trimesh::point other_info;
+};
+
 class TriMesh_bvh : public trimesh::TriMesh {
 
 private:
@@ -22,11 +28,9 @@ public:
 
     void sortInDirection(int left_index, int right_index, int coordinate, vector<int> *indices_faces);
 
-    vector<trimesh::point*> get_all_bbmin();
-    vector<trimesh::point*> get_all_bbmax();
-    vector<int> get_all_indices();
+    vector<struct bvh> Trimesh::get_bvh_info();
 
-    ~TriMesh_bvh(); 
+    ~TriMesh_bvh();
 
 };
 

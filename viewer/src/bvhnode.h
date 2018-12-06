@@ -2,6 +2,7 @@
 #define BVHNODE_H
 
 #include "TriMesh.h"
+#include "trimesh_bvh.h"
 
 class BVHNode {
 
@@ -32,11 +33,9 @@ class BVHNode {
             return bbox;
         };
 
-        void get_all_bbmin(std::vector<trimesh::point*> *bbmin);
-        void get_all_bbmax(std::vector<trimesh::point*> *bbmax);
-        void get_all_indices(std::vector<trimesh::point*> *indices);
+        void get_bvh_info(std::vector<struct bvh> *infos);
 
-        ~BVHNode(); 
+        ~BVHNode();
 };
 
 #endif

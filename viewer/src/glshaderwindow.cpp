@@ -318,25 +318,9 @@ void glShaderWindow::createSSBO()
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->colors.size() * sizeof(trimesh::Color), &(modelMesh->colors.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[3]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->faces.size() * 3 * sizeof(int), &(modelMesh->faces.front()), GL_STATIC_READ);
-
-    // Ajout des informations pour l'arbre des bbmin et des bbmax
-    // std::vector<trimesh::point*> bbmin = modelMesh->get_all_bbmin();
-    // std::vector<trimesh::point> bbminNoPointer;
-    // for (int i = 0; i < bbmin.size(); i++){
-    //     bbminNoPointer.push_back(&bbmin.at(i));
-    // }
-    // std::vector<trimesh::point*> bbmax = modelMesh->get_all_bbmax();
-    // std::vector<trimesh::point> bbmaxNoPointer;
-    // for (int i = 0; i < bbmin.size(); i++){
-    //     bbmaxNoPointer.push_back(&bbmax.at(i));
-    // }
-    // std::vector<int> indices_bvh = modelMesh->get_all_indices();
-    // glBufferData(GL_SHADER_STORAGE_BUFFER, bbminNoPointer.size() * sizeof(trimesh::point), &(bbminNoPointer.front()), GL_STATIC_READ);
-    // glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
-    // glBufferData(GL_SHADER_STORAGE_BUFFER, bbmaxNoPointer.size() * sizeof(trimesh::point), &(bbmaxNoPointer.front()), GL_STATIC_READ);
-    // glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[5]);
-    // glBufferData(GL_SHADER_STORAGE_BUFFER, indices_bvh.size() * sizeof(int), &(indices_bvh.front()), GL_STATIC_READ);
-    // glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[6]);
+    vector<struct bvh> bvh_info = model_mesh->get_bvh_info();
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, bvh_info.size() * 3 * sizeof(int)* sizeof(trimesh::point), &(bvh_info.front()), GL_STATIC_READ);
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -346,8 +330,6 @@ void glShaderWindow::createSSBO()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo[2]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo[3]);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo[4]);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, ssbo[5]);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, ssbo[6]);
 #endif
 }
 

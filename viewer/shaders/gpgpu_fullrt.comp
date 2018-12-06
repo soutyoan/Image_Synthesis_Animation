@@ -36,6 +36,14 @@ struct intersectionItem {
     vec4 color;
 };
 
+struct bvh {
+    vec4 bbmin;
+    vec4 bbmax;
+    // Place 0 : index
+    // Place 1 : number of elements
+    vec4 otherInformation;
+}
+
 float max3 (vec3 v) {
   return max (max (v.x, v.y), v.z);
 }
@@ -64,19 +72,9 @@ layout (std430, binding = 4) buffer Meshes
     int indices[];
 };
 
-layout (std430, binding = 5) buffer Vec_Bbmin
+layout (std430, binding = 5) buffer Vec_bvh
 {
-    vec4 vec_bbmin[];
-};
-
-layout (std430, binding = 6) buffer Vec_Bbmax
-{
-    vec4 vec_bbmax[];
-};
-
-layout (std430, binding = 7) buffer IndicesTree
-{
-    int vec_indicesTree[];
+    bvh vec_bvh[];
 };
 
 bool intersectBoundingBox(vec4 origin, vec4 dir) {

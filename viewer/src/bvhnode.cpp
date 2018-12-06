@@ -14,29 +14,16 @@ void BVHNode::makeNode(int left_index_, BVHNode *left_node, BVHNode *right_node,
     this->right_node = right_node;
 }
 
-void BVHNode::get_all_bbmin(std::vector<trimesh::point*> *bbmin){
-    trimesh::point *p = &(this->bbox.min);
-    bbmin->push_back(p);
+void BVHNode::get_bvh_info(std::vector<struct bvh> *infos){
+    trimesh::point p(index, n_objs, 0, 0);
+    struct bvh s = malloc(sizeof(struct bvh));
+    s.bbmin = this->bbox.min;
+    s.bbmax = this->bbox.max;
+    s.other_info = p;
+    infos->push_back(s);
     if (!leaf){
-        left_node->get_all_bbmin(bbmin);
-        right_node->get_all_bbmin(bbmin);
-    }
-}
-
-void BVHNode::get_all_bbmax(std::vector<trimesh::point*> *bbmax){
-    bbmax->push_back(&this->bbox.max);
-    if (!leaf){
-        left_node->get_all_bbmax(bbmax);
-        right_node->get_all_bbmax(bbmax);
-    }
-}
-
-void BVHNode::get_all_indices(std::vector<trimesh::point*> *indices){
-    trimesh::point p(index, index+n_objs, 0, 0);
-    indices->push_back(&p);
-    if (!leaf){
-        left_node->get_all_indices(indices);
-        right_node->get_all_indices(indices);
+        left_node->get_bvh_info(infos);
+        right_node->get_bvh_info(infos); 
     }
 }
 

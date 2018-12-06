@@ -96,27 +96,13 @@ void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node
     }
 }
 
-/** Get the bbmin boxes **/
-std::vector<trimesh::point*> TriMesh_bvh::get_all_bbmin(){
-    std::vector<trimesh::point*> *bbmin = new std::vector<trimesh::point*>();
-    Root->get_all_bbmin(bbmin);
-    return *bbmin;
-}
-
-/** Get the bbmin boxes **/
-std::vector<trimesh::point*> TriMesh_bvh::get_all_bbmax(){
-    std::vector<trimesh::point*> *bbmax = new std::vector<trimesh::point*>();
-    Root->get_all_bbmax(bbmax);
-    return *bbmax;
-}
-
-/** Get the indices boxes **/
-std::vector<int> TriMesh_bvh::get_all_indices(){
-    std::vector<trimesh::point*> *indices = new std::vector<trimesh::point*>();
-    return *_indices_faces;
+std::vector<struct bvh> Trimesh::get_bvh_info(){
+    std::vector<struct bvh> *bvh_infos = new std::vector<struct bvh>();
+    Root->get_bvh_infos(bvh_infos);
+    return *bvh_infos;
 }
 
 TriMesh_bvh::~TriMesh_bvh(){
     delete Root;
-    delete _indices_faces; 
+    delete _indices_faces;
 }
