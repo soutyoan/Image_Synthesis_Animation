@@ -93,9 +93,9 @@ float intersectBoudingBoxSpecial(vec4 origin, vec4 dir, vec4 _bbmin, vec4 _bbmax
     float in_val = max3(vec3(min(tmin.x, tmax.x), min(tmin.y, tmax.y), min(tmin.z, tmax.z)));
     float out_val = min3(vec3(max(tmin.x, tmax.x), max(tmin.y, tmax.y), max(tmin.z, tmax.z)));
 
-    if (out_val <= in_val){
-        return 1000000; // Dans le cas où on ne touche rien.
-    }
+    // if (out_val <= in_val){
+    //     return 1000000; // Dans le cas où on ne touche rien.
+    // }
 
     return tmin[direction];
 }
@@ -103,25 +103,33 @@ float intersectBoudingBoxSpecial(vec4 origin, vec4 dir, vec4 _bbmin, vec4 _bbmax
 // Récupérer les index des intersections.
 int getIndexIntersection(vec4 origin, vec4 dir, int index_debut, int index_fin, int direction){
 
-    while (index_debut < index_fin - THRESHOLD){
+    float resultLeaf = 0;
 
-        float inter1 = intersectBoudingBoxSpecial(origin, dir, vec_bvh[index_debut].bbmin, vec_bvh[index_debut].bbmax, direction);
-        float inter2 = intersectBoudingBoxSpecial(origin, dir, vec_bvh[int((index_debut + index_fin)/2)].bbmin,
-            vec_bvh[int((index_debut + index_fin)/2)].bbmax, direction);
+    while (resultLeaf < 0.1){
+
+        vec4 bbmindebut = vec_bvh[index_debut].bbmin;
+        vec4 bbmaxdebut = vec_bvh[index_debut].bbmax;
+        vec4 bbminfin = vec_bvh[index_fin].bbmin;
+        vec4 bbmaxfin = vec_bvh[index_fin].bbmax;
+
+        float inter1 = intersectBoudingBoxSpecial(origin, dir, bbmindebut, bbmaxdebut, direction);
+        float inter2 = intersectBoudingBoxSpecial(origin, dir, bbminfin, bbmaxfin, direction);
 
         if (inter1 < inter2){
             index_debut = index_debut+1;
-            index_fin = int((index_debut + vec_bvh[index_debut].otherInformation[1])/2);
+            index_fin = int(vec_bvh[index_debut].otherInformation[1]);
         } else if (inter2 > inter1){
-            index_debut = int((index_debut + vec_bvh[index_debut].otherInformation[1])/2);
+            index_debut = int(vec_bvh[index_debut].otherInformation[1]);
         } else {
-            return index_debut;
+            return -1;
         }
 
         direction = direction + 1;
+
+        resultLeaf = vec_bvh[index_debut].otherInformation[3];
     }
 
-    return index_debut;
+    return int(vec_bvh[index_debut].otherInformation[2]);
 }
 
 bool intersectPlane(vec4 origin, vec4 dir, out vec4 dist)
@@ -221,19 +229,18 @@ bool isIntersected(vec4 origin, vec4 dir, out hitinfo_t h)
 
     // check the intersection with plane
 	if(intersectBoundingBox(origin, dir)) {
-        int intersectBBIndices = getIndexIntersection(origin, dir, 0, int(vec_bvh.length()), 0);
-        for(int k = 0; k < int(vec_bvh[intersectBBIndices].otherInformation[1]); k += 1) {
-            for (int j = int(vec_bvh[intersectBBIndices].otherInformation[0]); j < int(vec_bvh[intersectBBIndices].otherInformation[0] + 3); j++){
-                int index_face = j;
-    			if(intersectTriangle(origin, dir, index_face, dist)) {
-                    hit = true;
-                    if (h.t.w > dist.w) {
-                        h.t = dist;
-                        h.hit_vptr = j;
-                    }
-                }
+        int fin = int(vec_bvh[0].otherInformation[1]);
+        int intersectBBIndices = getIndexIntersection(origin, dir, 0, fin, 0);
+        if (intersectBBIndices == -1){
+            return hit;
+        }
+		if(intersectTriangle(origin, dir, intersectBBIndices, dist)) {
+            hit = true;
+            if (h.t.w > dist.w) {
+                h.t = dist;
+                h.hit_vptr = intersectBBIndices;
             }
-		}
+        }
 	}
 	return hit;
 }

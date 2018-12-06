@@ -48,9 +48,9 @@ void TriMesh_bvh::sortInDirection(int left_index, int right_index, int coordinat
 }
 
 void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node, int depth){
-    if (right_index - left_index < THRESHOLD){ // Maybe put a maximal depth
+    if (right_index - left_index <= 1){ // Maybe put a maximal depth
         // Initiate current node as a leaf
-        node->makeLeaf(left_index, right_index - left_index);
+        node->makeLeaf(left_index, right_index - left_index, _indices_faces[left_index]);
     } else {
         // Ways to split :
         // Depth % 3 == 0 : we split in x
@@ -72,10 +72,10 @@ void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node
         BVHNode* right_node = new BVHNode();
 
         // Set child nodes to parent nodes
-        node->makeNode(left_index, left_node, right_node, 3);
+        node->makeNode(left_index, left_node, right_node, right_index);
 
         for (int i = left_index; i < split_index; i++){ // [left_index, split_index[
-            int a = _indices_faces.at(0);
+            // std::cerr << i << "\n";
             box_left += vertices[faces[_indices_faces.at(i)][0]];
             box_left += vertices[faces[_indices_faces.at(i)][1]];
             box_left += vertices[faces[_indices_faces.at(i)][2]];
@@ -91,9 +91,12 @@ void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node
         left_node->setBox(box_left);
         right_node->setBox(box_right);
 
+        // std::cerr << left_index << " " << right_index << "\n";
+        // std::cerr << box_right.min[0] << "\n";
+
         // Build recursive
         build_recursive(left_index, split_index, left_node, depth+1);
-        build_recursive(split_index, right_index, right_node, depth+1);
+        build_recursive(split_index+1, right_index, right_node, depth+1);
 
     }
 }
