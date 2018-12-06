@@ -26,7 +26,7 @@ float cos_angle(vec4 vectA, vec4 vectB)
 
 float F( float cos_theta )
 {
-    float inv_eta = 5/eta;
+    float inv_eta = eta;
     if ((pow(inv_eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
         return 1.0;
     }

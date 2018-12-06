@@ -19,9 +19,10 @@ uniform int shift_x;
 uniform int shift_y;
 uniform int indices_alternance[9];
 uniform int take_indices; // Number of indices to take from indices_alternance
+uniform int maxBounds; // Number of maximal bounded rays
 
-#define MAX_SCENE_BOUNDS    5
 #define EPS                 0.001
+#define M_PI 3.1415926535897932384626433832795
 
 
 struct hitinfo_t {
@@ -82,9 +83,12 @@ bool intersectPlane(vec4 origin, vec4 dir, out vec4 dist)
     if (dot(dir, normal_plane)!=0) {
         float lambda_plane = dot((Q - origin).xyz, normal_plane.xyz) / dot(normalize(dir).xyz, normal_plane.xyz);
         if (lambda_plane >= EPS) {
-            dist.xyz = origin.xyz + lambda_plane * dir.xyz;
-            dist.w = lambda_plane;
-            return true;
+            vec3 planePoint = origin.xyz + lambda_plane * dir.xyz;
+            if (length(center  - planePoint) <= 4.5*radius) {
+                dist.xyz = planePoint - center;
+                dist.w = lambda_plane;
+                return true;
+            }
         }
     }
     return false;
@@ -145,8 +149,9 @@ vec4 interpolateNormal(hitinfo_t h)
 vec4 interpolateColor(hitinfo_t h)
 {
     if (h.hit_vptr == -1) {
-        return vec4(0.2, 0.6, 0.7, 1);
-        //return texture2D(colorTexture, h.t.xz);
+        //return vec4(0.2, 0.6, 0.7, 1);
+        vec2 textPlaneCoords = vec2(cos(h.t.x/(4.5*radius)), sin(h.t.z/(4.5*radius)));
+        return texture2D(colorTexture, 0.5+0.5*textPlaneCoords);
     }
 	else if (h.hit_vptr>=0) {
         vec4 c0 = colors[indices[h.hit_vptr]];
@@ -227,40 +232,39 @@ vec4 phongModel(vec4 vertLight, vec4 vertNormal, vec4 vertEye, vec4 vertColor, f
 vec4 trace(vec4 origin, vec4 dir)
 {
     hitinfo_t h;
-    intersectionItem intersections[int(MAX_SCENE_BOUNDS)];
+    intersectionItem intersections[20]; // the maximal number of bounded rays
     int nb_bounds = 0;
     vec4 current_origin = vec4(origin.xyzw);
     vec4 current_dir = vec4(dir.xyzw);
     vec4 result = vec4(0,0,0,1);
     // hit either the plane or a triangle
-    while (nb_bounds < MAX_SCENE_BOUNDS && isIntersected(current_origin, current_dir, h)) {
+    while (nb_bounds <= maxBounds && isIntersected(current_origin, current_dir, h)) {
         intersections[nb_bounds].origin = vec4(current_origin);
         current_origin += h.t.w * current_dir;
         intersections[nb_bounds].point_hit = vec4(current_origin);
-        vec4 vertNormal = interpolateNormal(h);
-        vec4 vertColor = interpolateColor(h);
-        intersections[nb_bounds].normal = vec4(vertNormal);
-        vec4 vertEye = normalize(origin - current_origin);
-        vec4 vertLight = normalize(current_origin - vec4(lightPosition.xyz, 1));
-        hitinfo_t h_light;
-        bool only_ambiant = isIntersected(current_origin, -vertLight, h_light);
-        intersections[nb_bounds].color = phongModel(vertLight, vertNormal, vertEye, vertColor, lightIntensity, only_ambiant);
-        intersections[nb_bounds].dir = reflect(current_dir, vertNormal);
+        intersections[nb_bounds].normal = interpolateNormal(h);
+        intersections[nb_bounds].color = interpolateColor(h);
+        intersections[nb_bounds].dir = reflect(current_dir, intersections[nb_bounds].normal);
+        // check if the bounded ray does not enter the matter
         if (dot(intersections[nb_bounds].normal, intersections[nb_bounds].dir)<=0) {
             break;
         }
         current_dir = vec4(intersections[nb_bounds].dir);
         nb_bounds ++;
     }
-
     float current_Fresnel = 1.0;
+    // Backward color computing
     for (int s=nb_bounds-1; s>=0; s--) {
+        // computing the direct light with shadow ray
+        vec4 vertEye = normalize(origin - intersections[s].point_hit);
+        hitinfo_t h_light;
+        vec4 vertLight = normalize(intersections[s].point_hit - vec4(lightPosition, 1));
+        bool only_ambiant = isIntersected(current_origin, -vertLight, h_light);
+        vec4 directColor = phongModel(vertLight, intersections[s].normal, vertEye, intersections[s].color, lightIntensity, only_ambiant);
+        // adding the direct light to the result
+        result = current_Fresnel * directColor + (1 - current_Fresnel) * result;
         float cos_theta = dot(intersections[s].normal, intersections[s].dir);
         current_Fresnel *= F(cos_theta);
-        float currentEta = eta/5;
-        result *= current_Fresnel * currentEta;
-        result +=  (1-currentEta) * intersections[s].color;
-
     }
 
     return result;

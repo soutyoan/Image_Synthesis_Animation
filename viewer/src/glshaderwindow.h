@@ -48,6 +48,7 @@ public slots:
     void updateLightIntensity(int lightSliderValue);
     void updateShininess(int shininessSliderValue);
     void updateEta(int etaSliderValue);
+    void updateMaxBounds(int maxBoundsSliderValue);
 
 protected:
     void mousePressEvent(QMouseEvent *e);
@@ -109,6 +110,7 @@ private:
     float shininess;
     float lightDistance;
     float groundDistance;
+    int maxBounds;
 
 
     // OpenGL variables encapsulated by Qt
