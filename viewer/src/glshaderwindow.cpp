@@ -307,7 +307,7 @@ QWidget *glShaderWindow::makeAuxWindow()
     outer->addLayout(hboxEta);
     outer->addWidget(etaSlider);
 
-    // TODO : Max scene bounds slider
+    // Max scene bounds slider
     QSlider *maxBoundsSlider = new QSlider(Qt::Horizontal);
     maxBoundsSlider->setTickPosition(QSlider::TicksBelow);
     maxBoundsSlider->setTickInterval(1);
