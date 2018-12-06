@@ -14,16 +14,16 @@ void BVHNode::makeNode(int left_index_, BVHNode *left_node, BVHNode *right_node,
     this->right_node = right_node;
 }
 
-void BVHNode::get_bvh_info(std::vector<struct bvh> *infos){
+void BVHNode::get_bvh_infos(std::vector<struct bvh> *infos){
     trimesh::point p(index, n_objs, 0, 0);
-    struct bvh s = malloc(sizeof(struct bvh));
+    struct bvh s = bvh();
     s.bbmin = this->bbox.min;
     s.bbmax = this->bbox.max;
     s.other_info = p;
     infos->push_back(s);
     if (!leaf){
-        left_node->get_bvh_info(infos);
-        right_node->get_bvh_info(infos); 
+        left_node->get_bvh_infos(infos);
+        right_node->get_bvh_infos(infos);
     }
 }
 

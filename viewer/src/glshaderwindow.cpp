@@ -318,7 +318,7 @@ void glShaderWindow::createSSBO()
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->colors.size() * sizeof(trimesh::Color), &(modelMesh->colors.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[3]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->faces.size() * 3 * sizeof(int), &(modelMesh->faces.front()), GL_STATIC_READ);
-    vector<struct bvh> bvh_info = model_mesh->get_bvh_info();
+    vector<struct bvh> bvh_info = modelMesh->get_bvh_info();
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, bvh_info.size() * 3 * sizeof(int)* sizeof(trimesh::point), &(bvh_info.front()), GL_STATIC_READ);
 

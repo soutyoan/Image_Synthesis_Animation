@@ -96,7 +96,7 @@ void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node
     }
 }
 
-std::vector<struct bvh> Trimesh::get_bvh_info(){
+std::vector<struct bvh> TriMesh_bvh::get_bvh_info(){
     std::vector<struct bvh> *bvh_infos = new std::vector<struct bvh>();
     Root->get_bvh_infos(bvh_infos);
     return *bvh_infos;
