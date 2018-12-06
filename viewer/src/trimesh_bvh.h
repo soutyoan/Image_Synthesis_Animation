@@ -11,21 +11,16 @@ using namespace std;
 
 class TriMesh_bvh : public trimesh::TriMesh {
 
-private:
-    BVHNode *Root;
-    vector<int> *_indices_faces;
-
 public:
 
-    void build(vector<int> *indices_faces);
-    void build_recursive(int left_index, int right_index, BVHNode *node, int depth, vector<int> *indices_faces);
+    void build(BVHNode* Root);
+    void build_recursive(int left_index, int right_index, BVHNode *node, int depth);
 
-    void sortInDirection(int left_index, int right_index, int coordinate, vector<int> *indices_faces);
+    void sortInDirection(int left_index, int right_index, int coordinate);
 
-    vector<struct bvh> get_bvh_info();
+    vector<struct bvh> get_bvh_info(BVHNode *Root);
 
     ~TriMesh_bvh();
-
 };
 
 #endif

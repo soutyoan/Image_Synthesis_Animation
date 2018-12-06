@@ -4,12 +4,14 @@ using namespace std;
 
 const int THRESHOLD = 128;
 
-void TriMesh_bvh::build(vector<int> *indices_faces){
+void TriMesh_bvh::build(BVHNode *Root){
     vector<trimesh::point*> objectsCopy; // Copy the vector
     vector<BVHNode*> nodes; // New node vector
 
-    // Create the root node
-    BVHNode *rootNode = new BVHNode();
+    for (int i = 0; i < faces.size(); i++){
+        // std::cerr << i << "\n";
+        _indices_faces.push_back(i);
+    }
 
     // Creating the world box.
     trimesh::box worldBox;
@@ -19,34 +21,33 @@ void TriMesh_bvh::build(vector<int> *indices_faces){
         worldBox += vertices[i]; // We enlarge the box to have the point in it.
     }
 
-    rootNode->setBox(worldBox);
+    Root->setBox(worldBox);
 
-    build_recursive(0, (int)vertices.size(), rootNode, 0, indices_faces);
+    build_recursive(0, (int)_indices_faces.size(), Root, 0);
 
-    Root = rootNode; // Save the root Node
-    this->_indices_faces = indices_faces;
+    this->_indices_faces = _indices_faces;
 
 }
 
-void TriMesh_bvh::sortInDirection(int left_index, int right_index, int coordinate, vector<int> *indices_faces){
+void TriMesh_bvh::sortInDirection(int left_index, int right_index, int coordinate){
 
     // sort
     for (int i = left_index; i < right_index; i++){
         for (int j = left_index; j < i; j++){
-            float xA = (vertices[faces[indices_faces->at(i)][0]][coordinate] + vertices[faces[indices_faces->at(i)][1]][coordinate]
-                + vertices[faces[indices_faces->at(i)][2]][coordinate]) / 3;
-            float xB = (vertices[faces[indices_faces->at(j)][0]][coordinate] + vertices[faces[indices_faces->at(j)][1]][coordinate]
-                + vertices[faces[indices_faces->at(j)][2]][coordinate]) / 3;
+            float xA = (vertices[faces[_indices_faces.at(i)][0]][coordinate] + vertices[faces[_indices_faces.at(i)][1]][coordinate]
+                + vertices[faces[_indices_faces.at(i)][2]][coordinate]) / 3;
+            float xB = (vertices[faces[_indices_faces.at(j)][0]][coordinate] + vertices[faces[_indices_faces.at(j)][1]][coordinate]
+                + vertices[faces[_indices_faces.at(j)][2]][coordinate]) / 3;
             if (xB < xA){
-                int tmp = indices_faces->at(i);
-                indices_faces->at(i) = indices_faces->at(j);
-                indices_faces->at(j) = tmp;
+                int tmp = _indices_faces.at(i);
+                _indices_faces.at(i) = _indices_faces.at(j);
+                _indices_faces.at(j) = tmp;
             }
         }
     }
 }
 
-void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node, int depth, vector<int> *indices_faces){
+void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node, int depth){
     if (right_index - left_index < THRESHOLD){ // Maybe put a maximal depth
         // Initiate current node as a leaf
         node->makeLeaf(left_index, right_index - left_index);
@@ -57,7 +58,7 @@ void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node
         // Depth %3 == 2 : We split in z
 
         // We need to sort on the right way
-        sortInDirection(left_index, right_index, depth%3, indices_faces);
+        sortInDirection(left_index, right_index, depth%3);
 
         // Split intersectables to left and right
         int split_index = (int)((left_index + right_index)/2);
@@ -74,15 +75,16 @@ void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node
         node->makeNode(left_index, left_node, right_node, 3);
 
         for (int i = left_index; i < split_index; i++){ // [left_index, split_index[
-            box_left += vertices[faces[indices_faces->at(i)][0]];
-            box_left += vertices[faces[indices_faces->at(i)][1]];
-            box_left += vertices[faces[indices_faces->at(i)][2]];
+            int a = _indices_faces.at(0);
+            box_left += vertices[faces[_indices_faces.at(i)][0]];
+            box_left += vertices[faces[_indices_faces.at(i)][1]];
+            box_left += vertices[faces[_indices_faces.at(i)][2]];
         }
 
         for (int i = split_index; i < right_index; i++){// [split_index, right_index[
-            box_right += vertices[faces[indices_faces->at(i)][0]];
-            box_right += vertices[faces[indices_faces->at(i)][1]];
-            box_right += vertices[faces[indices_faces->at(i)][2]];
+            box_right += vertices[faces[_indices_faces.at(i)][0]];
+            box_right += vertices[faces[_indices_faces.at(i)][1]];
+            box_right += vertices[faces[_indices_faces.at(i)][2]];
         }
 
         // Set the boxes
@@ -90,19 +92,18 @@ void TriMesh_bvh::build_recursive(int left_index, int right_index, BVHNode *node
         right_node->setBox(box_right);
 
         // Build recursive
-        build_recursive(left_index, split_index, left_node, depth+1, indices_faces);
-        build_recursive(split_index, right_index, right_node, depth+1, indices_faces);
+        build_recursive(left_index, split_index, left_node, depth+1);
+        build_recursive(split_index, right_index, right_node, depth+1);
 
     }
 }
 
-std::vector<struct bvh> TriMesh_bvh::get_bvh_info(){
+std::vector<struct bvh> TriMesh_bvh::get_bvh_info(BVHNode *Root){
     std::vector<struct bvh> *bvh_infos = new std::vector<struct bvh>();
     Root->get_bvh_infos(bvh_infos);
     return *bvh_infos;
 }
 
 TriMesh_bvh::~TriMesh_bvh(){
-    delete Root;
-    delete _indices_faces;
+    // delete Root;
 }

@@ -247,6 +247,9 @@ public:
 	// Debugging
 	//
 
+    std::vector<int> _indices_faces;
+
+
 	// Debugging printout, controllable by a "verbose"ness parameter
 	static int verbose;
 	static void set_verbose(int);

@@ -318,7 +318,7 @@ void glShaderWindow::createSSBO()
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->colors.size() * sizeof(trimesh::Color), &(modelMesh->colors.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[3]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->faces.size() * 3 * sizeof(int), &(modelMesh->faces.front()), GL_STATIC_READ);
-    vector<struct bvh> bvh_info = modelMesh->get_bvh_info();
+    vector<struct bvh> bvh_info = modelMesh->get_bvh_info(Root);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, bvh_info.size() * 3 * sizeof(int)* sizeof(trimesh::point), &(bvh_info.front()), GL_STATIC_READ);
 
@@ -563,7 +563,7 @@ void glShaderWindow::openScene()
     }
 
     trimesh::TriMesh *readMesh = trimesh::TriMesh::read(qPrintable(modelName));
-    modelMesh = (TriMesh_bvh*)readMesh;
+    modelMesh = (TriMesh_bvh*)(readMesh);
     if (!modelMesh) {
         QMessageBox::warning(0, tr("qViewer"),
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
@@ -573,11 +573,8 @@ void glShaderWindow::openScene()
     modelMesh->need_bbox();
     modelMesh->need_normals();
     modelMesh->need_faces();
-    vector<int> *indices_faces = new vector<int>();
-    for (int i = 0; i < modelMesh->faces.size(); i ++){
-        indices_faces->push_back(i);
-    }
-    modelMesh->build(indices_faces); // Bounding volume hierarchy
+    Root = new BVHNode();
+    modelMesh->build(Root); // Bounding volume hierarchy
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
             modelMesh->bsphere.center[2]);

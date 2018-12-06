@@ -83,6 +83,7 @@ private:
     QString  textureName;
     QString  envMapName;
     TriMesh_bvh* modelMesh;
+    BVHNode *Root;
     uchar* pixels;
     // Ground
     trimesh::point *g_vertices;
