@@ -320,8 +320,8 @@ QWidget *glShaderWindow::makeAuxWindow()
     maxBoundsLabelValue->setNum(maxBounds);
     connect(maxBoundsSlider,SIGNAL(valueChanged(int)),maxBoundsLabelValue,SLOT(setNum(int)));
     QHBoxLayout *hboxMaxBounds= new QHBoxLayout;
-    hboxEta->addWidget(maxBoundsLabel);
-    hboxEta->addWidget(maxBoundsLabelValue);
+    hboxMaxBounds->addWidget(maxBoundsLabel);
+    hboxMaxBounds->addWidget(maxBoundsLabelValue);
     outer->addLayout(hboxMaxBounds);
     outer->addWidget(maxBoundsSlider);
 

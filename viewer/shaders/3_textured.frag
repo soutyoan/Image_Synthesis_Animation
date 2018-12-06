@@ -27,7 +27,7 @@ float cos_angle(vec4 vectA, vec4 vectB)
 
 float F( float cos_theta )
 {
-    float inv_eta = 5/eta;
+    float inv_eta = eta;
     if ((pow(inv_eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
         return 1.0;
     }
@@ -57,12 +57,13 @@ void main( void )
     // This is the place where there's work to be done
     float ka = 0.2;
     float kd = 0.5;
+    vec2 textPlaneCoords = vec2(cos(textCoords.x), sin(textCoords.y));
     vec4 textColor = texture2D(colorTexture, textCoords);
     vec4 vertNormalN = normalize(vertNormal);
     vec4 lightVectorN = normalize(lightVector);
     vec4 eyeVectorN = normalize(eyeVector);
 
-    vec4 Ca = ka * lightIntensity * vertColor;
+    vec4 Ca = ka * lightIntensity * textColor;
 
     // boolean value for shadow mapping : comparison bet. z_shadow and z_computed
     float z_shadow = texture2D(shadowMap, 0.5+0.5*lightSpace.xy).r;
@@ -71,12 +72,12 @@ void main( void )
 
 
     // diffuse coefficient
-    vec4 Cd = kd * lightIntensity * vertColor * max(dot(vertNormalN, lightVectorN), 0);
+    vec4 Cd = kd * lightIntensity * textColor * max(dot(vertNormalN, lightVectorN), 0);
     vec4 halfVector = normalize(eyeVectorN + lightVectorN);
     float cos_theta_d = cos_angle(halfVector, lightVectorN);
 
     // specular coefficient
-    vec4 Cs =  F(cos_theta_d) * lightIntensity * pow(max(dot(vertNormalN, halfVector), 0), shininess) * vertColor;
+    vec4 Cs =  F(cos_theta_d) * lightIntensity * pow(max(dot(vertNormalN, halfVector), 0), shininess) * textColor;
 
     // Cook-Torrance model computation
     if (!blinnPhong){
@@ -84,7 +85,7 @@ void main( void )
        float cos_theta_h = cos_angle(halfVector, vertNormalN);
        float cos_theta_i = cos_angle(lightVectorN, vertNormalN);
        float cos_theta_o = cos_angle(eyeVectorN, vertNormalN);
-       Cs = (F(cos_theta_d) * D(alpha, cos_theta_h) * G1(alpha, cos_theta_i) * G1(alpha, cos_theta_o) / (4 * cos_theta_i * cos_theta_o)) * vertColor;
+       Cs = (F(cos_theta_d) * D(alpha, cos_theta_h) * G1(alpha, cos_theta_i) * G1(alpha, cos_theta_o) / (4 * cos_theta_i * cos_theta_o)) * textColor;
     }
 
     if (z_shadow < z_computed - EPS) {
