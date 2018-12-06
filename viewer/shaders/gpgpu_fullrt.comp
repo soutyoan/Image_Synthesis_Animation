@@ -266,7 +266,10 @@ vec4 trace(vec4 origin, vec4 dir)
         float cos_theta = dot(intersections[s].normal, intersections[s].dir);
         current_Fresnel *= F(cos_theta);
     }
-
+    if (all(equal(result, vec4(0,0,0,1)))) {
+        // matching the bakground color with Phong rendering
+        result = vec4(0.19921875, 0.19921875, 0.19921875, 1);
+    }
     return result;
 }
 
