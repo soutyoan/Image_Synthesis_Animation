@@ -57,6 +57,7 @@ protected:
     void timerEvent(QTimerEvent *e);
     void resizeEvent(QResizeEvent * ev);
     void wheelEvent(QWheelEvent * ev);
+    void keyPressEvent(QKeyEvent* e);
 
 
 private:

@@ -6,5 +6,5 @@ if __name__ == "__main__":
     #     for line in f:
     #         print(line)
 
-    Root = Node.createStructureFromBVH("../data/walk.bvh")
+    Root = Node.createStructureFromBVH("../viewer/models/walk.bvh")
     print(Root)

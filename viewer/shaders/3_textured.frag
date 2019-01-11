@@ -57,7 +57,7 @@ void main( void )
     // This is the place where there's work to be done
     float ka = 0.2;
     float kd = 0.5;
-    vec2 textPlaneCoords = vec2(cos(textCoords.x), sin(textCoords.y));
+    //vec2 textPlaneCoords = vec2(cos(textCoords.x), sin(textCoords.y));
     vec4 textColor = texture2D(colorTexture, textCoords);
     vec4 vertNormalN = normalize(vertNormal);
     vec4 lightVectorN = normalize(lightVector);
