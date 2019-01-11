@@ -25,13 +25,26 @@ vec4 getColorFromEnvironment(in vec3 direction)
     float theta = atan(u_direction.z, u_direction.x);
     return texture2D(envMap, vec2((theta+M_PI) / (2*M_PI), phi / M_PI));
 }
+//
+// // Fresnel coefficient computation
+// float F( float cos_theta, float eta)
+// {
+//     float ci = sqrt(pow(eta, 2) - (1 - pow(cos_theta, 2)));
+//     float Fs = pow(abs((cos_theta - ci) / (cos_theta + ci)), 2);
+//     float Fp = pow(abs((pow(eta, 2) * cos_theta - ci) / (pow(eta, 2) * cos_theta + ci)), 2);
+//
+//     return (Fs + Fp) / 2;
+// }
 
-// Fresnel coefficient computation
-float F( float cos_theta, float eta)
+float F( float cos_theta, float eta )
 {
-    float ci = sqrt(pow(eta, 2) - (1 - pow(cos_theta, 2)));
+    float inv_eta = eta;
+    if ((pow(inv_eta, 2) - (1 - pow(cos_theta, 2))) < 0) {
+        return 1.0;
+    }
+    float ci = sqrt(pow(inv_eta, 2) - (1 - pow(cos_theta, 2)));
     float Fs = pow(abs((cos_theta - ci) / (cos_theta + ci)), 2);
-    float Fp = pow(abs((pow(eta, 2) * cos_theta - ci) / (pow(eta, 2) * cos_theta + ci)), 2);
+    float Fp = pow(abs((pow(inv_eta, 2) * cos_theta - ci) / (pow(inv_eta, 2) * cos_theta + ci)), 2);
 
     return (Fs + Fp) / 2;
 }
@@ -79,7 +92,7 @@ void main(void)
     vec3 reflected_direction = vec3(0);
     vec3 refracted_direction = vec3(0);
     int nb_rays = 0;
-    int nb_wished_rebounbs = 4;
+    int nb_wished_rebounbs = 14;
     if (!transparent) {
         nb_wished_rebounbs = 0;
     }
