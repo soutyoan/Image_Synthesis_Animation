@@ -188,7 +188,7 @@ class Node:
 			number_of_frames = int(Node.readline(f)[1])
 			Root.frame_time = float(Node.readline(f)[2])
 
-			info_frame = [[float(j) for j in i.split(" ")] for i in f]
+			info_frame = [[float(j) for j in i.replace("\t", " ").split(" ")] for i in f]
 
 
 		with open(file_name) as f: # Use file to refer to the file object
