@@ -1081,6 +1081,18 @@ static int nextPower2(int x) {
     return x;
 }
 
+void glShaderWindow::keyPressEvent(QKeyEvent* e)
+{
+	int key = e->key();
+	switch (key)
+	{
+	case Qt::Key_Space:
+		toggleAnimating();
+		break;
+	default:
+		break;
+	}
+}
 
 int get_indices_rendu_alternance(GLint* indices, int* shifts, int render_number){
     /*

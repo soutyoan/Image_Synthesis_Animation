@@ -1,5 +1,5 @@
 
-// à insérer dans les membres protected de la classe glShaderWindow
+// ï¿½ insï¿½rer dans les membres protected de la classe glShaderWindow
 
 void keyPressEvent(QKeyEvent* e)
 {

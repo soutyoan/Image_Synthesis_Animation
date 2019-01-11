@@ -10,9 +10,10 @@ Joint* Joint::createFromFile(std::string fileName) {
 	ifstream inputfile(fileName.data());
 	if(inputfile.good()) {
 		while(!inputfile.eof()) {
-			string buf;	
+			string buf;
 			inputfile >> buf;
-			// TODO : construire la structure de données root à partir du fichier
+			// TODO : construire la structure de donnï¿½es root ï¿½ partir du fichier
+			
 		}
 		inputfile.close();
 	} else {
@@ -25,7 +26,7 @@ Joint* Joint::createFromFile(std::string fileName) {
 	return root;
 }
 
-void Joint::animate(int iframe) 
+void Joint::animate(int iframe)
 {
 	// Update dofs :
 	_curTx = 0; _curTy = 0; _curTz = 0;
@@ -37,7 +38,7 @@ void Joint::animate(int iframe)
 		if(!_dofs[idof].name.compare("Zrotation")) _curRz = _dofs[idof]._values[iframe];
 		if(!_dofs[idof].name.compare("Yrotation")) _curRy = _dofs[idof]._values[iframe];
 		if(!_dofs[idof].name.compare("Xrotation")) _curRx = _dofs[idof]._values[iframe];
-	}	
+	}
 	// Animate children :
 	for (unsigned int ichild = 0 ; ichild < _children.size() ; ichild++) {
 		_children[ichild]->animate(iframe);

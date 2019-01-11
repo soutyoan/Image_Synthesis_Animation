@@ -184,3 +184,9 @@ void OpenGLWindow::setAnimating(bool animating)
         renderLater();
 }
 //! [5]
+
+void OpenGLWindow::toggleAnimating() {
+	m_animating = !m_animating;
+	m_update_pending = false;
+	renderNow();
+}
