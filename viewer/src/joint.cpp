@@ -65,69 +65,72 @@ void Joint::nbDofs() {
 }
 
 
-friend std::ostream& operator<<(std::ostream& os, const Joint& joint){
+std::ostream& operator<<(std::ostream& os, const Joint& joint){
 	int global_tab_count = 0;
-	joint.printRecursivly(&global_tab_count);
+	joint.printRecursivly(os, &global_tab_count);
+	return os;
 
 
 }
 
-void multTab(int *global_tab_count){
+void multTab(std::ostream& os, int *global_tab_count){
 	for (int i = 0; i < *global_tab_count; i++)
-		std::cout << "   ";
+		os << "   ";
 }
 
 
-void Joint::printRecursivly(int *global_tab_count){
-	multTab(global_tab_count);
-	std::cout << "JOINT" << this->name << "\n";
-	multTab(global_tab_count);
-	std::cout << "{\n";
+void Joint::printRecursivly(std::ostream& os, int *global_tab_count) const{
+	multTab(os, global_tab_count);
+	os << "JOINT" << this->_name << "\n";
+	multTab(os, global_tab_count);
+	os << "{\n";
 
-	*global_tab_count ++;
-	multTab(global_tab_count);
-	std::cout << "OFFSET " << this->_offZ <<
+	*global_tab_count = *global_tab_count + 1;
+	multTab(os, global_tab_count);
+	os << "OFFSET " << this->_offZ <<
 	" " << this->_offY << " " << this->_offX << "\n";
 	if (this->nbRotation() + this->nbTranslation() != 0){
-		multTab(global_tab_count);
-		std::cout << "CHANNELS " << this->nbRotation() + this->nbTranslation() << " ";
+		multTab(os, global_tab_count);
+		os << "CHANNELS " << this->nbRotation() + this->nbTranslation() << " ";
 		if (this->nbTranslation() != 0)
-			std::cout << this->_curTz << " " << this->_curTy << " " << this->_curTx << " ";
+			os << this->_curTz << " " << this->_curTy << " " << this->_curTx << " ";
 		if (this->nbRotation() != 0)
-			std::cout << this->_curRz << " " << this->_curRy << " " << this->_curRx << " ";
-		std::std::cout << "\n";
+			os << this->_curRz << " " << this->_curRy << " " << this->_curRx << " ";
+		os << "\n";
 	}
-	for (std::vector<Joint *>::iterator it = this->_children.begin() ; it != this->_children.end(); ++it){
-		if (*it != NULL){
-			*it.printRecursivly(global_tab_count);
-		}
+	for (int i = 0; i < int(this->_children.size()); i++)
+	{
+		Joint* it = this->_children[i];
+		// if (*it != NULL){
+			it->printRecursivly(os, global_tab_count);
+		// }
 	}
 
-	*global_tab_count --;
-	multTab(global_tab_count);
-	std::cout << '}\n';
+	*global_tab_count = *global_tab_count - 1;
+	multTab(os, global_tab_count);
+	os << "}\n";
 
 }
 
-int Joint::nbRotation(){
+int Joint::nbRotation() const{
 	int result = 0;
-	if (this->__curRx != 0)
+	if (this->_curRx != 0)
 		result ++;
-	if (this->__curRy != 0)
+	if (this->_curRy != 0)
 		result ++;
-	if (this->__curRz != 0)
+	if (this->_curRz != 0)
 		result ++;
 	return result;
 
 }
 
-int Joint::nbTranslation(){
+int Joint::nbTranslation() const{
 	int result = 0;
-	if (this->__curTx != 0)
+	if (this->_curTx != 0)
 		result ++;
-	if (this->__curTy != 0)
+	if (this->_curTy != 0)
 		result ++;
-	if (this->__curTz != 0)
+	if (this->_curTz != 0)
 		result ++;
 	return result;
 

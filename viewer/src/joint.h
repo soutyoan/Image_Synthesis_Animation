@@ -24,7 +24,7 @@ enum RotateOrder {roXYZ=0, roYZX, roZXY, roXZY, roYXZ, roZYX};
 class Joint {
 
 private :
-	void printRecursivly(int *global_tab_count);
+	void printRecursivly(std::ostream& os, int *global_tab_count) const;
 
 public :
 	std::string _name;					// name of joint
@@ -80,10 +80,10 @@ public :
 
 	friend std::ostream& operator<<(std::ostream& os, const Joint& joint);
 
-	int nbRotation();
+	int nbRotation() const;
 
-	int nbTranslation();
+	int nbTranslation() const;
 };
 
-
+std::ostream& operator<<(std::ostream& os, const Joint& joint);
 #endif
