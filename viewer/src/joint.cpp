@@ -3,6 +3,68 @@
 
 using namespace std;
 
+bool compare_str(string s1, string s2){
+	return (s1.compare(s2) == 0);
+}
+
+int getIntFromStr(string s){
+	if (compare_str(s, "X")){
+		return 0;
+	} else if (compare_str(s, "Y")){
+		return 1;
+	} else {
+		return 2;
+	}
+}
+
+void Joint::fillInformation(string name, ifstream &file, Joint* j){
+	j->_name = name;
+
+	string buf;
+	file >> buf;
+#if DEBUG
+	if (!compar_str(file, "{")){
+		cerr << "Incorrect parsing" << endl;
+		exit(1);
+	}
+#endif
+
+	file >> buf;
+#if DEBUG
+	if (!compar_str(file, "OFFSET")){
+		cerr << "Incorrect parsing" << endl;
+		exit(1);
+	}
+#endif
+	file >> j->_offX; file >> j->_offY; file >> j->_offZ;
+
+	file >> buf;
+#if DEBUG
+	if (!compar_str(file, "CHANNELS")){
+		cerr << "Incorrect parsing" << endl;
+		exit(1);
+	}
+#endif
+
+	int numberChannels = 0;
+	file >> numberChannels;
+	for (int i = 0; i < numberChannels; i++){
+		string currentChannel;
+		file >> currentChannel;
+		string end = currentChannel.substr(1);
+		if (compare_str(end, "rotation")){
+			j->orderRotation.push_back(getIntFromStr(currentChannel.substr(0, 1)));
+		} else {
+			j->orderTranslation.push_back(getIntFromStr(currentChannel.substr(0, 1)));
+		}
+	}
+
+}
+
+Joint* Joint::createNewJoint(ifstream &file, string filename){
+
+}
+
 Joint* Joint::createFromFile(std::string fileName) {
 	Joint* root = NULL;
 	cout << "Loading from " << fileName << endl;
@@ -10,11 +72,20 @@ Joint* Joint::createFromFile(std::string fileName) {
 	ifstream inputfile(fileName.data());
 	if(inputfile.good()) {
 		// We first recover the values at the end of the file
-		while(!inputfile.eof()) {
-			string buf;
+		string buf;
+		while(buf.compare("MOTION") != 0) {
 			inputfile >> buf;
+			if (buf.compare("JOINT") == 0){
+				string name;
+				inputfile >> name;
+				createNewJoint(inputfile, name);
+			}
+
+
 			// TODO : construire la structure de donn�es root � partir du fichier
-			cout << buf;
+			if (buf.compare("MOTION") == 0){
+
+			}
 		}
 		inputfile.close();
 	} else {
