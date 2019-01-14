@@ -22,6 +22,10 @@ public :
 enum RotateOrder {roXYZ=0, roYZX, roZXY, roXZY, roYXZ, roZYX};
 
 class Joint {
+
+private :
+	void printRecursivly(int *global_tab_count);
+
 public :
 	std::string _name;					// name of joint
 	double _offX;						// initial offset in X
@@ -66,13 +70,19 @@ public :
 		return child;
 	}
 
-	// Load from file (.bvh) :	
+	// Load from file (.bvh) :
 	static Joint* createFromFile(std::string fileName);
 
 	void animate(int iframe=0);
 
 	// Analysis of degrees of freedom :
 	void nbDofs();
+
+	friend std::ostream& operator<<(std::ostream& os, const Joint& joint);
+
+	int nbRotation();
+
+	int nbTranslation();
 };
 
 
