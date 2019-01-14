@@ -9,11 +9,12 @@ Joint* Joint::createFromFile(std::string fileName) {
 
 	ifstream inputfile(fileName.data());
 	if(inputfile.good()) {
+		// We first recover the values at the end of the file
 		while(!inputfile.eof()) {
 			string buf;
 			inputfile >> buf;
 			// TODO : construire la structure de donn�es root � partir du fichier
-
+			cout << buf;
 		}
 		inputfile.close();
 	} else {
