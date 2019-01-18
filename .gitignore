@@ -6,3 +6,4 @@ Makefile
 */Makefile*
 *.a
 /.vs
+*.pyc
