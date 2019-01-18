@@ -101,6 +101,8 @@ public :
 	int nbRotation() const;
 
 	int nbTranslation() const;
+
+	int nbChannels() const;
 };
 
 std::ostream& operator<<(std::ostream& os, const Joint& joint);
