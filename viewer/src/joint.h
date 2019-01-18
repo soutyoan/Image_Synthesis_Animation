@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <assert.h>
+#include <sstream>
 #include "TriMesh.h"
 
 using namespace std;
@@ -15,15 +17,13 @@ const bool DEBUG=true;
 
 class AnimCurve {
 public :
-	AnimCurve() {};
+	AnimCurve() {_values.resize(6); };
 	~AnimCurve() {
 		_values.clear();
 	}
 public :
 	std::string name;					// name of dof
-	std::vector<float> _values;		// different keyframes = animation curve
-	vector<vec> translation;
-	vector<vec> rotation;
+	std::vector<float> _values;			// different keyframes = animation curve
 };
 
 
@@ -57,6 +57,7 @@ public :
 
 
 public :
+	Joint* parent;
 	// Constructor :
 	Joint() {};
 	// Destructor :
@@ -84,9 +85,11 @@ public :
 		return child;
 	}
 
-	static Joint* createNewJoint(ifstream &file, string filename);
+	static Joint* createNewJoint(ifstream &file, string filename, bool isEnd,
+		vector<string> &animValues);
 
-	static void fillInformation(string name, ifstream &file, Joint* j);
+	void fillInformation(string name, ifstream &file, bool isEnd,
+		vector<string> &animValues);
 
 	// Load from file (.bvh) :
 	static Joint* createFromFile(std::string fileName);

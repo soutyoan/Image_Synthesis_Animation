@@ -17,8 +17,9 @@ int getIntFromStr(string s){
 	}
 }
 
-void Joint::fillInformation(string name, ifstream &file, Joint* j){
-	j->_name = name;
+void Joint::fillInformation(string name, ifstream &file, bool isEnd,
+	vector<string> &animValues){
+	this->_name = name;
 
 	string buf;
 	file >> buf;
@@ -36,7 +37,11 @@ void Joint::fillInformation(string name, ifstream &file, Joint* j){
 		exit(1);
 	}
 #endif
-	file >> j->_offX; file >> j->_offY; file >> j->_offZ;
+	file >> this->_offX; file >> this->_offY; file >> this->_offZ;
+
+	if (isEnd){
+		return;
+	}
 
 	file >> buf;
 #if DEBUG
@@ -48,44 +53,118 @@ void Joint::fillInformation(string name, ifstream &file, Joint* j){
 
 	int numberChannels = 0;
 	file >> numberChannels;
+	this->_dofs.resize(animValues.size());
 	for (int i = 0; i < numberChannels; i++){
 		string currentChannel;
 		file >> currentChannel;
 		string end = currentChannel.substr(1);
 		if (compare_str(end, "rotation")){
-			j->orderRotation.push_back(getIntFromStr(currentChannel.substr(0, 1)));
+			this->orderRotation.push_back(getIntFromStr(currentChannel.substr(0, 1)));
+			for (int i = 0; i < animValues.size(); i++){
+				float currentValue;
+				stringstream s(animValues[i]);
+				s >> currentValue;
+				if (compare_str(currentChannel.substr(0, 1), "X")){
+					this->_dofs[i]._values[3] = currentValue;
+				}
+				if (compare_str(currentChannel.substr(0, 1), "Y")){
+					this->_dofs[i]._values[4] = currentValue;
+				}
+				if (compare_str(currentChannel.substr(0, 1), "Z")){
+					this->_dofs[i]._values[5] = currentValue;
+				}
+				animValues[i] = s.str();
+			}
 		} else {
-			j->orderTranslation.push_back(getIntFromStr(currentChannel.substr(0, 1)));
+			this->orderTranslation.push_back(getIntFromStr(currentChannel.substr(0, 1)));
+			for (int i = 0; i < animValues.size(); i++){
+				float currentValue;
+				stringstream s(animValues[i]);
+				s >> currentValue;
+				if (compare_str(currentChannel.substr(0, 1), "X")){
+					this->_dofs[i]._values[0] = currentValue;
+				}
+				if (compare_str(currentChannel.substr(0, 1), "Y")){
+					this->_dofs[i]._values[1] = currentValue;
+				}
+				if (compare_str(currentChannel.substr(0, 1), "Z")){
+					this->_dofs[i]._values[2] = currentValue;
+				}
+				animValues[i] = s.str();
+			}
 		}
 	}
 
 }
 
-Joint* Joint::createNewJoint(ifstream &file, string filename){
-
+Joint* Joint::createNewJoint(ifstream &file, string filename, bool isEnd,
+	vector<string> &animValues){
+	Joint* j = new Joint();
+	j->fillInformation(filename, file, isEnd, animValues);
+	return j;
 }
 
 Joint* Joint::createFromFile(std::string fileName) {
 	Joint* root = NULL;
 	cout << "Loading from " << fileName << endl;
 
+	ifstream motionfile(fileName.data());
+	vector<string> animValues;
+	if(motionfile.good()) {
+		// We first recover the values at the end of the file
+		string buf;
+		motionfile >> buf;
+		while (!compare_str(buf, "MOTION")){
+			motionfile >> buf;
+		}
+		motionfile >> buf;
+		assert (compare_str(buf, "Frames:"));
+		int numberFrames = 0;
+		motionfile >> numberFrames;
+		motionfile >> buf;
+		assert (compare_str(buf, "Frame"));
+		motionfile >> buf;
+		assert (compare_str(buf, "Time:"));
+		float frameTime = 0;
+		motionfile >> frameTime;
+		while(!motionfile.eof()){
+			string line;
+			float currentf;
+			while (getline (motionfile,line)){
+				animValues.push_back(line);
+			}
+		}
+	}
+
 	ifstream inputfile(fileName.data());
+	Joint* parent;
 	if(inputfile.good()) {
 		// We first recover the values at the end of the file
 		string buf;
-		while(buf.compare("MOTION") != 0) {
+		inputfile >> buf;
+		while (!compare_str(buf, "ROOT")){
 			inputfile >> buf;
+		}
+		string name;
+		inputfile >> name;
+		root = createNewJoint(inputfile, name, false, animValues);
+		while(buf.compare("MOTION") != 0) {
 			if (buf.compare("JOINT") == 0){
 				string name;
 				inputfile >> name;
-				createNewJoint(inputfile, name);
+				Joint* j = createNewJoint(inputfile, name, false, animValues);
+				j->parent = parent;
+				parent = j;
+			} else if (compare_str(buf, "End")){
+				string name;
+				inputfile >> name;
+				Joint* j = createNewJoint(inputfile, name, true, animValues);
+				j->parent = parent;
+				parent = j;
+			} else if (compare_str(buf, "}")){
+				parent = parent->parent;
 			}
-
-
-			// TODO : construire la structure de donn�es root � partir du fichier
-			if (buf.compare("MOTION") == 0){
-
-			}
+			inputfile >> buf;
 		}
 		inputfile.close();
 	} else {
