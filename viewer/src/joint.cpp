@@ -27,6 +27,8 @@ Joint* Joint::createFromFile(std::string fileName) {
 	return root;
 }
 
+
+
 void Joint::animate(int iframe)
 {
 	// Update dofs :
