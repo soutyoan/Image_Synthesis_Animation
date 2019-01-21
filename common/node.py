@@ -66,18 +66,18 @@ class Node:
 		number_channels = int(l[1])
 		rotation = []
 		position = []
-		for i in range(2, 2 + number_channels):
-			if "position" in l[i]:
-				frame_numbers = [l[i][0], []]
-				for frame in range(len(info_frame)):
-					frame_numbers[1].append(info_frame[0][frame])
-				position.append(frame_numbers)
-			if "rotation" in l[i]:
-				frame_numbers = [l[i][0], []]
-				for frame in range(len(info_frame)):
-					frame_numbers[1].append(info_frame[0][frame])
-				rotation.append(frame_numbers)
-		info_frame.pop(0)
+
+		for frame in range(len(info_frame[0])):
+			if number_channels == 6: #A CHANGER ICI 
+				positionLoc = [info_frame[0][frame], info_frame[1][frame], info_frame[2][frame]]
+				position.append(positionLoc)
+				rotationLoc = [info_frame[0][frame], info_frame[1][frame], info_frame[2][frame]]
+				rotation.append(rotationLoc)
+			else:
+				rotationLoc = [info_frame[0][frame], info_frame[1][frame], info_frame[2][frame]]
+				rotation.append(rotationLoc)
+		for i in range(number_channels):
+			info_frame.pop(0)
 		return offset, position, rotation
 
 	@staticmethod
@@ -202,6 +202,7 @@ class Node:
 				tmp.append(deviceFrames)
 			info_frame = tmp
 
+
 				
 
 
@@ -222,7 +223,6 @@ class Node:
 			Node.CreateChild(Root, f, info_frame);
 
 			# We need to assert that info_frame is fully empty
-			print(info_frame)
 			for i in info_frame:
 				assert len(i) == 0
 
@@ -233,9 +233,16 @@ class Node:
 	 	"""
 	 	Creates the joints structure in MAYA
 	 	"""
-		#print(self.position)
-		positionM = [self.position[0][1][1], self.position[1][1][1], self.position[2][1][1]]
-		rotationM = [self.rotate[0][1][1], self.rotate[1][1][1], self.rotate[2][1][1]]
+		positionM = []
+		rotationM = []
+		if len(self.position) != 0:
+			positionM = self.position[0]
+		else:
+			positionM = [0, 0, 0]
+		if len(self.rotate) != 0:
+			rotationM = self.rotate[0]
+		else:
+			rotationM = [0, 0, 0]
 		#print(positionM)
 
 	 	cm.joint( name=self.name, p=positionM, o=rotationM, roo="zyx", zso=True, oj='zyx', r=True )
