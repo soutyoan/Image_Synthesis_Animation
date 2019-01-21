@@ -1,7 +1,7 @@
 // Projet MAYA Ensimag 2018-2019
 // Plug-In C++ implementation
 
-if #ifndef BVH_TRANSLATOR
+#ifndef BVH_TRANSLATOR
 #define BVH_TRANSLATOR
 
 #include <maya/MStatus.h>
@@ -32,7 +32,7 @@ public:
 	/// Default constructor
 	BvhTranslator() {};
 
-	/// Destructor 
+	/// Destructor
 	~BvhTranslator() {};
 
 	/// Tells MAYA that translator can read .bvh files. (import, open)
@@ -56,10 +56,10 @@ public:
 	///This returns the default extension ".lep" in this case.
 	MString defaultExtension() const;
 
-	//If this method returns true it means that the translator can handle opening files 
+	//If this method returns true it means that the translator can handle opening files
 	//as well as importing them.
-	//If the method returns false then only imports are handled. The difference between 
-	//an open and an import is that the scene is cleared(e.g. 'file -new') prior to an 
+	//If the method returns false then only imports are handled. The difference between
+	//an open and an import is that the scene is cleared(e.g. 'file -new') prior to an
 	//open, which may affect the behaviour of the translator.
 	bool canBeOpened() const { return true; }
 
