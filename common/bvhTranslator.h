@@ -74,10 +74,6 @@ public:
 		const MString& optionsString,
 		MPxFileTranslator::FileAccessMode mode);
 
-	//This function is called by maya when export or save is called.
-	MStatus writer(const MFileObject& file,
-		const MString& optionsString,
-		MPxFileTranslator::FileAccessMode mode);
 
 private:
 	//The magic string to verify it's a LEP file
