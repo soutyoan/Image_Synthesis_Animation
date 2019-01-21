@@ -1,7 +1,7 @@
 """
 Hierarchy model of the class
 """
-import maya.cmds as cm
+# import maya.cmds as cm
 
 
 GLOBAL_TAB_COUNT = 0
@@ -69,15 +69,15 @@ class Node:
 		for i in range(2, 2 + number_channels):
 			if "position" in l[i]:
 				frame_numbers = [l[i][0], []]
-				for frame in range(len(info_frame)):
-					frame_numbers[1].append(info_frame[0][frame])
+				for k in range(len(info_frame)):
+					frame_numbers[1].append(info_frame[k].pop(0))
 				position.append(frame_numbers)
 			if "rotation" in l[i]:
 				frame_numbers = [l[i][0], []]
-				for frame in range(len(info_frame)):
-					frame_numbers[1].append(info_frame[0][frame])
+				for k in range(len(info_frame)):
+					frame_numbers[1].append(info_frame[k].pop(0))
 				rotation.append(frame_numbers)
-		info_frame.pop(0)
+
 		return offset, position, rotation
 
 	@staticmethod
@@ -104,27 +104,26 @@ class Node:
 			to this function and we get the "filled" root node
 			in the end
 		"""
-		if (len(f) != 0):
+		l = Node.readline(f)
+		while l[0] != "MOTION":
+			if l[0] == "JOINT":
+				Child = Node(l[1], parent)
+				offset, position, rotation = Node.readInfo(f, info_frame)
+				Child.translate = offset; Child.position = position; Child.rotate = rotation
+				parent.fils.append(Child)
+				parent = Child
+			elif l[0] == "End":
+				Child = Node(l[1], parent)
+				offset = Node.readInfo(f, info_frame, True)
+				Child.translate = offset
+				parent.fils.append(Child)
+				parent = Child
+			elif l[0] == "}":
+				parent = parent.parent
+			else:
+				print("Invalid input")
+				raise
 			l = Node.readline(f)
-			while l[0] != "MOTION":
-				if l[0] == "JOINT":
-					Child = Node(l[1], parent)
-					offset, position, rotation = Node.readInfo(f, info_frame)
-					Child.translate = offset; Child.position = position; Child.rotate = rotation
-					parent.fils.append(Child)
-					parent = Child
-				elif l[0] == "End":
-					Child = Node(l[1], parent)
-					offset = Node.readInfo(f, info_frame, True)
-					Child.translate = offset
-					parent.fils.append(Child)
-					parent = Child
-				elif l[0] == "}":
-					parent = parent.parent
-				else:
-					print("Invalid input")
-					raise
-				l = Node.readline(f)
 
 	@staticmethod
 	def readline(f):
@@ -149,7 +148,6 @@ class Node:
 
 		"""
 		l = f[0].replace("\t", "")
-		l = l.replace("\r", "")
 		f.pop(0)
 		while len(l) == 0:
 			l = f[0].replace("\t", "")
@@ -182,8 +180,7 @@ class Node:
 
 		with open(file_name) as motion_info:
 			f = motion_info.read().strip()
-			f = f.splitlines()
-
+			f = f.split("\n")
 			line = Node.readline(f)
 
 			while (Node.readline(f)[0] != "MOTION"):
@@ -193,16 +190,7 @@ class Node:
 			number_of_frames = int(Node.readline(f)[1])
 			Root.frame_time = float(Node.readline(f)[2])
 
-			info_frame = [[float(j) for j in i.split()] for i in f]
-			tmp = []
-			for nodeID in range(len(info_frame[0])):
-				deviceFrames = []
-				for frame in range(len(info_frame)):
-					deviceFrames.append(info_frame[frame][nodeID])
-				tmp.append(deviceFrames)
-			info_frame = tmp
-
-				
+			info_frame = [[float(j) for j in i.split(" ")] for i in f]
 
 
 		with open(file_name) as f: # Use file to refer to the file object
@@ -222,26 +210,19 @@ class Node:
 			Node.CreateChild(Root, f, info_frame);
 
 			# We need to assert that info_frame is fully empty
-			print(info_frame)
 			for i in info_frame:
 				assert len(i) == 0
 
 			return Root
 
-
-	def create_jointsAnimation_MAYA(self, nb_keyFrames):
-	 	"""
-	 	Creates the joints structure in MAYA
-	 	"""
-		#print(self.position)
-		positionM = [self.position[0][1][1], self.position[1][1][1], self.position[2][1][1]]
-		rotationM = [self.rotate[0][1][1], self.rotate[1][1][1], self.rotate[2][1][1]]
-		#print(positionM)
-
-	 	cm.joint( name=self.name, p=positionM, o=rotationM, roo="zyx", zso=True, oj='zyx', r=True )
-	 	for child in self.fils:
-	 		child.create_jointsAnimation_MAYA(nb_keyFrames)
-	 		cm.select( d=True )
+	# def create_jointsAnimation_MAYA(self, nb_keyFrames):
+	# 	"""
+	# 	Creates the joints structure in MAYA
+	# 	"""
+	# 	cm.joint( name=self.name, p=self.position[0], o=self.rotation[0], roo="zyx", zso=True, oj='zyx', r=True )
+	# 	for child in self.fils:
+	# 		child.create_jointsAnimation_MAYA(nb_keyFrames)
+	# 		cm.select( d=True )
 
 
 
