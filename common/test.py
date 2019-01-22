@@ -8,5 +8,5 @@ if __name__ == "__main__":
     Root = Node.createStructureFromBVH("C:\\Users\\ensimag\\Source\\Repos\\Image_Synthesis_Animation\\viewer\\models\\walk.bvh")
     L = [[0, 0, 0] for _ in range(1000)]
     a = 1
-    Root.create_jointsAnimation_MAYA(a, L)
+    Root.createjointDEBUG(a, L)
 	

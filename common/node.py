@@ -257,13 +257,23 @@ class Node:
 				cmds.setKeyframe( objB,t=newKey*frameTime,at='rotateZ', v=objRot[0])
 				cmds.setKeyframe( objB,t=newKey*frameTime,at='rotateY', v=objRot[1])
 				cmds.setKeyframe( objB,t=newKey*frameTime,at='rotateX', v=objRot[2])
-				current_rotation.append(objRot)
+				current_rotation.append(self.rotate[newKey])
 			else:
 				objRot = [0, 0, 0]
 			
 		
 	 	for child in self.fils:
 	 		child.create_jointsAnimation_MAYA(frameTime, current_rotation)
+			cmds.select(self.name)
+
+
+	def createjointDEBUG(self, frameTime, global_offset):
+		print(global_offset)
+		positionC = [x+y for x, y in zip(self.translate, global_offset[0])]
+		cm.joint(name = self.name, p = positionC)
+		for child in self.fils:
+			a = [positionC]
+	 		child.createjointDEBUG(frameTime, a)
 			cmds.select(self.name)
 
 
