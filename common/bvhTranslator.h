@@ -26,6 +26,7 @@
 #include <map>
 
 using namespace std;
+using namespace MGlobal;
 
 namespace {
 	const std::string kChannels = "CHANNELS";
@@ -103,5 +104,11 @@ private:
 
 	///List of joints from the Joint class from the SIA project.
 	static Joint* root;
+
+	MStatus parser_hierarchy(ifstream& file);
+
+	MStatus parser_joint(ifstream& file, MFnIkJoint& parent, MFnIkJoint& current);
+
+	MStatus parser_motion(ifstramé file);
 };
 #endif
