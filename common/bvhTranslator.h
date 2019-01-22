@@ -24,7 +24,6 @@
 #include <maya/MNamespace.h>
 #include <string.h>
 #include <map>
-#include "joint.h"
 
 class BvhTranslator : public MPxFileTranslator {
 public:

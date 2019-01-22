@@ -41,22 +41,46 @@ MStatus BvhTranslator::reader(const MFileObject& file,
 	}
 	inputfile.close();
 
-	/// reading .bvh file with Joint parser
+	// reading .bvh file with Joint parser
+	// TODO : a specific version of the parser for .bvh reader
 	root = Joint.createFromFile(fname.asChar());
 
-	/// creating MFnIkJoint and MFnAnimCurve for animation
+	// joints creation
 	map<string, bool> visited;
 	createMFnIkJointFromJoint(root, MObject::kNullObj, visited);
+
+	// joints manipulation with DAG object
+	MItDag dagIteratorJoint(kDepthFirst, kJoint, rval);
+	for (; !dagIteratorµJoint.isDone(); dagIteratorJoint.next()) {
+
+		MDagPath dagPath;
+		rval = dagIterator.getPath(dagPath);
+		if (!rval) {
+			rval.perror("MItDag::getPath");
+			continue;
+		}
+		MFnDagNode dagNode(dagPath, &rval);
+		if (!rval) {
+			rval.perror("MFnDagNode constructor");
+			continue;
+		}
+
+
+	}
 	return rval;
 }
 
-/// creation of a MFnJoint from a Joint member
-/// We assume that each Joint has an unique identifier based on its name.
+/**
+Recursive creation of MAYA Joint Object from a Joint object
+@param	Joint				Input Joint pointer object
+@param	father_mfnjoint		Input father MAYA Joint to joint 
+@param	visited				map for avoiding endless loop in recursive callings
+*/
 void createMFnIkJointFromJoint(Joint* joint, MFnIkJoint& father_mfnjoint, map<string, bool>& visited)
 {
 	visited[joint->_name] = true;
 	MFnIkJoint child_mfnjoint;
-	child_mfnjoint.create(father_mfnjoint);
+	child_mfnjoint.create(parent=father_mfnjoint);
 	// TODO : init all values of the MFnIkJoint
 	MFnAnimCurve child_animcurve(child_mfnjoint);
 	// TODO : set something to AnimCurve ?
