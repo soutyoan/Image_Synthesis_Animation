@@ -64,6 +64,7 @@ class Node:
 			raise
 
 		number_channels = int(l[1])
+
 		rotation = []
 		position = []
 
@@ -71,7 +72,7 @@ class Node:
 			if number_channels == 6: #A CHANGER ICI 
 				positionLoc = [info_frame[0][frame], info_frame[1][frame], info_frame[2][frame]]
 				position.append(positionLoc)
-				rotationLoc = [info_frame[0][frame], info_frame[1][frame], info_frame[2][frame]]
+				rotationLoc = [info_frame[3][frame], info_frame[4][frame], info_frame[5][frame]]
 				rotation.append(rotationLoc)
 			else:
 				rotationLoc = [info_frame[0][frame], info_frame[1][frame], info_frame[2][frame]]
@@ -229,40 +230,40 @@ class Node:
 			return Root
 
 
-	def create_jointsAnimation_MAYA(self, frameTime):
+	def create_jointsAnimation_MAYA(self, frameTime, rotations_parent):
 	 	"""
 	 	Creates the joints structure in MAYA
 	 	"""
 		positionM = [self.translate[0], self.translate[1], self.translate[2]]
-		rotationM = []
-		if len(self.position) != 0:
-			positionM = [sum(x) for x in zip(positionM, self.position[0])]
-		if len(self.rotate) != 0:
-			rotationM = self.rotate[0]
-		else:
-			rotationM = [0, 0, 0]
+		rotationM = [0, 0, 0]
 		#print(positionM)
 
-	 	cm.joint( name=self.name, p=positionM, o=rotationM, roo="zyx", zso=True, oj='zyx', r=True )
+	 	cm.joint( name=self.name, p=positionM, r=True, roo = "zyx")
+		current_rotation = []
+		
 		for newKey in range(len(self.rotate)):
 			objB = self.name
 			if len(self.rotate) != 0: #A CHANGER ICI FAUT FAIRE ATTENTION AUX NOMS ET SI ON EST A LA FIN OU NON
-				objRot = self.rotate[newKey]
+				objRot =  [x-y for x, y in zip(self.rotate[newKey],rotations_parent[newKey])]
 				if len(self.position) != 0:
 					objTrans = self.position[newKey]
 				else:
 					objTrans = [0, 0, 0]
-				cmds.setKeyframe( objB, t=newKey*frameTime,at='tz', v=objTrans[0] + self.translate[0]) #set keys for B on all the frames in keyBuffer to values in keyBuffer
-				cmds.setKeyframe( objB,t=newKey*frameTime,at='ty', v=objTrans[1] + self.translate[1])
-				cmds.setKeyframe( objB,t=newKey*frameTime,at='tx', v=objTrans[2] + self.translate[2])
-				cmds.setKeyframe( objB,t=newKey*frameTime,at='rz', v=objRot[0])
-				cmds.setKeyframe( objB,t=newKey*frameTime,at='ry', v=objRot[1])
-				cmds.setKeyframe( objB,t=newKey*frameTime,at='rx', v=objRot[2])
+					if self.name == "rthumb":
+						print("THU " + str(objRot))
+				cmds.setKeyframe( objB, t=newKey*frameTime,at='translateZ', v=objTrans[0] + self.translate[0]) 
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='translateY', v=objTrans[1] + self.translate[1])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='translateX', v=objTrans[2] + self.translate[2])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='rotateZ', v=objRot[0])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='rotateY', v=objRot[1])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='rotateX', v=objRot[2])
+				current_rotation.append(objRot)
 			else:
 				objRot = [0, 0, 0]
 			
+		
 	 	for child in self.fils:
-	 		child.create_jointsAnimation_MAYA(frameTime)
+	 		child.create_jointsAnimation_MAYA(frameTime, current_rotation)
 			cmds.select(self.name)
 
 
