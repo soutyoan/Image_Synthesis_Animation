@@ -229,7 +229,7 @@ class Node:
 			return Root
 
 
-	def create_jointsAnimation_MAYA(self, nb_keyFrames):
+	def create_jointsAnimation_MAYA(self, frameTime):
 	 	"""
 	 	Creates the joints structure in MAYA
 	 	"""
@@ -244,8 +244,25 @@ class Node:
 		#print(positionM)
 
 	 	cm.joint( name=self.name, p=positionM, o=rotationM, roo="zyx", zso=True, oj='zyx', r=True )
+		for newKey in range(len(self.rotate)):
+			objB = self.name
+			if len(self.rotate) != 0: #A CHANGER ICI FAUT FAIRE ATTENTION AUX NOMS ET SI ON EST A LA FIN OU NON
+				objRot = self.rotate[newKey]
+				if len(self.position) != 0:
+					objTrans = self.position[newKey]
+				else:
+					objTrans = [0, 0, 0]
+				cmds.setKeyframe( objB, t=newKey*frameTime,at='tz', v=objTrans[0] + self.translate[0]) #set keys for B on all the frames in keyBuffer to values in keyBuffer
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='ty', v=objTrans[1] + self.translate[1])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='tx', v=objTrans[2] + self.translate[2])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='rz', v=objRot[0])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='ry', v=objRot[1])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='rx', v=objRot[2])
+			else:
+				objRot = [0, 0, 0]
+			
 	 	for child in self.fils:
-	 		child.create_jointsAnimation_MAYA(nb_keyFrames)
+	 		child.create_jointsAnimation_MAYA(frameTime)
 			cmds.select(self.name)
 
 

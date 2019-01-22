@@ -6,6 +6,6 @@ if __name__ == "__main__":
     #     for line in f:
     #         print(line)
     Root = Node.createStructureFromBVH("C:\\Users\\ensimag\\Source\\Repos\\\soutyoan\\Image_Synthesis_Animation\\viewer\\models\\walk.bvh")
-
-    Root.create_jointsAnimation_MAYA(2)
+    a = 1
+    Root.create_jointsAnimation_MAYA(a)
 	
