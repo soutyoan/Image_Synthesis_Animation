@@ -25,6 +25,28 @@
 #include <string.h>
 #include <map>
 
+using namespace std;
+
+namespace {
+	const std::string kChannels = "CHANNELS";
+	const std::string kEnd = "End";
+	const std::string kEndSite = "End Site";
+	const std::string kFrame = "Frame";
+	const std::string kFrames = "Frames:";
+	const std::string kHierarchy = "HIERARCHY";
+	const std::string kJoint = "JOINT";
+	const std::string kMotion = "MOTION";
+	const std::string kOffset = "OFFSET";
+	const std::string kRoot = "ROOT";
+	const std::string kXpos = "Xposition";
+	const std::string kYpos = "Yposition";
+	const std::string kZpos = "Zposition";
+	const std::string kXrot = "Xrotation";
+	const std::string kYrot = "Yrotation";
+	const std::string kZrot = "Zrotation";
+
+}
+
 class BvhTranslator : public MPxFileTranslator {
 public:
 

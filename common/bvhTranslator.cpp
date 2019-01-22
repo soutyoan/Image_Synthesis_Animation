@@ -19,8 +19,7 @@ MStatus BvhTranslator::reader(const MFileObject& file,
 	const MString fname = file.fullName();
 
 	MStatus rval(MS::kSuccess);
-	const int maxLineSize = 1024;
-	char buf[maxLineSize];
+	string buf;
 
 	ifstream inputfile(fname.asChar(), ios::in);
 	if (!inputfile) {
@@ -29,69 +28,25 @@ MStatus BvhTranslator::reader(const MFileObject& file,
 		return MS::kFailure;
 	}
 
-	if (!inputfile.getline(buf, maxLineSize)) {
-		cerr << "file " << fname << " contained no lines ... aborting\n";
-		return MS::kFailure;
-	}
-
-	if (0 != strncmp(buf, magic.asChar(), magic.length())) {
-		cerr << "first line of file " << fname;
-		cerr << " did not contain " << magic.asChar() << " ... aborting\n";
-		return MS::kFailure;
-	}
+	rval = parser_hierarchy(file);
 	inputfile.close();
 
-	// reading .bvh file with Joint parser
-	// TODO : a specific version of the parser for .bvh reader
-	root = Joint.createFromFile(fname.asChar());
-
-	// joints creation
-	map<string, bool> visited;
-	createMFnIkJointFromJoint(root, MObject::kNullObj, visited);
-
-	// joints manipulation with DAG object
-	MItDag dagIteratorJoint(kDepthFirst, kJoint, rval);
-	for (; !dagIteratorµJoint.isDone(); dagIteratorJoint.next()) {
-
-		MDagPath dagPath;
-		rval = dagIterator.getPath(dagPath);
-		if (!rval) {
-			rval.perror("MItDag::getPath");
-			continue;
-		}
-		MFnDagNode dagNode(dagPath, &rval);
-		if (!rval) {
-			rval.perror("MFnDagNode constructor");
-			continue;
-		}
-
-
-	}
 	return rval;
 }
 
-/**
-Recursive creation of MAYA Joint Object from a Joint object
-@param	Joint				Input Joint pointer object
-@param	father_mfnjoint		Input father MAYA Joint to joint 
-@param	visited				map for avoiding endless loop in recursive callings
-*/
-void createMFnIkJointFromJoint(Joint* joint, MFnIkJoint& father_mfnjoint, map<string, bool>& visited)
+MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 {
-	visited[joint->_name] = true;
-	MFnIkJoint child_mfnjoint;
-	child_mfnjoint.create(parent=father_mfnjoint);
-	// TODO : init all values of the MFnIkJoint
-	MFnAnimCurve child_animcurve(child_mfnjoint);
-	// TODO : set something to AnimCurve ?
-	vector<Joint*>::iterator joint_children;
-	for (joint_children = joint->_children.begin(); joint_children != joint->end(); joint_children++) {
-		it = visited.find(*joint_children->_name);
-		if (it != visited.end()) {
-			createMFnIkJointFromJoint(*joint_children, child_mfnjoint, visited);
-		}
-	}
+	// TODO : parser for hierarchy
+}
 
+Mstatus BvhTranslator::parser_joint(ifstream& file, MFnObject& parent, MFnObject& current)
+{
+	// TODO : parser for a joint
+}
+
+MStatus BvhTranslator::parser_motion(ifstream& file)
+{
+	// TODO : parser for motion part
 }
 
 // The currently recognised primitives.
