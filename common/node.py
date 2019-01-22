@@ -233,12 +233,10 @@ class Node:
 	 	"""
 	 	Creates the joints structure in MAYA
 	 	"""
-		positionM = []
+		positionM = [self.translate[0], self.translate[1], self.translate[2]]
 		rotationM = []
 		if len(self.position) != 0:
-			positionM = self.position[0]
-		else:
-			positionM = [0, 0, 0]
+			positionM = [sum(x) for x in zip(positionM, self.position[0])]
 		if len(self.rotate) != 0:
 			rotationM = self.rotate[0]
 		else:
@@ -248,7 +246,7 @@ class Node:
 	 	cm.joint( name=self.name, p=positionM, o=rotationM, roo="zyx", zso=True, oj='zyx', r=True )
 	 	for child in self.fils:
 	 		child.create_jointsAnimation_MAYA(nb_keyFrames)
-	 		cm.select( d=True )
+			cmds.select(self.name)
 
 
 
