@@ -108,7 +108,14 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(MAYA_LOCATION)\lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/export:initializePlugin /export:uninitializePlugin %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt); $(MAYA_LOCATION)/lib</OutputFile>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetPath) C:\maya\mll\$(ProjectName).mll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -116,7 +123,14 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(MAYA_LOCATION)\lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/export:initializePlugin /export:uninitializePlugin %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt); $(MAYA_LOCATION)/lib</OutputFile>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetPath) C:\maya\mll\$(ProjectName).mll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\viewer\src\joint.cpp" />

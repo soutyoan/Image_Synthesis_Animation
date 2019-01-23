@@ -134,7 +134,7 @@ MStatus BvhTranslator::parser_joint(ifstream& file, Joint* parent, Joint* curren
 	while (file.good()) {
 		file >> buf;
 		if (buf==kJoint) { // joint
-			Joint* child;
+			Joint* child= new Joint();
 			rval = parser_joint(file, current, child);
 		} else if (buf==kEnd) { // end of site
 			file >> buf; // parsing '{'
