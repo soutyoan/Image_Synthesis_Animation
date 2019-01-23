@@ -35,11 +35,11 @@ MStatus BvhTranslator::reader(const MFileObject& file,
 	string buf;
 	inputfile >> buf;
 	if (buf != kHierarchy) {
-		MGlobal::displayError("Could not parse the file : missing HIERARCHY header\n");
+		MGlobal::MGlobal::displayError("Could not parse the file : missing HIERARCHY header\n");
 		return MS::kFailure;
 	}
 
-	rval = parser_hierarchy(file);
+	rval = parser_hierarchy(inputfile);
 	inputfile.close();
 
 	return rval;
@@ -75,38 +75,38 @@ MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 }
 
 
-Mstatus BvhTranslator::parser_joint(ifstream& file, Joint* parent, Joint* current)
+MStatus BvhTranslator::parser_joint(ifstream& file, Joint* parent, Joint* current)
 {
 	string buf;
 	MStatus rval;
 	file >> buf;
 	string name = buf;
 	double _offx; double _offy; double _offz;
-	displayInfo("Creating Joint. \n");
+	MGlobal::displayInfo("Creating Joint. \n");
 	file >> buf; // parsing '{'
 
 	file >> buf; // parsing 'OFFSET'
 	if (buf != kOffset) {
-		displayError("Could not parse file : missing OFFSET keyword\n");
+		MGlobal::displayError("Could not parse file : missing OFFSET keyword\n");
 		return MS::kFailure;
 	}
 	try {
 		file >> _offx >> _offy >> _offz;
 	} catch (...) {
-		displayError("Could not parse Offset of current Joint\n");
+		MGlobal::displayError("Could not parse Offset of current Joint\n");
 		return MS::kFailure;
 	}
-	current = Joint.create(name, _offx, _offy, _offz, parent);
+	current = Joint::create(name, _offx, _offy, _offz, parent);
 	
 	file >> buf; // parsing CHANNELS
 	if (buf!=kChannels) {
-		diplayError("Could not parse file : missing CHANNELS keyword\n");
+		MGlobal::displayError("Could not parse file : missing CHANNELS keyword\n");
 	}
 	file >> buf;
 	int _nb = atoi(buf);
 	for (int _i=0; _i<_nb; _i++) {
 		file >> buf;
-		AnimCurve _currAnim();
+		AnimCurve _currAnim;
 		_currAnim.name = buf;
 		current->_dofs.push_back(_currAnim);
 	}
@@ -123,19 +123,19 @@ Mstatus BvhTranslator::parser_joint(ifstream& file, Joint* parent, Joint* curren
 			file >> buf >> buf; // parsing 'Site {'
 			file >> buf;
 			if (buf!=kOffset) {
-				displayError("Could not parse file : missing OFFSET keyword\n");
+				MGlobal::displayError("Could not parse file : missing OFFSET keyword\n");
 				return MS::kFailure;
 			}
 			try {
 				file >> _offx >> _offy >> _offz;
 			}
 			catch (...) {
-				displayError("Could not parse Offset of end Joint\n");
+				MGlobal::displayError("Could not parse Offset of end Joint\n");
 				return MS::kFailure;
 			}
-			child = Joint.create(kEndSite, _offx, _offy, _offz, parent);
+			child = Joint::create(kEndSite, _offx, _offy, _offz, parent);
 			file >> buf; // parsing '}' of end site
-		} else if (buf=='}') { // end of current joint
+		} else if (buf=="}") { // end of current joint
 			// Question : should we change something about parent ?
 			return MS::kSuccess;
 		}
@@ -147,8 +147,8 @@ MStatus BvhTranslator::parser_motion(ifstream& file)
 	string buf;
 	file >> buf;
 	if (buf!=kMotion) {
-		displayError("Could not parse file : missing MOTION keyword\n");
-		return MS;kFailure;
+		MGlobal::displayError("Could not parse file : missing MOTION keyword\n");
+		return MS::kFailure;
 	}
 	// TODO : the frames parsing
 }

@@ -23,7 +23,12 @@
 #include <maya/MFileIO.h>
 #include <maya/MFnTransform.h>
 #include <maya/MNamespace.h>
+
+#include <maya/MFileIO.h>
+#include <iostream>
+#include <stdlib.h>
 #include <string>
+#include <stdio>
 #include <map>
 #include "../viewer/src/joint.h"
 
@@ -111,7 +116,7 @@ private:
 
 	MStatus parser_joint(ifstream& file, Joint* parent, Joint* current);
 
-	MStatus parser_motion(ifstream file);
+	MStatus parser_motion(ifstream& file);
 
 	MStatus BvhTranslator::parser_hierarchy(ifstream& file);
 };
