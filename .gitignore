@@ -8,3 +8,4 @@ Makefile
 /.vs
 /common/.vs/Maya/v15
 /common/x64/Debug
+/common/x64/Release

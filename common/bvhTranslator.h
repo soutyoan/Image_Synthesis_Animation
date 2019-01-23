@@ -24,7 +24,6 @@
 #include <maya/MFnTransform.h>
 #include <maya/MNamespace.h>
 
-#include <maya/MFileIO.h>
 #include <iostream>
 #include <string>
 #include <stdio.h>
@@ -58,7 +57,7 @@ class BvhTranslator : public MPxFileTranslator {
 public:
 
 	/// Default constructor
-	BvhTranslator() {};
+	BvhTranslator() = default;
 
 	/// Destructor
 	~BvhTranslator() {};
@@ -102,6 +101,7 @@ public:
 		const MString& optionsString,
 		MPxFileTranslator::FileAccessMode mode);
 
+	MStatus doIt(const MArgList&);
 
 private:
 	//The magic string to verify it's a LEP file
@@ -117,4 +117,6 @@ private:
 
 	MStatus parser_motion(ifstream& file);
 };
+
+
 #endif
