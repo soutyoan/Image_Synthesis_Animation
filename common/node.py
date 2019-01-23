@@ -275,11 +275,16 @@ class Node:
 
 	def createjointDEBUG(self, frameTime, global_offset):
 		positionC = addL(self.translate, global_offset[0])
+		
+
 		if len(self.position) == 0:
 			if len(self.rotate) != 0:
-				cm.joint(name = self.name, p = [positionC[2], positionC[1], positionC[0]], angleZ = 90, angleY = self.rotate[0][1], angleX = self.rotate[0][2])
+				cm.joint(name = self.name, p = [positionC[2], positionC[1], positionC[0]], angleX = 0, angleY = 0, angleZ = 0)
+				cmds.setKeyframe(self.name, t = 0, at="rotateZ", v=0)
+				cmds.setKeyframe(self.name, t = 0, at="rotateY", v=0)
+				cmds.setKeyframe(self.name, t = 0, at="rotateX", v=0)
 			else:
-				cm.joint(name = self.name, p = [positionC[2], positionC[1], positionC[0]])
+				cm.joint(name = self.name, p = [positionC[2], positionC[1], positionC[0]], angleX = 0, angleY = 0, angleZ = 0)
 		if len(self.rotate) != 0:
 			for keyFrameid in range(len(self.rotate)):
 				positionKeyFrame = []
@@ -287,14 +292,18 @@ class Node:
 					positionKeyFrame = addL(self.position[keyFrameid], self.translate)
 					if keyFrameid == 0:
 						positionC = positionKeyFrame
-						print(positionC)
-						cm.joint(name = self.name, p = [positionC[2], positionC[1], positionC[0]])
-					cmds.setKeyframe(self.name, t = keyFrameid, at="translateZ", v=positionKeyFrame[0])
-					cmds.setKeyframe(self.name, t = keyFrameid, at="translateY", v=positionKeyFrame[1])
-					cmds.setKeyframe(self.name, t = keyFrameid, at="translateX", v=positionKeyFrame[2])
-				cmds.setKeyframe(self.name, t = keyFrameid, at="rotateZ", v=self.rotate[keyFrameid][0])
-				cmds.setKeyframe(self.name, t = keyFrameid, at="rotateY", v=self.rotate[keyFrameid][1])
-				cmds.setKeyframe(self.name, t = keyFrameid, at="rotateX", v=self.rotate[keyFrameid][2])
+						cm.joint(name = self.name, p = [positionC[2], positionC[1], positionC[0]], angleX = 0, angleY = 0, angleZ = 0)
+						cmds.setKeyframe(self.name, t = 0, at="rotateZ", v=0)
+						cmds.setKeyframe(self.name, t = 0, at="rotateY", v=0)
+						cmds.setKeyframe(self.name, t = 0, at="rotateX", v=0)
+					cmds.setKeyframe(self.name, t = keyFrameid + 1, at="translateZ", v=positionKeyFrame[0])
+					cmds.setKeyframe(self.name, t = keyFrameid + 1, at="translateY", v=positionKeyFrame[1])
+					cmds.setKeyframe(self.name, t = keyFrameid + 1, at="translateX", v=positionKeyFrame[2])
+				cmds.setKeyframe(self.name, t = keyFrameid + 1, at="rotateZ", v=self.rotate[keyFrameid][0])
+				cmds.setKeyframe(self.name, t = keyFrameid + 1, at="rotateY", v=self.rotate[keyFrameid][1])
+				cmds.setKeyframe(self.name, t = keyFrameid + 1, at="rotateX", v=self.rotate[keyFrameid][2])
+
+				
 
 		for child in self.fils:
 	 		child.createjointDEBUG(frameTime,  [positionC])
@@ -339,3 +348,5 @@ class Node:
 		string += "   " * GLOBAL_TAB_COUNT + "}\n"
 
 		return string
+
+			
