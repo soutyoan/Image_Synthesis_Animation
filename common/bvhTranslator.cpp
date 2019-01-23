@@ -1,4 +1,5 @@
 #include "bvhTranslator.h"
+Joint* BvhTranslator::root = NULL;
 
 ///Creates one instance of the BvhTranslator
 void* BvhTranslator::creator()
@@ -80,7 +81,7 @@ MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 			MGlobal::displayError("Could not parse the file : ROOT header missing\n");
 			return MS::kFailure;
 		}
-		rval = parser_joint(file, NULL, root);
+		rval = parser_joint(file, NULL, BvhTranslator::root);
 	}
 	if (file.good()) {
 		file >> buf;
@@ -261,4 +262,8 @@ MStatus uninitializePlugin(MObject obj)
 	}
 
 	return status;
+}
+
+MStatus BvhTranslator::doIt(const MArgList&) {
+	return MS::kSuccess;
 }
