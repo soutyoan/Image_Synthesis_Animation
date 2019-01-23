@@ -1,4 +1,3 @@
-#include "joint.h"
 #include <QtGui/QMatrix4x4>
 
 using namespace std;
