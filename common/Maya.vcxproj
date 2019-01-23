@@ -115,6 +115,7 @@
     <Link>
       <AdditionalDependencies>OpenMaya.lib;Foundation.lib;OpenMayaAnim.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(MAYA_LOCATION)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/export:initializePlugin /export:uninitializePlugin %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -124,6 +125,7 @@
     <Link>
       <AdditionalDependencies>OpenMaya.lib;Foundation.lib;OpenMayaAnim.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(MAYA_LOCATION)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/export:initializePlugin /export:uninitializePlugin %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -133,6 +135,10 @@
   <ItemGroup>
     <ClInclude Include="..\viewer\src\joint.h" />
     <ClInclude Include="bvhTranslator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Desktop\Maya-devkit-2016\win\devkit\plug-ins\lepTranslator\lepTranslator.lep" />
+    <None Include="..\..\..\..\Desktop\Maya-devkit-2016\win\devkit\plug-ins\lepTranslator\lepTranslator.rgb" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

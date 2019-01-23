@@ -53,6 +53,9 @@ namespace {
 	const std::string kZrot = "Zrotation";
 
 }
+MStatus uninitializePlugin(MObject obj);
+
+MStatus initializePlugin(MObject obj);
 
 class BvhTranslator : public MPxFileTranslator {
 public:

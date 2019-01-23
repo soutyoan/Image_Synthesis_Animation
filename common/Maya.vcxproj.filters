@@ -30,4 +30,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Desktop\Maya-devkit-2016\win\devkit\plug-ins\lepTranslator\lepTranslator.rgb" />
+    <None Include="..\..\..\..\Desktop\Maya-devkit-2016\win\devkit\plug-ins\lepTranslator\lepTranslator.lep" />
+  </ItemGroup>
 </Project>

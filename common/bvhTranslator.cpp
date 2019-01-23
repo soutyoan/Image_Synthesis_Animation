@@ -235,9 +235,9 @@ MStatus initializePlugin(MObject obj)
 	// new objects, but allows MEL commands other than those that are
 	// part of the Maya Ascii file format to function correctly.
 	status = plugin.registerFileTranslator("Lep",
-		"BvhTranslator.rgb",
+		"lepTranslator.rgb",
 		BvhTranslator::creator,
-		"BvhTranslatorOpts",
+		"lepTranslatorOpts",
 		"showPositions=1",
 		true);
 	if (!status)
