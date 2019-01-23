@@ -61,8 +61,7 @@ MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 			displayError("Could not parse the file : ROOT header missing\n");
 			return MS::kFailure;
 		}
-		MFnIkJoint rootJoint;
-		rval = parser_joint(file, kNullObj, rootJoint);
+		rval = parser_joint(file, NULL, root);
 	}
 	if (file.good()) {
 		file >> buf;
@@ -76,32 +75,30 @@ MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 }
 
 
-Mstatus BvhTranslator::parser_joint(ifstream& file, MFnIkJoint& parent, MFnIkJoint& current)
+Mstatus BvhTranslator::parser_joint(ifstream& file, Joint* parent, Joint* current)
 {
 	string buf;
 	MStatus rval;
-	// linking current to its parent+name setting
-	current.create(parent);
 	file >> buf;
-	current.setName(MString(buf));
+	string name = buf;
+	double _offx; double _offy; double _offz;
 	displayInfo("Creating Joint. \n");
 	file >> buf; // parsing '{'
 
-	// offset parsing
-	file >> buf;
-	if (buf!=kOffset) {
+	file >> buf; // parsing 'OFFSET'
+	if (buf != kOffset) {
 		displayError("Could not parse file : missing OFFSET keyword\n");
 		return MS::kFailure;
-
-
 	}
-	for (int _i=0; _i<3; _i++) {
-		file >> buf;
-		// TODO : set offset of current joint
+	try {
+		file >> _offx >> _offy >> _offz;
+	} catch (...) {
+		displayError("Could not parse Offset of current Joint\n");
+		return MS::kFailure;
 	}
-
-	// channel parsing
-	file >> buf;
+	current = Joint.create(name, _offx, _offy, _offz, parent);
+	
+	file >> buf; // parsing CHANNELS
 	if (buf!=kChannels) {
 		diplayError("Could not parse file : missing CHANNELS keyword\n");
 	}
@@ -109,30 +106,34 @@ Mstatus BvhTranslator::parser_joint(ifstream& file, MFnIkJoint& parent, MFnIkJoi
 	int _nb = atoi(buf);
 	for (int _i=0; _i<_nb; _i++) {
 		file >> buf;
-		// TODO : deal with channels values
+		AnimCurve _currAnim();
+		_currAnim.name = buf;
+		current->_dofs.push_back(_currAnim);
 	}
 
 	// Children joints parsing
 	while (file.good()) {
 		file >> buf;
 		if (buf==kJoint) { // joint
-			MFnIkJoint child;
+			Joint* child;
 			rval = parser_joint(file, current, child);
 		} else if (buf==kEnd) { // end of site
 			file >> buf; // parsing '{'
-			MFnIkJoint child;
-			child.create(current);
-			child.setName(MString(kEndSite));
+			Joint* child;
 			file >> buf >> buf; // parsing 'Site {'
 			file >> buf;
 			if (buf!=kOffset) {
 				displayError("Could not parse file : missing OFFSET keyword\n");
 				return MS::kFailure;
 			}
-			for (int _i=0; _i<3; _i++) {
-				file >> buf;
-				// TODO : set offest of child joint
+			try {
+				file >> _offx >> _offy >> _offz;
 			}
+			catch (...) {
+				displayError("Could not parse Offset of current Joint\n");
+				return MS::kFailure;
+			}
+			child = Joint.create(kEndSite, _offx, _offy, _offz, parent);
 			file >> buf; // parsing '}' of end site
 		} else if (buf=='}') { // end of current joint
 			return MS::kSuccess;

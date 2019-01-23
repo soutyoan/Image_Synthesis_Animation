@@ -24,6 +24,7 @@
 #include <maya/MNamespace.h>
 #include <string.h>
 #include <map>
+#include "joint.h"
 
 using namespace std;
 using namespace MGlobal;
