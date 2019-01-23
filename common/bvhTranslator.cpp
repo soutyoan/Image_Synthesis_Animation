@@ -130,12 +130,13 @@ Mstatus BvhTranslator::parser_joint(ifstream& file, Joint* parent, Joint* curren
 				file >> _offx >> _offy >> _offz;
 			}
 			catch (...) {
-				displayError("Could not parse Offset of current Joint\n");
+				displayError("Could not parse Offset of end Joint\n");
 				return MS::kFailure;
 			}
 			child = Joint.create(kEndSite, _offx, _offy, _offz, parent);
 			file >> buf; // parsing '}' of end site
 		} else if (buf=='}') { // end of current joint
+			// Question : should we change something about parent ?
 			return MS::kSuccess;
 		}
 	}
