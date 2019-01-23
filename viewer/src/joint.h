@@ -40,8 +40,8 @@ public :
 	double _curRy;						// current value of rotation about Y (deg)
 	double _curRz;						// current value of rotation about Z (deg)
 	int _rorder;						// order of euler angles to reconstruct rotation
-	Joint* _parent						// parent of the current joint
-	std::vector<Joint*> _children;	// children of the current joint
+	Joint* _parent;						// parent of the current joint
+	vector<Joint*> _children;	// children of the current joint
 
 
 public :
