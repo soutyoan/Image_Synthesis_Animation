@@ -103,7 +103,7 @@ MStatus BvhTranslator::parser_joint(ifstream& file, Joint* parent, Joint* curren
 		MGlobal::displayError("Could not parse file : missing CHANNELS keyword\n");
 	}
 	file >> buf;
-	int _nb = atoi(buf);
+	int _nb = stoi(buf);
 	for (int _i=0; _i<_nb; _i++) {
 		file >> buf;
 		AnimCurve _currAnim;
