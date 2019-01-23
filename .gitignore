@@ -7,3 +7,4 @@ Makefile
 *.a
 /.vs
 /common/.vs/Maya/v15
+/common/x64/Debug
