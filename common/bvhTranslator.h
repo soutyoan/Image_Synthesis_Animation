@@ -116,7 +116,5 @@ private:
 	MStatus parser_joint(ifstream& file, Joint* parent, Joint* current);
 
 	MStatus parser_motion(ifstream& file);
-
-	MStatus BvhTranslator::parser_hierarchy(ifstream& file);
 };
 #endif
