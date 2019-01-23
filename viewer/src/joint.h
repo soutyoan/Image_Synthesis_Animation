@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <stdio.h>
 #include <iostream>
 #include <fstream>
 
@@ -72,9 +71,6 @@ public :
 		return child;
 	}
 
-	// Load from file (.bvh) :
-	static Joint* createFromFile(std::string fileName);
-
 	void animate(int iframe=0);
 
 	// Analysis of degrees of freedom :
@@ -88,4 +84,12 @@ public :
 };
 
 std::ostream& operator<<(std::ostream& os, const Joint& joint);
+
+class joint :
+	public Joint
+{
+public:
+	joint();
+	~joint();
+};
 #endif

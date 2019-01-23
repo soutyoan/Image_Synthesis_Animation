@@ -5,6 +5,7 @@
 #define BVH_TRANSLATOR
 
 #include <maya/MStatus.h>
+#include <maya/MFnIkJoint.h>
 #include <maya/MObject.h>
 #include <maya/MFnPlugin.h>
 #include <maya/MString.h>
@@ -22,12 +23,12 @@
 #include <maya/MFileIO.h>
 #include <maya/MFnTransform.h>
 #include <maya/MNamespace.h>
-#include <string.h>
+#include <string>
 #include <map>
-#include "joint.h"
+#include "../viewer/src/joint.h"
 
 using namespace std;
-using namespace MGlobal;
+//using namespace MGlobal;
 
 namespace {
 	const std::string kChannels = "CHANNELS";
@@ -110,6 +111,8 @@ private:
 
 	MStatus parser_joint(ifstream& file, MFnIkJoint& parent, MFnIkJoint& current);
 
-	MStatus parser_motion(ifstramé file);
+	MStatus parser_motion(ifstream file);
+
+	MStatus BvhTranslator::parser_hierarchy(ifstream& file);
 };
 #endif

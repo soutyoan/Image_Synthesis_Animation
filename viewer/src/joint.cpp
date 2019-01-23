@@ -1,30 +1,6 @@
-#include <QtGui/QMatrix4x4>
+#include "joint.h"
 
 using namespace std;
-
-Joint* Joint::createFromFile(std::string fileName) {
-	Joint* root = NULL;
-	cout << "Loading from " << fileName << endl;
-
-	ifstream inputfile(fileName.data());
-	if(inputfile.good()) {
-		// We first recover the values at the end of the file
-		while(!inputfile.eof()) {
-			string buf;
-			inputfile >> buf;
-			// TODO : construire la structure de donn�es root � partir du fichier
-			cout << buf;
-		}
-		inputfile.close();
-	} else {
-		std::cerr << "Failed to load the file " << fileName.data() << std::endl;
-		fflush(stdout);
-	}
-
-	cout << "file loaded" << endl;
-
-	return root;
-}
 
 
 

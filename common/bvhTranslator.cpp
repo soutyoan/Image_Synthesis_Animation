@@ -58,7 +58,7 @@ MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 	if (file.good()) {
 		file >> buf;
 		if (buf != kRoot) {
-			displayError("Could not parse the file : ROOT header missing\n");
+			MGlobal::displayError("Could not parse the file : ROOT header missing\n");
 			return MS::kFailure;
 		}
 		rval = parser_joint(file, NULL, root);
@@ -66,7 +66,7 @@ MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 	if (file.good()) {
 		file >> buf;
 		if (buf!=kMotion) {
-			displayError("Could not parse the file : MOTION header missing\n");
+			MGlobal::displayError("Could not parse the file : MOTION header missing\n");
 			return MS::kFailure;
 		}
 		rval = parser_motion(file);
