@@ -26,9 +26,8 @@
 
 #include <maya/MFileIO.h>
 #include <iostream>
-#include <stdlib.h>
 #include <string>
-#include <stdio>
+#include <stdio.h>
 #include <map>
 #include "../viewer/src/joint.h"
 
