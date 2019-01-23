@@ -39,12 +39,31 @@ MStatus BvhTranslator::reader(const MFileObject& file,
 		return MS::kFailure;
 	}
 
+	// Creating Joint root object
 	rval = parser_hierarchy(inputfile);
 	inputfile.close();
+
+	// Create MAYA Joint
+	rval = Joint_to_MAYA(root, MObject::kNullObj);
 
 	return rval;
 }
 
+MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
+{
+	MStatus rval;
+	MFnIkJoint Mjoint;
+	MObject created = Mjoint.create(Mparent);
+	const char *cname = joint->_name.c_str();
+	Mjoint.setName(MString(cname));
+	const double offs[3] = { joint->_offX, joint->_offY, joint->_offZ };
+	Mjoint.setTranslation(MVector(offs), MSpace::kTransform);
+	vector<Joint*>::iterator children;
+	for (children = joint->_children.begin(); children != joint->_children.end(); children++) {
+		rval = Joint_to_MAYA(*children, created);
+	}
+	return rval;
+}
 
 /**
  * Bvh parser for HIERARCHY section

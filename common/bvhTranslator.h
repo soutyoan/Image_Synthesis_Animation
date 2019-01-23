@@ -26,9 +26,9 @@
 
 #include <maya/MFileIO.h>
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
-#include <stdio>
+#include <cstdio>
 #include <map>
 #include "../viewer/src/joint.h"
 
@@ -118,6 +118,6 @@ private:
 
 	MStatus parser_motion(ifstream& file);
 
-	MStatus BvhTranslator::parser_hierarchy(ifstream& file);
+	MStatus Joint_to_MAYA(Joint* joint, MObject& Mparent);
 };
 #endif
