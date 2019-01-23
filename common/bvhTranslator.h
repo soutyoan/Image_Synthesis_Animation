@@ -109,7 +109,7 @@ private:
 
 	MStatus parser_hierarchy(ifstream& file);
 
-	MStatus parser_joint(ifstream& file, MFnIkJoint& parent, MFnIkJoint& current);
+	MStatus parser_joint(ifstream& file, Joint* parent, Joint* current);
 
 	MStatus parser_motion(ifstream file);
 
