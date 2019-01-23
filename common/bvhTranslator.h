@@ -25,8 +25,9 @@
 #include <maya/MNamespace.h>
 
 #include <iostream>
+#include <cstdlib>
 #include <string>
-#include <stdio.h>
+#include <cstdio>
 #include <map>
 #include "../viewer/src/joint.h"
 
@@ -116,6 +117,8 @@ private:
 	MStatus parser_joint(ifstream& file, Joint* parent, Joint* current);
 
 	MStatus parser_motion(ifstream& file);
+
+	MStatus Joint_to_MAYA(Joint* joint, MObject& Mparent);
 };
 
 
