@@ -27,4 +27,17 @@ def ascii_to_bvh(elbow_data, wrist_data, output_name="output"):
         output_file.write("\t}\n")
         output_file.write("}\n")
 
+	# Motion part
+
+
+def fill_data(elbow_data, wrist_data):
+	"""
+	Extraction of values (positions and angles)
+
+	Returns two tables with data, frame rate, numbers of frames
+	"""
+
+
+l="zsdc  dsxcw sd \n zdsqzsd\t"
+print(l.rstrip())
 ascii_to_bvh(0,0)

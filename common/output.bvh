@@ -1,0 +1,15 @@
+HIERARCHY
+ROOT elbow
+{
+	OFFSET 0.00000 0.00000 0.00000
+	CHANNELS 6 Xposition Yposition Zposition Zrotation Yrotation Xrotation
+	JOIN wrist
+	{
+		OFFSET -2.0 -2.0 0.0
+		CHANNELS 3 Zrotation Yrotation Xrotation
+		End Site
+		{
+		OFFSET -2.0 -2.0 0.0
+		}
+	}
+}
