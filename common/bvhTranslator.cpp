@@ -57,7 +57,6 @@ MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
 	MStatus rval;
 	MFnIkJoint Mjoint;
 	MObject created = Mjoint.create(Mparent);
-	MGlobal::displayInfo(MString(_root->_name.c_str()));
 	//return MS::kSuccess;
 	const char *cname = joint->_name.c_str();
 	//return MS::kSuccess;
@@ -67,9 +66,7 @@ MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
 	vector<Joint*>::iterator children;
 	for (children = joint->_children.begin(); children != joint->_children.end(); children++) {
 		rval = Joint_to_MAYA(*children, created);
-		MGlobal::displayInfo(MString("JESUIS UN ENFANT"));
 	}
-	MGlobal::displayInfo(MString("JAI FINI"));
 	return rval;
 }
 
@@ -87,14 +84,16 @@ MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 		MGlobal::displayError("Could not parse the file : ROOT header missing\n");
 		return MS::kFailure;
 	}
-	rval = parser_joint(file);
+	rval = parser_joint(file, buf);
+	rval = parser_motion(file, buf);
+	MGlobal::displayInfo(MString("HOLLA : "));
+	MGlobal::displayInfo(MString(buf.c_str()));
 	return MS::kSuccess;
 }
 
 
-MStatus BvhTranslator::parser_joint(ifstream& file)
+MStatus BvhTranslator::parser_joint(ifstream& file, string &buf)
 {
-	string buf;
 	string name;
 	double _offx; double _offy; double _offz;
 	MStatus rval;
@@ -185,14 +184,49 @@ MStatus BvhTranslator::parser_channels(ifstream& file, Joint* current, string& b
 	return MStatus::kSuccess;
 }
 
-MStatus BvhTranslator::parser_motion(ifstream& file)
+MStatus parseRec(ifstream& file, string &buf, Joint *current) {
+	if (current == NULL) {
+		MGlobal::displayError(MString("Current is Null not possible"));
+		return MStatus::kFailure;
+
+	}
+	int numbr_channels = current->_dofs.size(); // I initialize myself
+	stringstream ss;
+	ss << numbr_channels;
+	string str = ss.str();
+	MGlobal::displayError(MString(buf.c_str()));
+	for (int i = 0; i < numbr_channels; i++) {
+		current->_dofs[i]._values.push_back(stoi(buf));
+		file >> buf;
+	}
+
+	
+
+	vector<Joint*>::iterator children;
+	for (children = current->_children.begin(); children != current->_children.end(); children++) {
+		parseRec(file, buf, *children);
+	}
+
+	return MStatus::kSuccess;
+
+	
+
+}
+
+MStatus BvhTranslator::parser_motion(ifstream& file, string &buf)
 {
-	string buf;
-	file >> buf;
 	if (buf!=kMotion) {
-		MGlobal::displayError("Could not parse file : missing MOTION keyword\n");
+		MGlobal::displayError(MString("Could not parse file : missing MOTION keyword\n"));
 		return MS::kFailure;
 	}
+	file >> buf;
+
+	file >> buf;
+	file >> buf;
+	file >> buf;
+	file >> buf;
+	file >> buf;
+	return parseRec(file, buf, _root);
 	// TODO : the frames parsing
 }
 
