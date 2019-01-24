@@ -1,0 +1,5 @@
+﻿  bvhTranslator.cpp
+c:\users\ensimag\source\repos\image_synthesis_animation\common\bvhtranslator.cpp(174): warning C4715: 'BvhTranslator::parser_motion' : les chemins de contrôle ne retournent pas tous une valeur
+c:\users\ensimag\source\repos\image_synthesis_animation\common\bvhtranslator.cpp(163): warning C4715: 'BvhTranslator::parser_joint' : les chemins de contrôle ne retournent pas tous une valeur
+     CrÚation de la bibliothÞque C:\Users\ensimag\source\repos\Image_Synthesis_Animation\common\x64\Debug\Maya.lib et de l'objet C:\Users\ensimag\source\repos\Image_Synthesis_Animation\common\x64\Debug\Maya.exp
+  Maya.vcxproj -> C:\Users\ensimag\source\repos\Image_Synthesis_Animation\common\x64\Debug\Maya.mll

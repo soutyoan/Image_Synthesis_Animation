@@ -22,7 +22,7 @@ def ascii_to_bvh(elbow_data, wrist_data, output_name="output"):
         output_file.write("\t\tCHANNELS 3 Zrotation Yrotation Xrotation\n")
         output_file.write("\t\tEnd Site\n")
         output_file.write("\t\t{\n")
-        output_file.write("\t\t\tCHANNELS 3 Zrotation Yrotation Xrotation\n")
+        output_file.write("\t\tOFFSET -2.0 -2.0 0.0\n")
         output_file.write("\t\t}\n")
         output_file.write("\t}\n")
         output_file.write("}\n")
