@@ -29,6 +29,7 @@
 #include <string>
 #include <cstdio>
 #include <map>
+#include <sstream>
 #include "../viewer/src/joint.h"
 
 using namespace std;
@@ -62,6 +63,9 @@ public:
 
 	/// Default constructor
 	BvhTranslator() = default;
+
+	///List of joints from the Joint class from the SIA project.
+	Joint* _root;
 
 	/// Destructor
 	~BvhTranslator() {};
@@ -112,12 +116,14 @@ private:
 	//simply "<LEP>"
 	static MString const magic;
 
-	///List of joints from the Joint class from the SIA project.
-	static Joint* root;
 
 	MStatus parser_hierarchy(ifstream& file);
 
-	MStatus parser_joint(ifstream& file, Joint* parent, Joint* current);
+	MStatus parser_joint(ifstream& file);
+	
+	MStatus parser_offset(ifstream& file, string& name, double& _offx, double& _offy, double& _offz, string& buf);
+
+	MStatus parser_channels(ifstream& file, Joint* current, string& buf);
 
 	MStatus parser_motion(ifstream& file);
 

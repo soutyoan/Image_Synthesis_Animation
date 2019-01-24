@@ -1,5 +1,5 @@
 #include "bvhTranslator.h"
-Joint* BvhTranslator::root = NULL;
+Joint* _root = NULL;
 
 ///Creates one instance of the BvhTranslator
 void* BvhTranslator::creator()
@@ -40,12 +40,14 @@ MStatus BvhTranslator::reader(const MFileObject& file,
 		return MS::kFailure;
 	}
 
+
 	// Creating Joint root object
+	_root = Joint::create("ROOT", 0, 0, 0, NULL);
 	rval = parser_hierarchy(inputfile);
 	inputfile.close();
 
 	// Create MAYA Joint
-	rval = Joint_to_MAYA(root, MObject::kNullObj);
+	rval = Joint_to_MAYA(_root, MObject::kNullObj);
 
 	return rval;
 }
@@ -55,14 +57,19 @@ MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
 	MStatus rval;
 	MFnIkJoint Mjoint;
 	MObject created = Mjoint.create(Mparent);
+	MGlobal::displayInfo(MString(_root->_name.c_str()));
+	//return MS::kSuccess;
 	const char *cname = joint->_name.c_str();
+	//return MS::kSuccess;
 	Mjoint.setName(MString(cname));
 	const double offs[3] = { joint->_offX, joint->_offY, joint->_offZ };
 	Mjoint.setTranslation(MVector(offs), MSpace::kTransform);
 	vector<Joint*>::iterator children;
 	for (children = joint->_children.begin(); children != joint->_children.end(); children++) {
 		rval = Joint_to_MAYA(*children, created);
+		MGlobal::displayInfo(MString("JESUIS UN ENFANT"));
 	}
+	MGlobal::displayInfo(MString("JAI FINI"));
 	return rval;
 }
 
@@ -75,33 +82,69 @@ MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 {
 	string buf;
 	MStatus rval;
-	if (file.good()) {
-		file >> buf;
-		if (buf != kRoot) {
-			MGlobal::displayError("Could not parse the file : ROOT header missing\n");
-			return MS::kFailure;
-		}
-		rval = parser_joint(file, NULL, BvhTranslator::root);
+	file >> buf;
+	if (buf != kRoot) {
+		MGlobal::displayError("Could not parse the file : ROOT header missing\n");
+		return MS::kFailure;
 	}
-	if (file.good()) {
-		file >> buf;
-		if (buf!=kMotion) {
-			MGlobal::displayError("Could not parse the file : MOTION header missing\n");
-			return MS::kFailure;
-		}
-		rval = parser_motion(file);
-	}
+	rval = parser_joint(file);
 	return MS::kSuccess;
 }
 
 
-MStatus BvhTranslator::parser_joint(ifstream& file, Joint* parent, Joint* current)
+MStatus BvhTranslator::parser_joint(ifstream& file)
 {
 	string buf;
-	MStatus rval;
-	file >> buf;
-	string name = buf;
+	string name;
 	double _offx; double _offy; double _offz;
+	MStatus rval;
+	Joint *parent = NULL;
+	Joint *current = _root;
+	//return MStatus::kSuccess;
+
+	// Creating the root Joint //
+	rval = parser_offset(file, name, _offx, _offy, _offz, buf);
+	*current = *Joint::create(name, _offx, _offy, _offz, parent);
+	
+	
+	rval = parser_channels(file, current, buf);
+
+	// Children joints parsing
+	while (buf!=kMotion) {
+		MGlobal::displayError("loop\n");
+		file >> buf;
+		if (buf==kJoint) { // joint
+			parent = current;
+			rval = parser_offset(file, name, _offx, _offy, _offz, buf);
+			current = Joint::create(name, _offx, _offy, _offz, parent);
+			rval = parser_channels(file, current, buf);
+
+		} else if (buf==kEnd) { // end of site
+			parent = current;
+			rval = parser_offset(file, name, _offx, _offy, _offz, buf);
+			current = Joint::create(name, _offx, _offy, _offz, parent);
+			//file >> buf; // parsing '}' of End Site
+		} else if (buf=="}") { // end of current joint
+			MGlobal::displayInfo("} case\n");
+			current = current->_parent;
+		}
+		else if (buf == kMotion) {
+			MGlobal::displayInfo("MOT \n");
+		}
+		else {
+			MGlobal::displayError("Could not parse file : unknown token\n");
+			MGlobal::displayError(MString(buf.c_str()));
+			MGlobal::displayError(MString(current->_name.c_str()));
+			return MS::kFailure;
+		}
+	}
+	MGlobal::displayInfo("JAI TOUT LU\n");
+	return MS::kSuccess;
+}
+
+MStatus BvhTranslator::parser_offset(ifstream& file, string& name, double& _offx, double& _offy, double& _offz, string& buf)
+{
+	file >> name;
 	MGlobal::displayInfo("Creating Joint. \n");
 	file >> buf; // parsing '{'
 
@@ -112,54 +155,34 @@ MStatus BvhTranslator::parser_joint(ifstream& file, Joint* parent, Joint* curren
 	}
 	try {
 		file >> _offx >> _offy >> _offz;
-	} catch (...) {
+	}
+	catch (...) {
 		MGlobal::displayError("Could not parse Offset of current Joint\n");
 		return MS::kFailure;
 	}
-	current = Joint::create(name, _offx, _offy, _offz, parent);
+	return MS::kSuccess;
+}
+
+MStatus BvhTranslator::parser_channels(ifstream& file, Joint* current, string& buf)
+{
 	
 	file >> buf; // parsing CHANNELS
-	if (buf!=kChannels) {
+
+	
+	
+	if (buf != kChannels) {
 		MGlobal::displayError("Could not parse file : missing CHANNELS keyword\n");
 	}
 	file >> buf;
 	int _nb = stoi(buf);
-	for (int _i=0; _i<_nb; _i++) {
+	for (int _i = 0; _i < _nb; _i++) {
 		file >> buf;
 		AnimCurve _currAnim;
 		_currAnim.name = buf;
 		current->_dofs.push_back(_currAnim);
 	}
-
-	// Children joints parsing
-	while (file.good()) {
-		file >> buf;
-		if (buf==kJoint) { // joint
-			Joint* child= new Joint();
-			rval = parser_joint(file, current, child);
-		} else if (buf==kEnd) { // end of site
-			file >> buf; // parsing '{'
-			Joint* child;
-			file >> buf >> buf; // parsing 'Site {'
-			file >> buf;
-			if (buf!=kOffset) {
-				MGlobal::displayError("Could not parse file : missing OFFSET keyword\n");
-				return MS::kFailure;
-			}
-			try {
-				file >> _offx >> _offy >> _offz;
-			}
-			catch (...) {
-				MGlobal::displayError("Could not parse Offset of end Joint\n");
-				return MS::kFailure;
-			}
-			child = Joint::create(kEndSite, _offx, _offy, _offz, parent);
-			file >> buf; // parsing '}' of end site
-		} else if (buf=="}") { // end of current joint
-			// Question : should we change something about parent ?
-			return MS::kSuccess;
-		}
-	}
+	MGlobal::displayInfo("Chanel\n");
+	return MStatus::kSuccess;
 }
 
 MStatus BvhTranslator::parser_motion(ifstream& file)
@@ -262,8 +285,4 @@ MStatus uninitializePlugin(MObject obj)
 	}
 
 	return status;
-}
-
-MStatus BvhTranslator::doIt(const MArgList&) {
-	return MS::kSuccess;
 }

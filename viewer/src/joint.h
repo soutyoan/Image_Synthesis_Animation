@@ -70,6 +70,9 @@ public :
 			parent->_children.push_back(child);
 			child->_parent = parent;
 		}
+		else {
+			child->_parent = NULL;
+		}
 		return child;
 	}
 
@@ -86,12 +89,4 @@ public :
 };
 
 std::ostream& operator<<(std::ostream& os, const Joint& joint);
-
-class joint :
-	public Joint
-{
-public:
-	joint();
-	~joint();
-};
 #endif
