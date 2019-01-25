@@ -123,7 +123,7 @@ void createTranslation(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval) {
 	}
 }
 
-void createRotations(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval) {
+void createRotations(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval, int idx, int idy, int idz) {
 	MString attrNameX("rotateZ");
 	MString attrNameY("rotateY");
 	MString attrNameZ("rotateX");
@@ -132,7 +132,7 @@ void createRotations(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval) {
 	Mjoint.getPath(mObject);
 
 	if (joint->_dofs.size() != 0) {
-		// ATTX 
+		// ROTATEZ 
 		const MObject attrX = Mjoint.attribute(attrNameX, &rval);
 		if (MS::kSuccess != rval) {
 			cerr << "Failure to find attribute\n";
@@ -144,11 +144,11 @@ void createRotations(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval) {
 		if (MS::kSuccess != rval) {
 			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
 		}
-		std::vector<double> translationsJointX = joint->_dofs[0]._values;
+		std::vector<double> translationsJointX = joint->_dofs[idx]._values;
 
-		//ENDATTX 
+		//ENDATTZ 
 
-		// ATTY 
+		// ROTATEY 
 		const MObject attrY = Mjoint.attribute(attrNameY, &rval);
 		if (MS::kSuccess != rval) {
 			cerr << "Failure to find attribute\n";
@@ -161,11 +161,11 @@ void createRotations(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval) {
 			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
 		}
 
-		std::vector<double> translationsJointY = joint->_dofs[1]._values;
+		std::vector<double> translationsJointY = joint->_dofs[idy]._values;
 
 		//ENDATTY 
 
-		// ATTZ 
+		// ROTATEX 
 		const MObject attrZ = Mjoint.attribute(attrNameZ, &rval);
 		if (MS::kSuccess != rval) {
 			cerr << "Failure to find attribute\n";
@@ -177,21 +177,24 @@ void createRotations(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval) {
 		if (MS::kSuccess != rval) {
 			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
 		}
-		std::vector<double> translationsJointZ = joint->_dofs[2]._values;
-		//ENDATTZ 
+		std::vector<double> translationsJointZ = joint->_dofs[idz]._values;
+		//ENDATTX 
 
 		for (int i = 1; i < translationsJointX.size(); i++) {
-			std::ostringstream ss;
-			ss << translationsJointX[i];
-			std::string s(ss.str());
+			if (joint->_parent == NULL) {
+				std::ostringstream ss;
+				ss << translationsJointX[i];
+				std::string s(ss.str());
+				MGlobal::displayError(s.c_str());
+			}
 
-			MGlobal::displayError(s.c_str());
 			
 
 			MTime tm((double)i, MTime::kFilm);
-			if ((MS::kSuccess != acFnSetX.addKeyframe(tm, translationsJointX[i]/100)) ||
-				(MS::kSuccess != acFnSetY.addKeyframe(tm, translationsJointY[i]/100)) ||
-				(MS::kSuccess != acFnSetZ.addKeyframe(tm, translationsJointZ[i]/100))) {
+			double convRad = 2 * M_PI / 360;
+			if ((MS::kSuccess != acFnSetX.addKeyframe(tm, translationsJointX[i]*convRad)) ||
+				(MS::kSuccess != acFnSetY.addKeyframe(tm, translationsJointY[i]*convRad)) ||
+				(MS::kSuccess != acFnSetZ.addKeyframe(tm, translationsJointZ[i]*convRad))) {
 				cerr << "Error setting the keyframe\n";
 			}
 		}
@@ -216,9 +219,10 @@ MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
 	// MOTION PART 
 	if (Mparent == MObject::kNullObj) { // Il manque ici la rotation de base
 		createTranslation(Mjoint, joint, rval);
+		createRotations(Mjoint, joint, rval, 3, 4, 5);
 	}
 	else {
-		createRotations(Mjoint, joint, rval);
+		createRotations(Mjoint, joint, rval, 0, 1, 2);
 	}
 
 

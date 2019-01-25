@@ -3,6 +3,7 @@
 
 #ifndef BVH_TRANSLATOR
 #define BVH_TRANSLATOR
+# define M_PI           3.14159265358979323846
 
 #include <maya/MStatus.h>
 #include <maya/MFnIkJoint.h>
@@ -31,6 +32,7 @@
 #include <string>
 #include <cstdio>
 #include <map>
+
 #include <sstream>
 #include "../viewer/src/joint.h"
 
