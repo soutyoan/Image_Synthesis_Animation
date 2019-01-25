@@ -23,6 +23,8 @@
 #include <maya/MFileIO.h>
 #include <maya/MFnTransform.h>
 #include <maya/MNamespace.h>
+#include <maya/MFnAnimCurve.h>
+#include <maya/MDagPath.h>
 
 #include <iostream>
 #include <cstdlib> 
@@ -128,6 +130,7 @@ private:
 	MStatus parser_motion(ifstream& file, string &buf);
 
 	MStatus Joint_to_MAYA(Joint* joint, MObject& Mparent);
+
 };
 
 

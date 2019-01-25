@@ -52,17 +52,92 @@ MStatus BvhTranslator::reader(const MFileObject& file,
 	return rval;
 }
 
+
 MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
 {
 	MStatus rval;
 	MFnIkJoint Mjoint;
 	MObject created = Mjoint.create(Mparent);
+
 	//return MS::kSuccess;
 	const char *cname = joint->_name.c_str();
 	//return MS::kSuccess;
 	Mjoint.setName(MString(cname));
 	const double offs[3] = { joint->_offX, joint->_offY, joint->_offZ };
 	Mjoint.setTranslation(MVector(offs), MSpace::kTransform);
+
+	// MOTION PART 
+	if (Mparent == MObject::kNullObj) {
+		MString attrNameX("translateX");
+		MString attrNameY("translateY");
+		MString attrNameZ("translateZ");
+
+		MDagPath mObject;
+		Mjoint.getPath(mObject);
+
+		// ATTX 
+		const MObject attrX = Mjoint.attribute(attrNameX, &rval);
+		if (MS::kSuccess != rval) {
+			cerr << "Failure to find attribute\n";
+		}
+
+		MFnAnimCurve acFnSetX;
+		acFnSetX.create(mObject.transform(), attrX, NULL, &rval);
+
+		if (MS::kSuccess != rval) {
+			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+		}
+		std::vector<double> translationsJointX = joint->_dofs[0]._values;
+		
+		//ENDATTX 
+
+		// ATTY 
+		const MObject attrY = Mjoint.attribute(attrNameY, &rval);
+		if (MS::kSuccess != rval) {
+			cerr << "Failure to find attribute\n";
+		}
+
+		MFnAnimCurve acFnSetY;
+		acFnSetY.create(mObject.transform(), attrY, NULL, &rval);
+
+		if (MS::kSuccess != rval) {
+			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+		}
+
+		std::vector<double> translationsJointY = joint->_dofs[1]._values;
+
+		//ENDATTY 
+
+		// ATTX 
+		const MObject attrZ = Mjoint.attribute(attrNameZ, &rval);
+		if (MS::kSuccess != rval) {
+			cerr << "Failure to find attribute\n";
+		}
+
+		MFnAnimCurve acFnSetZ;
+		acFnSetZ.create(mObject.transform(), attrZ, NULL, &rval);
+
+		if (MS::kSuccess != rval) {
+			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+		}
+		std::vector<double> translationsJointZ = joint->_dofs[2]._values;
+
+		for (int i = 0; i < translationsJointX.size(); i++) {
+
+			MTime tm((double)i, MTime::kFilm);
+			if ((MS::kSuccess != acFnSetX.addKeyframe(tm, translationsJointX[i])) ||
+				(MS::kSuccess != acFnSetY.addKeyframe(tm, translationsJointY[i])) ||
+				(MS::kSuccess != acFnSetZ.addKeyframe(tm, translationsJointZ[i]))) {
+				cerr << "Error setting the keyframe\n";
+			}
+		}
+		//ENDATTX 
+		MGlobal::displayError("ANIMATION ROOT CREATED\n");
+	}
+
+
+	//END MOTION PART
+
 	vector<Joint*>::iterator children;
 	for (children = joint->_children.begin(); children != joint->_children.end(); children++) {
 		rval = Joint_to_MAYA(*children, created);
@@ -193,7 +268,7 @@ MStatus parseRec(ifstream& file, string &buf, Joint *current) {
 	ss << numbr_channels;
 	string str = ss.str();
 	for (int i = 0; i < numbr_channels; i++) {
-		current->_dofs[i]._values.push_back(stoi(buf));
+		current->_dofs[i]._values.push_back(stod(buf));
 		file >> buf;
 	}
 
