@@ -17,13 +17,13 @@ def ascii_to_bvh(elbow_data, wrist_data, output_name="output"):
         output_file.write("{\n")
         output_file.write("\tOFFSET 0.00000 0.00000 0.00000\n")
         output_file.write("\tCHANNELS 6 Xposition Yposition Zposition Zrotation Yrotation Xrotation\n")
-        output_file.write("\tJOIN wrist\n")
+        output_file.write("\tJOINT wrist\n")
         output_file.write("\t{\n")
-        output_file.write("\t\tOFFSET -2.0 -2.0 0.0\n")
+        output_file.write("\t\tOFFSET -5.0 -0.0 0.0\n")
         output_file.write("\t\tCHANNELS 3 Zrotation Yrotation Xrotation\n")
         output_file.write("\t\tEnd Site\n")
         output_file.write("\t\t{\n")
-        output_file.write("\t\tOFFSET -2.0 -2.0 0.0\n")
+        output_file.write("\t\tOFFSET 0.0 5.0 0.0\n")
         output_file.write("\t\t}\n")
         output_file.write("\t}\n")
         output_file.write("}\n")
@@ -34,7 +34,7 @@ def ascii_to_bvh(elbow_data, wrist_data, output_name="output"):
         output_file.write("Frames: "+str(frames)+"\n")
         output_file.write("Frame rate: "+str(frame_rate)+"\n")
         for i in range(frames):
-            output_file.write("0.0 0.0 0.0 0.0 0.0 0.0 ") # unchanged for root (all to 0.0)
+            output_file.write("0.0 0.0 0.0 ") # unchanged for root (all to 0.0)
             for val in values1[i]:
                 output_file.write(str(val)+" ")
             for val in values2[i]:
