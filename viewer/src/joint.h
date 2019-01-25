@@ -6,16 +6,24 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <assert.h>
+#include <sstream>
+#include "TriMesh.h"
+
+using namespace std;
+using namespace trimesh;
+
+const bool DEBUG=true;
 
 class AnimCurve {
 public :
-	AnimCurve() {};
+	AnimCurve() {_values.resize(6); };
 	~AnimCurve() {
 		_values.clear();
 	}
 public :
 	std::string name;					// name of dof
-	std::vector<double> _values;		// different keyframes = animation curve
+	std::vector<float> _values;			// different keyframes = animation curve
 };
 
 
@@ -41,8 +49,15 @@ public :
 	int _rorder;						// order of euler angles to reconstruct rotation
 	std::vector<Joint*> _children;	// children of the current joint
 
+	/*
+	The orders to read in translation and rotation.
+	*/
+	vector<int> orderRotation;
+	vector<int> orderTranslation;
+
 
 public :
+	Joint* parent;
 	// Constructor :
 	Joint() {};
 	// Destructor :
@@ -70,6 +85,12 @@ public :
 		return child;
 	}
 
+	static Joint* createNewJoint(ifstream &file, string filename, bool isEnd,
+		vector<string> &animValues);
+
+	void fillInformation(string name, ifstream &file, bool isEnd,
+		vector<string> &animValues);
+
 	// Load from file (.bvh) :
 	static Joint* createFromFile(std::string fileName);
 
@@ -83,6 +104,8 @@ public :
 	int nbRotation() const;
 
 	int nbTranslation() const;
+
+	int nbChannels() const;
 };
 
 std::ostream& operator<<(std::ostream& os, const Joint& joint);

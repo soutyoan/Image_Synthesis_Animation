@@ -6,5 +6,4 @@ Makefile
 */Makefile*
 *.a
 /.vs
-/common/x64/Debug
-/common/.vs/Maya/v15
+*.pyc
