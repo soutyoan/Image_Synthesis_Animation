@@ -52,6 +52,75 @@ MStatus BvhTranslator::reader(const MFileObject& file,
 	return rval;
 }
 
+void createTranslation(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval) {
+	MString attrNameX("translateX");
+	MString attrNameY("translateY");
+	MString attrNameZ("translateZ");
+
+	MDagPath mObject;
+	Mjoint.getPath(mObject);
+
+	// ATTX 
+	const MObject attrX = Mjoint.attribute(attrNameX, &rval);
+	if (MS::kSuccess != rval) {
+		cerr << "Failure to find attribute\n";
+	}
+
+	MFnAnimCurve acFnSetX;
+	acFnSetX.create(mObject.transform(), attrX, NULL, &rval);
+
+	if (MS::kSuccess != rval) {
+		cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+	}
+	std::vector<double> translationsJointX = joint->_dofs[0]._values;
+
+	//ENDATTX 
+
+	// ATTY 
+	const MObject attrY = Mjoint.attribute(attrNameY, &rval);
+	if (MS::kSuccess != rval) {
+		cerr << "Failure to find attribute\n";
+	}
+
+	MFnAnimCurve acFnSetY;
+	acFnSetY.create(mObject.transform(), attrY, NULL, &rval);
+
+	if (MS::kSuccess != rval) {
+		cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+	}
+
+	std::vector<double> translationsJointY = joint->_dofs[1]._values;
+
+	//ENDATTY 
+
+	// ATTZ 
+	const MObject attrZ = Mjoint.attribute(attrNameZ, &rval);
+	if (MS::kSuccess != rval) {
+		cerr << "Failure to find attribute\n";
+	}
+
+	MFnAnimCurve acFnSetZ;
+	acFnSetZ.create(mObject.transform(), attrZ, NULL, &rval);
+
+	if (MS::kSuccess != rval) {
+		cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+	}
+	std::vector<double> translationsJointZ = joint->_dofs[2]._values;
+	//ENDATTZ 
+
+
+	for (int i = 0; i < translationsJointX.size(); i++) {
+
+		MTime tm((double)i, MTime::kFilm);
+		if ((MS::kSuccess != acFnSetX.addKeyframe(tm, translationsJointX[i])) ||
+			(MS::kSuccess != acFnSetY.addKeyframe(tm, translationsJointY[i])) ||
+			(MS::kSuccess != acFnSetZ.addKeyframe(tm, translationsJointZ[i]))) {
+			cerr << "Error setting the keyframe\n";
+		}
+	}
+	MGlobal::displayError("ANIMATION ROOT CREATED\n");
+}
+
 
 MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
 {
@@ -68,71 +137,10 @@ MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
 
 	// MOTION PART 
 	if (Mparent == MObject::kNullObj) {
-		MString attrNameX("translateX");
-		MString attrNameY("translateY");
-		MString attrNameZ("translateZ");
+		createTranslation(Mjoint, joint, rval);
+	}
+	else {
 
-		MDagPath mObject;
-		Mjoint.getPath(mObject);
-
-		// ATTX 
-		const MObject attrX = Mjoint.attribute(attrNameX, &rval);
-		if (MS::kSuccess != rval) {
-			cerr << "Failure to find attribute\n";
-		}
-
-		MFnAnimCurve acFnSetX;
-		acFnSetX.create(mObject.transform(), attrX, NULL, &rval);
-
-		if (MS::kSuccess != rval) {
-			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
-		}
-		std::vector<double> translationsJointX = joint->_dofs[0]._values;
-		
-		//ENDATTX 
-
-		// ATTY 
-		const MObject attrY = Mjoint.attribute(attrNameY, &rval);
-		if (MS::kSuccess != rval) {
-			cerr << "Failure to find attribute\n";
-		}
-
-		MFnAnimCurve acFnSetY;
-		acFnSetY.create(mObject.transform(), attrY, NULL, &rval);
-
-		if (MS::kSuccess != rval) {
-			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
-		}
-
-		std::vector<double> translationsJointY = joint->_dofs[1]._values;
-
-		//ENDATTY 
-
-		// ATTX 
-		const MObject attrZ = Mjoint.attribute(attrNameZ, &rval);
-		if (MS::kSuccess != rval) {
-			cerr << "Failure to find attribute\n";
-		}
-
-		MFnAnimCurve acFnSetZ;
-		acFnSetZ.create(mObject.transform(), attrZ, NULL, &rval);
-
-		if (MS::kSuccess != rval) {
-			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
-		}
-		std::vector<double> translationsJointZ = joint->_dofs[2]._values;
-
-		for (int i = 0; i < translationsJointX.size(); i++) {
-
-			MTime tm((double)i, MTime::kFilm);
-			if ((MS::kSuccess != acFnSetX.addKeyframe(tm, translationsJointX[i])) ||
-				(MS::kSuccess != acFnSetY.addKeyframe(tm, translationsJointY[i])) ||
-				(MS::kSuccess != acFnSetZ.addKeyframe(tm, translationsJointZ[i]))) {
-				cerr << "Error setting the keyframe\n";
-			}
-		}
-		//ENDATTX 
-		MGlobal::displayError("ANIMATION ROOT CREATED\n");
 	}
 
 
