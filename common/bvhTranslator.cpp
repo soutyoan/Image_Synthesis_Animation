@@ -86,8 +86,6 @@ MStatus BvhTranslator::parser_hierarchy(ifstream& file)
 	}
 	rval = parser_joint(file, buf);
 	rval = parser_motion(file, buf);
-	MGlobal::displayInfo(MString("HOLLA : "));
-	MGlobal::displayInfo(MString(buf.c_str()));
 	return MS::kSuccess;
 }
 
@@ -194,7 +192,6 @@ MStatus parseRec(ifstream& file, string &buf, Joint *current) {
 	stringstream ss;
 	ss << numbr_channels;
 	string str = ss.str();
-	MGlobal::displayError(MString(buf.c_str()));
 	for (int i = 0; i < numbr_channels; i++) {
 		current->_dofs[i]._values.push_back(stoi(buf));
 		file >> buf;
@@ -222,11 +219,17 @@ MStatus BvhTranslator::parser_motion(ifstream& file, string &buf)
 	file >> buf;
 
 	file >> buf;
+
+	int nbr_frames = stoi(buf);
 	file >> buf;
 	file >> buf;
 	file >> buf;
 	file >> buf;
-	return parseRec(file, buf, _root);
+
+	for (int frame = 0; frame < nbr_frames; frame++) {
+		parseRec(file, buf, _root);
+	}
+	return MS::kSuccess;
 	// TODO : the frames parsing
 }
 
