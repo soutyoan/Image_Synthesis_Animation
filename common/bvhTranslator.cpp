@@ -60,67 +60,145 @@ void createTranslation(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval) {
 	MDagPath mObject;
 	Mjoint.getPath(mObject);
 
-	// ATTX 
-	const MObject attrX = Mjoint.attribute(attrNameX, &rval);
-	if (MS::kSuccess != rval) {
-		cerr << "Failure to find attribute\n";
-	}
-
-	MFnAnimCurve acFnSetX;
-	acFnSetX.create(mObject.transform(), attrX, NULL, &rval);
-
-	if (MS::kSuccess != rval) {
-		cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
-	}
-	std::vector<double> translationsJointX = joint->_dofs[0]._values;
-
-	//ENDATTX 
-
-	// ATTY 
-	const MObject attrY = Mjoint.attribute(attrNameY, &rval);
-	if (MS::kSuccess != rval) {
-		cerr << "Failure to find attribute\n";
-	}
-
-	MFnAnimCurve acFnSetY;
-	acFnSetY.create(mObject.transform(), attrY, NULL, &rval);
-
-	if (MS::kSuccess != rval) {
-		cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
-	}
-
-	std::vector<double> translationsJointY = joint->_dofs[1]._values;
-
-	//ENDATTY 
-
-	// ATTZ 
-	const MObject attrZ = Mjoint.attribute(attrNameZ, &rval);
-	if (MS::kSuccess != rval) {
-		cerr << "Failure to find attribute\n";
-	}
-
-	MFnAnimCurve acFnSetZ;
-	acFnSetZ.create(mObject.transform(), attrZ, NULL, &rval);
-
-	if (MS::kSuccess != rval) {
-		cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
-	}
-	std::vector<double> translationsJointZ = joint->_dofs[2]._values;
-	//ENDATTZ 
-
-
-	for (int i = 0; i < translationsJointX.size(); i++) {
-
-		MTime tm((double)i, MTime::kFilm);
-		if ((MS::kSuccess != acFnSetX.addKeyframe(tm, translationsJointX[i])) ||
-			(MS::kSuccess != acFnSetY.addKeyframe(tm, translationsJointY[i])) ||
-			(MS::kSuccess != acFnSetZ.addKeyframe(tm, translationsJointZ[i]))) {
-			cerr << "Error setting the keyframe\n";
+	if (joint->_dofs.size() != 0) {
+		// ATTX 
+		const MObject attrX = Mjoint.attribute(attrNameX, &rval);
+		if (MS::kSuccess != rval) {
+			cerr << "Failure to find attribute\n";
 		}
+
+		MFnAnimCurve acFnSetX;
+		acFnSetX.create(mObject.transform(), attrX, NULL, &rval);
+
+		if (MS::kSuccess != rval) {
+			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+		}
+		std::vector<double> translationsJointX = joint->_dofs[0]._values;
+
+		//ENDATTX 
+
+		// ATTY 
+		const MObject attrY = Mjoint.attribute(attrNameY, &rval);
+		if (MS::kSuccess != rval) {
+			cerr << "Failure to find attribute\n";
+		}
+
+		MFnAnimCurve acFnSetY;
+		acFnSetY.create(mObject.transform(), attrY, NULL, &rval);
+
+		if (MS::kSuccess != rval) {
+			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+		}
+
+		std::vector<double> translationsJointY = joint->_dofs[1]._values;
+
+		//ENDATTY 
+
+		// ATTZ 
+		const MObject attrZ = Mjoint.attribute(attrNameZ, &rval);
+		if (MS::kSuccess != rval) {
+			cerr << "Failure to find attribute\n";
+		}
+
+		MFnAnimCurve acFnSetZ;
+		acFnSetZ.create(mObject.transform(), attrZ, NULL, &rval);
+
+		if (MS::kSuccess != rval) {
+			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+		}
+		std::vector<double> translationsJointZ = joint->_dofs[2]._values;
+		//ENDATTZ 
+
+
+		for (int i = 1; i < translationsJointX.size(); i++) {
+
+			MTime tm((double)i, MTime::kFilm);
+			if ((MS::kSuccess != acFnSetX.addKeyframe(tm, translationsJointX[i])) ||
+				(MS::kSuccess != acFnSetY.addKeyframe(tm, translationsJointY[i])) ||
+				(MS::kSuccess != acFnSetZ.addKeyframe(tm, translationsJointZ[i]))) {
+				cerr << "Error setting the keyframe\n";
+			}
+		}
+		MGlobal::displayError("ANIMATION ROOT CREATED\n");
 	}
-	MGlobal::displayError("ANIMATION ROOT CREATED\n");
 }
 
+void createRotations(MFnIkJoint& Mjoint, Joint* joint, MStatus& rval) {
+	MString attrNameX("rotateZ");
+	MString attrNameY("rotateY");
+	MString attrNameZ("rotateX");
+
+	MDagPath mObject;
+	Mjoint.getPath(mObject);
+
+	if (joint->_dofs.size() != 0) {
+		// ATTX 
+		const MObject attrX = Mjoint.attribute(attrNameX, &rval);
+		if (MS::kSuccess != rval) {
+			cerr << "Failure to find attribute\n";
+		}
+
+		MFnAnimCurve acFnSetX;
+		acFnSetX.create(mObject.transform(), attrX, NULL, &rval);
+
+		if (MS::kSuccess != rval) {
+			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+		}
+		std::vector<double> translationsJointX = joint->_dofs[0]._values;
+
+		//ENDATTX 
+
+		// ATTY 
+		const MObject attrY = Mjoint.attribute(attrNameY, &rval);
+		if (MS::kSuccess != rval) {
+			cerr << "Failure to find attribute\n";
+		}
+
+		MFnAnimCurve acFnSetY;
+		acFnSetY.create(mObject.transform(), attrY, NULL, &rval);
+
+		if (MS::kSuccess != rval) {
+			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+		}
+
+		std::vector<double> translationsJointY = joint->_dofs[1]._values;
+
+		//ENDATTY 
+
+		// ATTZ 
+		const MObject attrZ = Mjoint.attribute(attrNameZ, &rval);
+		if (MS::kSuccess != rval) {
+			cerr << "Failure to find attribute\n";
+		}
+
+		MFnAnimCurve acFnSetZ;
+		acFnSetZ.create(mObject.transform(), attrZ, NULL, &rval);
+
+		if (MS::kSuccess != rval) {
+			cerr << "Failure creating MFnAnimCurve function set (translateX)\n";
+		}
+		std::vector<double> translationsJointZ = joint->_dofs[2]._values;
+		//ENDATTZ 
+
+		for (int i = 1; i < translationsJointX.size(); i++) {
+			std::ostringstream ss;
+			ss << translationsJointX[i];
+			std::string s(ss.str());
+
+			MGlobal::displayError(s.c_str());
+			
+
+			MTime tm((double)i, MTime::kFilm);
+			if ((MS::kSuccess != acFnSetX.addKeyframe(tm, translationsJointX[i]/100)) ||
+				(MS::kSuccess != acFnSetY.addKeyframe(tm, translationsJointY[i]/100)) ||
+				(MS::kSuccess != acFnSetZ.addKeyframe(tm, translationsJointZ[i]/100))) {
+				cerr << "Error setting the keyframe\n";
+			}
+		}
+		//MGlobal::displayError("ANIMATION ROOT CREATED\n");
+	}
+
+}
 
 MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
 {
@@ -136,11 +214,11 @@ MStatus BvhTranslator::Joint_to_MAYA(Joint* joint, MObject& Mparent)
 	Mjoint.setTranslation(MVector(offs), MSpace::kTransform);
 
 	// MOTION PART 
-	if (Mparent == MObject::kNullObj) {
+	if (Mparent == MObject::kNullObj) { // Il manque ici la rotation de base
 		createTranslation(Mjoint, joint, rval);
 	}
 	else {
-
+		createRotations(Mjoint, joint, rval);
 	}
 
 
