@@ -7,6 +7,28 @@
 #include <iostream>
 #include <fstream>
 
+using namespace std;
+
+namespace {
+	const std::string kChannels = "CHANNELS";
+	const std::string kEnd = "End";
+	const std::string kEndSite = "End Site";
+	const std::string kFrame = "Frame";
+	const std::string kFrames = "Frames:";
+	const std::string kHierarchy = "HIERARCHY";
+	const std::string kJoint = "JOINT";
+	const std::string kMotion = "MOTION";
+	const std::string kOffset = "OFFSET";
+	const std::string kRoot = "ROOT";
+	const std::string kXpos = "Xposition";
+	const std::string kYpos = "Yposition";
+	const std::string kZpos = "Zposition";
+	const std::string kXrot = "Xrotation";
+	const std::string kYrot = "Yrotation";
+	const std::string kZrot = "Zrotation";
+
+}
+
 class AnimCurve {
 public :
 	AnimCurve() {};
@@ -22,7 +44,7 @@ public :
 enum RotateOrder {roXYZ=0, roYZX, roZXY, roXZY, roYXZ, roZYX};
 
 class Joint {
-public :
+public:
 	std::string _name;					// name of joint
 	double _offX;						// initial offset in X
 	double _offY;						// initial offset in Y
@@ -36,9 +58,10 @@ public :
 	double _curRz;						// current value of rotation about Z (deg)
 	int _rorder;						// order of euler angles to reconstruct rotation
 	std::vector<Joint*> _children;	// children of the current joint
+	Joint* _parent; 						// parent of current joint
 
 
-public :
+public:
 	// Constructor :
 	Joint() {};
 	// Destructor :
@@ -62,17 +85,31 @@ public :
 		child->_curRz = 0;
 		if(parent != NULL) {
 			parent->_children.push_back(child);
+			child->_parent = parent;
 		}
 		return child;
 	}
 
-	// Load from file (.bvh) :	
+	// Load from file (.bvh) :
 	static Joint* createFromFile(std::string fileName);
 
 	void animate(int iframe=0);
 
 	// Analysis of degrees of freedom :
 	void nbDofs();
+
+private:
+	static void parser_hierarchy(ifstream& file, string& buf);
+
+	static void parser_joints(ifstream& file, string& buf, Joint* root);
+
+	static void parser_offset(ifstream& file, string& buf, string& name, double& _offx, double& _offy, double& _offz);
+
+	static void parser_channels(ifstream& file, string& buf, Joint* current);
+
+	static void parser_motion(ifstream& file, string& buf, Joint* root);
+
+	static void parse_frame(ifstream& file, string& buf, Joint* current);
 };
 
 
