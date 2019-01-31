@@ -650,7 +650,9 @@ void glShaderWindow::openSkeleton()
     }
     isGPGPU = false; // we do not use the GPU for matrixes computation
     std::cout << "Loading model from skeleton\n";
-    modelMesh = trimesh::TriMesh::read(qPrintable(modelName));
+    // TODO : give normals, indexes to modelMesh
+    modelMesh = new trimesh::TriMesh();
+    //modelMesh = trimesh::TriMesh::read(qPrintable(modelName));
     bindSceneToProgram();
 }
 

@@ -4,7 +4,7 @@
 using namespace std;
 
 Joint* Joint::createFromFile(std::string fileName) {
-	Joint* root = NULL;
+	Joint* root = new Joint();
 	cout << "Loading from " << fileName << endl;
 
 	ifstream inputfile(fileName.data());
@@ -18,7 +18,7 @@ Joint* Joint::createFromFile(std::string fileName) {
 		inputfile.close();
 	} else {
 		std::cerr << "Failed to load the file " << fileName.data() << std::endl;
-		fflush(stdout);
+		exit (EXIT_FAILURE);
 	}
 	cout << "file loaded" << endl;
 	return root;
@@ -44,8 +44,10 @@ void Joint::parser_hierarchy(ifstream& file, string& buf) {
  */
 void Joint::parser_joints(ifstream& file, string& buf, Joint* root) {
 	file >> buf;
+
 	if (buf!=kRoot) {
 		cerr << "Could not load .BVH file : missing ROOT keyword"<<endl;
+		exit (EXIT_FAILURE);
 	}
 	Joint* parent;
 	Joint* current = root;
@@ -54,8 +56,7 @@ void Joint::parser_joints(ifstream& file, string& buf, Joint* root) {
 
 	// Creating root Joint
 	Joint::parser_offset(file, buf, name, _offx, _offy, _offz);
-	*current = *Joint::create(name, _offx, _offy, _offz, parent);
-
+	*current = *Joint::create(name, _offx, _offy, _offz, NULL);
 	Joint::parser_channels(file, buf, current);
 
 	// Children joints parsing
@@ -71,13 +72,16 @@ void Joint::parser_joints(ifstream& file, string& buf, Joint* root) {
 			parent = current;
 			Joint::parser_offset(file, buf, name, _offx, _offy, _offz);
 			current = Joint::create(name, _offx, _offy, _offz, parent);
-			Joint::parser_channels(file, buf, current);
 		}
 		else if (buf=="}") {
 			current = current->_parent;
 		}
+		else if (buf.compare(kMotion)==0) {
+			break;
+		}
 		else {
 			cerr << "Could not parse .BVH file: unknown word: "<<buf<<endl;
+			exit (EXIT_FAILURE);
 		}
 	}
 }
@@ -97,12 +101,14 @@ void Joint::parser_offset(ifstream& file, string& buf, string& name, double& _of
 	file >> buf;
 	if (buf!=kOffset) {
 		cerr << "Could not parse .BVH file: missing OFFSET word" << endl;
+		exit (EXIT_FAILURE);
 	}
 	try {
 		file >> _offx >> _offy >> _offz;
 	}
 	catch(...) {
 		cerr << "Could not read offset values of current Joint"<<endl;
+		exit (EXIT_FAILURE);
 	}
 }
 
@@ -116,6 +122,7 @@ void Joint::parser_channels(ifstream& file, string& buf, Joint* current) {
 	file >> buf;
 	if (buf!=kChannels) {
 		cerr << "Could not parse .BVH file: missing CHANNELS word "<<endl;
+		exit (EXIT_FAILURE);
 	}
 	file >> buf;
 	int _nb = stoi(buf);
@@ -136,6 +143,7 @@ void Joint::parser_channels(ifstream& file, string& buf, Joint* current) {
 void Joint::parser_motion(ifstream& file, string& buf, Joint* root) {
 	if (buf!=kMotion) {
 		cerr << "Could not parse .BVH file: missing MOTION word"<<endl;
+		exit (EXIT_FAILURE);
 	}
 	file >> buf; // parsing 'Frames:'
 	file >> buf;
@@ -143,8 +151,9 @@ void Joint::parser_motion(ifstream& file, string& buf, Joint* root) {
 	file >> buf; // parsing 'Frame' 'Time:' '<value>'
 	file >> buf;
 	file >> buf;
-	file >> buf;
+	file>>buf;
 	for (int frame=0; frame<nb_frames; frame++) {
+		// cout<<"frame "<<frame<<endl;
 		Joint::parse_frame(file, buf, root);
 	}
 }
@@ -158,8 +167,10 @@ void Joint::parser_motion(ifstream& file, string& buf, Joint* root) {
 void Joint::parse_frame(ifstream& file, string& buf, Joint* current) {
 	if (current==NULL) {
 		cerr << "Error while parsing frame : current Joint cannot be NULL" << endl;
+		exit (EXIT_FAILURE);
 	}
 	int nb_channels = current->_dofs.size();
+	// cout<<"nb "<<nb_channels<<endl;
 	for (int i=0; i<nb_channels; i++) {
 		current->_dofs[i]._values.push_back(stod(buf));
 		file >> buf;
