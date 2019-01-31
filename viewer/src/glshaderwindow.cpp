@@ -417,10 +417,13 @@ void glShaderWindow::bindSceneToProgram()
     if (!isGPGPU) m_vertexBuffer.allocate(&(modelMesh->vertices.front()), modelMesh->vertices.size() * sizeof(trimesh::point));
     else m_vertexBuffer.allocate(gpgpu_vertices, 4 * sizeof(trimesh::point));
 
-    m_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_indexBuffer.bind();
-    if (!isGPGPU) m_indexBuffer.allocate(&(modelMesh->faces.front()), m_numFaces * 3 * sizeof(int));
-    else m_indexBuffer.allocate(gpgpu_indices, m_numFaces * 3 * sizeof(int));
+    // drawing lines for skeleton i.e no faces
+    if (m_numFaces) {
+        m_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+        m_indexBuffer.bind();
+        if (!isGPGPU) m_indexBuffer.allocate(&(modelMesh->faces.front()), m_numFaces * 3 * sizeof(int));
+        else m_indexBuffer.allocate(gpgpu_indices, m_numFaces * 3 * sizeof(int));
+    }
 
     if (modelMesh->colors.size() > 0) {
         m_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -651,14 +654,15 @@ void glShaderWindow::openSkeleton()
     isGPGPU = false; // we do not use the GPU for matrixes computation
     std::cout << "Loading model from skeleton\n";
     modelMesh = new trimesh::TriMesh();
-    // fill modelMesh->vertices with Joint object
-    
+    vector<trimesh::point> joint_vertices;
+    skeleton->fill_vertices(joint_vertices);
+    modelMesh->vertices = joint_vertices;
     modelMesh->need_bsphere();
     modelMesh->need_bbox();
-    modelMesh->need_normals();
-    modelMesh->need_faces();
+    modelMesh->need_normals(); // does it still work with lines ?
     //modelMesh = trimesh::TriMesh::read(qPrintable(modelName));
     bindSceneToProgram();
+    initializeTransformForScene();
 }
 
 void glShaderWindow::saveScene()

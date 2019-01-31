@@ -217,3 +217,9 @@ void Joint::nbDofs() {
 	}
 
 }
+
+bool Joint::fill_vertices(vector<trimesh::point>& joint_vertices)
+{
+	// TODO : Deep First Search and take the offset to be uploaded in vector of points
+	return true;
+}

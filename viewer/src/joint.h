@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include "../../trimesh2/include/Box.h"
 
 using namespace std;
 
@@ -57,8 +58,8 @@ public:
 	double _curRy;						// current value of rotation about Y (deg)
 	double _curRz;						// current value of rotation about Z (deg)
 	int _rorder;						// order of euler angles to reconstruct rotation
-	std::vector<Joint*> _children;	// children of the current joint
-	Joint* _parent; 						// parent of current joint
+	std::vector<Joint*> _children;		// children of the current joint
+	Joint* _parent; 					// parent of current joint
 
 
 public:
@@ -97,6 +98,8 @@ public:
 
 	// Analysis of degrees of freedom :
 	void nbDofs();
+
+	bool fill_vertices(vector<trimesh::point>& joint_vertices);
 
 private:
 	static void parser_hierarchy(ifstream& file, string& buf);
