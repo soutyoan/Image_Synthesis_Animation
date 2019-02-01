@@ -15,29 +15,33 @@ void Weight::createFromFile(string &filename, vector<Weight> &VerticesWeights){
     }
 
     int indexVertex = 0;
+    int expected = 0;
     while(!file.eof()){
-        Weight w(file, numberJoints, indicesJoints, indexVertex);
+        file >> expected;
+
+        if (file.eof()){
+            return;
+        }
+
+        if (expected != indexVertex) {
+            std::cerr << "Unexpected element : " << expected << " should be " << indexVertex << endl;
+        }
+
+        Weight w(file, numberJoints, indicesJoints);
         VerticesWeights.push_back(w);
         indexVertex ++;
     }
 }
 
-Weight::Weight(ifstream &filestream, int sizeVector, vector<int> indicesJoints, int expectedElement){
+Weight::Weight(ifstream &filestream, int sizeVector, vector<int> indicesJoints){
     weightJoints.resize(sizeVector);
-    create(filestream, sizeVector, indicesJoints, expectedElement);
+    create(filestream, sizeVector, indicesJoints);
 }
 
-void Weight::create(ifstream &filestream, int sizeVector, vector<int> indicesJoints, int expectedElement){
-    int expected;
-    filestream >> expected;
-
-    if (expected != expectedElement) {
-        std::cerr << "Unexpected element : " << expected << " should be " << expectedElement << endl;
-    }
-
+void Weight::create(ifstream &filestream, int sizeVector, vector<int> indicesJoints){
     float weightJ;
     for (int i = 0; i < sizeVector; i++){
         filestream >> weightJ;
-        indicesJoints[indicesJoints[i]] = weightJ;
+        weightJoints[indicesJoints[i]] = weightJ;
     }
 }
