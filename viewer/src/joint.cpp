@@ -285,6 +285,7 @@ int Joint::nbTranslation() const{
 	if (this->_curTz != 0)
 		result ++;
 	return result;
+}
 
 bool Joint::fill_vertices(vector<trimesh::point>& joint_vertices)
 {

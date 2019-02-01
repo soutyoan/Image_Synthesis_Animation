@@ -119,23 +119,6 @@ void glShaderWindow::openSceneFromFile() {
     }
 }
 
-/**
- * Creating a Joint structured example skeleton to be displayed
- */
-void glShaderWindow::openSkeleton() {
-    Joint* chest = Joint().create("chest", 0.0, 0.0, 0.0, NULL);
-    Joint* lhand = Joint().create("lhand", -1.0, 0.0, 0.0, chest);
-    Joint* rhand = Joint().create("rhand", 1.0, 0.0, 0.0, chest);
-    Joint* head = Joint().create("head", 0.0, 0.0, 1.0, chest);
-    Joint* pelvis = Joint().create("pelvis", 0.0, 0.0, 1.0, chest);
-    Joint* lleg = Joint().create("lleg", -1.0, 0.0, -2.0, pelvis);
-    Joint* rleg = Joint().create("rleg", 1.0, 0.0, -2.0, pelvis);
-
-    if (modelMesh) delete modelMesh;
-    
-
-}
-
 void glShaderWindow::openNewTexture() {
     QFileDialog dialog(0, "Open texture image", workingDirectory + "../textures/", "*.png *.PNG *.jpg *.JPG *.tif *.TIF");
     dialog.setAcceptMode(QFileDialog::AcceptOpen);

@@ -98,7 +98,7 @@ public:
 		}
 		return child;
 	}
-  
+
 	// Load from file (.bvh) :
 	static Joint* createFromFile(std::string fileName);
 	void animate(int iframe=0);
@@ -120,7 +120,6 @@ private:
 	static void parser_motion(ifstream& file, string& buf, Joint* root);
 
 	static void parse_frame(ifstream& file, string& buf, Joint* current);
-};
 
 	friend std::ostream& operator<<(std::ostream& os, const Joint& joint);
 
