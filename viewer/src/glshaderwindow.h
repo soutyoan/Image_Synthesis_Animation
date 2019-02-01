@@ -3,6 +3,7 @@
 
 #include "openglwindow.h"
 #include "TriMesh.h"
+#include "joint.h"
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QMatrix4x4>
@@ -35,6 +36,7 @@ public slots:
     void openSceneFromFile();
     void openNewTexture();
     void openNewEnvMap();
+    void openSkeletonFromBvh();
     void saveScene();
     void toggleFullScreen();
     void saveScreenshot();
@@ -57,6 +59,7 @@ protected:
     void timerEvent(QTimerEvent *e);
     void resizeEvent(QResizeEvent * ev);
     void wheelEvent(QWheelEvent * ev);
+    void keyPressEvent(QKeyEvent* e);
 
 
 private:
@@ -68,12 +71,16 @@ private:
     void initPermTexture();
     void loadTexturesForShaders();
     void openScene();
+    void openSkeleton();
     void mouseToTrackball(QVector2D &in, QVector3D &out);
 
     // Are we using GPGPU?
     bool isGPGPU;
     // Are we using FullRt shader?
     bool isFullRt;
+
+    // Are we animating the skeleton ?
+    bool isAnimate;
 
     // Are we using compute shaders?
     bool hasComputeShaders;
@@ -83,6 +90,7 @@ private:
     QString  textureName;
     QString  envMapName;
     trimesh::TriMesh* modelMesh;
+    Joint* skeleton; // skeleton Joint class
     uchar* pixels;
     // Ground
     trimesh::point *g_vertices;

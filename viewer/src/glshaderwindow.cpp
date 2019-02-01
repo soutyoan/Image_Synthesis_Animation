@@ -52,6 +52,9 @@ glShaderWindow::~glShaderWindow()
         ground_program->release();
         delete ground_program;
     }
+    if (skeleton) {
+        delete skeleton;
+    }
     if (shadowMapGenerationProgram) {
         shadowMapGenerationProgram->release();
         delete shadowMapGenerationProgram;
@@ -116,6 +119,8 @@ void glShaderWindow::openSceneFromFile() {
     }
 }
 
+
+
 void glShaderWindow::openNewTexture() {
     QFileDialog dialog(0, "Open texture image", workingDirectory + "../textures/", "*.png *.PNG *.jpg *.JPG *.tif *.TIF");
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
@@ -166,6 +171,24 @@ void glShaderWindow::openNewEnvMap() {
             environmentMap->setMagnificationFilter(QOpenGLTexture::Nearest);
             environmentMap->bind(1);
         }
+        renderNow();
+    }
+}
+
+void glShaderWindow::openSkeletonFromBvh() {
+    QFileDialog dialog(0, "Open BVH file of skeleton", workingDirectory+"../models/", "*.bvh");
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    QString filename;
+    int ret = dialog.exec();
+    if (ret == QDialog::Accepted) {
+        workingDirectory = dialog.directory().path() + "/";
+        modelName = dialog.selectedFiles()[0];
+    }
+
+    if (!modelName.isNull())
+    {
+        skeleton = Joint::createFromFile(modelName.toStdString());
+        openSkeleton();
         renderNow();
     }
 }
@@ -325,6 +348,8 @@ QWidget *glShaderWindow::makeAuxWindow()
     outer->addLayout(hboxMaxBounds);
     outer->addWidget(maxBoundsSlider);
 
+    // TODO : add a button for skeleton animation
+
     auxWidget->setLayout(outer);
     return auxWidget;
 }
@@ -392,10 +417,13 @@ void glShaderWindow::bindSceneToProgram()
     if (!isGPGPU) m_vertexBuffer.allocate(&(modelMesh->vertices.front()), modelMesh->vertices.size() * sizeof(trimesh::point));
     else m_vertexBuffer.allocate(gpgpu_vertices, 4 * sizeof(trimesh::point));
 
-    m_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_indexBuffer.bind();
-    if (!isGPGPU) m_indexBuffer.allocate(&(modelMesh->faces.front()), m_numFaces * 3 * sizeof(int));
-    else m_indexBuffer.allocate(gpgpu_indices, m_numFaces * 3 * sizeof(int));
+    // drawing lines for skeleton i.e no faces
+    if (m_numFaces) {
+        m_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+        m_indexBuffer.bind();
+        if (!isGPGPU) m_indexBuffer.allocate(&(modelMesh->faces.front()), m_numFaces * 3 * sizeof(int));
+        else m_indexBuffer.allocate(gpgpu_indices, m_numFaces * 3 * sizeof(int));
+    }
 
     if (modelMesh->colors.size() > 0) {
         m_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -603,6 +631,36 @@ void glShaderWindow::openScene()
 	if (compute_program) {
         createSSBO();
     }
+    bindSceneToProgram();
+    initializeTransformForScene();
+}
+
+void glShaderWindow::openSkeleton()
+{
+    if (modelMesh) {
+        delete(modelMesh);
+        m_vertexBuffer.release();
+        m_indexBuffer.release();
+        m_colorBuffer.release();
+        m_normalBuffer.release();
+        m_texcoordBuffer.release();
+        m_vao.release();
+    }
+    if (!skeleton) {
+        QMessageBox::warning(0, tr("qViewer"),
+                             tr("Could not load file ") + modelName, QMessageBox::Ok);
+        openSkeletonFromBvh();
+    }
+    isGPGPU = false; // we do not use the GPU for matrixes computation
+    std::cout << "Loading model from skeleton\n";
+    modelMesh = new trimesh::TriMesh();
+    vector<trimesh::point> joint_vertices;
+    skeleton->fill_vertices(joint_vertices);
+    modelMesh->vertices = joint_vertices;
+    modelMesh->need_bsphere();
+    modelMesh->need_bbox();
+    modelMesh->need_normals(); // does it still work with lines ?
+    //modelMesh = trimesh::TriMesh::read(qPrintable(modelName));
     bindSceneToProgram();
     initializeTransformForScene();
 }
@@ -1081,6 +1139,18 @@ static int nextPower2(int x) {
     return x;
 }
 
+void glShaderWindow::keyPressEvent(QKeyEvent* e)
+{
+	int key = e->key();
+	switch (key)
+	{
+	case Qt::Key_Space:
+		toggleAnimating();
+		break;
+	default:
+		break;
+	}
+}
 
 int get_indices_rendu_alternance(GLint* indices, int* shifts, int render_number){
     /*

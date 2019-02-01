@@ -71,6 +71,9 @@ public:
     virtual void render();
 
     void setAnimating(bool animating);
+    bool getAnimating() { return m_animating; }
+
+    void toggleAnimating();
 
 public slots:
     void renderLater();

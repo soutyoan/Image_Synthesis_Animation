@@ -44,8 +44,8 @@ static bool read_vvd(FILE *f, TriMesh *mesh);
 static bool read_ray(FILE *f, TriMesh *mesh);
 static bool read_obj(FILE *f, TriMesh *mesh);
 static bool read_off(FILE *f, TriMesh *mesh);
-static bool read_sm( FILE *f, TriMesh *mesh);
-static bool read_stl( FILE *f, TriMesh *mesh);
+static bool read_sm(FILE *f, TriMesh *mesh);
+static bool read_stl(FILE *f, TriMesh *mesh);
 
 static bool read_verts_bin(FILE *f, TriMesh *mesh, bool &need_swap,
 	int nverts, int vert_len, int vert_pos, int vert_norm,
@@ -346,7 +346,7 @@ out:
 // Read a ply file
 static bool read_ply(FILE *f, TriMesh *mesh)
 {
-	char buf[1024];	
+	char buf[1024];
 	bool binary = false, need_swap = false, float_color = false;
 	int result, nverts = 0, nfaces = 0, nstrips = 0, ngrid = 0;
 	int vert_len = 0, vert_pos = -1, vert_norm = -1;
@@ -970,7 +970,7 @@ static bool read_verts_bin(FILE *f, TriMesh *mesh, bool &need_swap,
 	while (++i < new_nverts) {
 		COND_READ(true, buf[0], vert_len);
 		memcpy(&mesh->vertices[i][0], &buf[vert_pos], vert_size);
-		mesh->vertices[i][3] = 1.0; 
+		mesh->vertices[i][3] = 1.0;
 		if (have_norm) {
 			memcpy(&mesh->normals[i][0], &buf[vert_norm], norm_size);
 			mesh->normals[i][3] = 0.0;
