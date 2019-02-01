@@ -100,6 +100,11 @@ private:
     int *g_indices;
     int g_numPoints;
     int g_numIndices;
+    // Skeleton
+    int s_numPoints;
+    trimesh::point *s_vertices;
+    trimesh::point *s_colors;
+    int *s_indices;
     // GPGPU
     trimesh::point *gpgpu_vertices;
     trimesh::vec *gpgpu_normals;
@@ -124,6 +129,7 @@ private:
     // OpenGL variables encapsulated by Qt
     QOpenGLShaderProgram *m_program;
     QOpenGLShaderProgram *ground_program;
+    QOpenGLShaderProgram *skeleton_program;
     QOpenGLShaderProgram *compute_program;
     QOpenGLShaderProgram *shadowMapGenerationProgram;
     QOpenGLTexture* environmentMap;
@@ -148,6 +154,11 @@ private:
     QOpenGLBuffer ground_normalBuffer;
     QOpenGLBuffer ground_colorBuffer;
     QOpenGLBuffer ground_texcoordBuffer;
+    // skeleton
+    QOpenGLVertexArrayObject skeleton_vao;
+    QOpenGLBuffer skeleton_vertexBuffer;
+    QOpenGLBuffer skeleton_indexBuffer;
+    QOpenGLBuffer skeleton_colorBuffer;
     // Matrix for all objects
     QMatrix4x4 m_matrix[3]; // 0 = object, 1 = light, 2 = ground
     QMatrix4x4 m_perspective;

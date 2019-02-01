@@ -7,7 +7,7 @@ int Joint::GLOBAL_INDEX = 0;
 Joint::Joint(){
 	local_index = GLOBAL_INDEX;
 	GLOBAL_INDEX++;
-	// std::cout << "Index current " << local_index << endl; 
+	// std::cout << "Index current " << local_index << endl;
 }
 
 Joint* Joint::createFromFile(std::string fileName) {
@@ -298,5 +298,6 @@ int Joint::nbTranslation() const{
 bool Joint::fill_vertices(vector<trimesh::point>& joint_vertices)
 {
 	// TODO : Deep First Search and take the offset to be uploaded in vector of points
+	// such as point(offx, offy, offz, 1.0)
 	return true;
 }
