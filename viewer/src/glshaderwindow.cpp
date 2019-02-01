@@ -22,8 +22,9 @@
 glShaderWindow::glShaderWindow(QWindow *parent)
 // Initialize obvious default values here (e.g. 0 for pointers)
     : OpenGLWindow(parent), modelMesh(0),
-      m_program(0), ground_program(0), compute_program(0), shadowMapGenerationProgram(0),
+      m_program(0), ground_program(0), skeleton_program(0), compute_program(0), shadowMapGenerationProgram(0),
       g_vertices(0), g_normals(0), g_texcoords(0), g_colors(0), g_indices(0),
+      s_vertices(0), s_colors(0), s_indices(0),
       gpgpu_vertices(0), gpgpu_normals(0), gpgpu_texcoords(0), gpgpu_colors(0), gpgpu_indices(0),
       environmentMap(0), texture(0), permTexture(0), pixels(0), mouseButton(Qt::NoButton), auxWidget(0),
       isGPGPU(false), hasComputeShaders(false), blinnPhong(true), transparent(true), eta(1.5), lightIntensity(1.0f), shininess(50.0f), lightDistance(5.0f), groundDistance(0.78),
@@ -418,12 +419,10 @@ void glShaderWindow::bindSceneToProgram()
     else m_vertexBuffer.allocate(gpgpu_vertices, 4 * sizeof(trimesh::point));
 
     // drawing lines for skeleton i.e no faces
-    if (m_numFaces) {
-        m_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-        m_indexBuffer.bind();
-        if (!isGPGPU) m_indexBuffer.allocate(&(modelMesh->faces.front()), m_numFaces * 3 * sizeof(int));
-        else m_indexBuffer.allocate(gpgpu_indices, m_numFaces * 3 * sizeof(int));
-    }
+    m_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_indexBuffer.bind();
+    if (!isGPGPU) m_indexBuffer.allocate(&(modelMesh->faces.front()), m_numFaces * 3 * sizeof(int));
+    else m_indexBuffer.allocate(gpgpu_indices, m_numFaces * 3 * sizeof(int));
 
     if (modelMesh->colors.size() > 0) {
         m_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -563,6 +562,38 @@ void glShaderWindow::bindSceneToProgram()
     ground_program->setAttributeBuffer( "texcoords", GL_FLOAT, 0, 2 );
     ground_program->enableAttributeArray( "texcoords" );
     ground_program->release();
+
+    // // Bind the skeleton part
+    // skeleton_vao.bind();
+    //
+    // // TODO set s_numPoints
+    //
+    // if (s_vertices == 0) s_vertices = new trimesh::point[s_numPoints];
+    // if (s_colors == 0) s_colors = new trimesh::point[s_numPoints];
+    // if (s_indices == 0) s_indices = new int[s_numPoints-1];
+    //
+    // // TODO : fill s_vertices, s_colors and s_indices
+    //
+    // skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    // skeleton_vertexBuffer.bind();
+    // skeleton_vertexBuffer.allocate(s_vertices, s_numPoints * sizeof(trimesh::point));
+    // skeleton_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    // skeleton_colorBuffer.bind();
+    // skeleton_colorBuffer.allocate(s_colors, s_numPoints * sizeof(trimesh::point));
+    // skeleton_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    // skeleton_indexBuffer.bind();
+    // skeleton_indexBuffer.allocate(s_indices, (s_numPoints-1) * sizeof(int));
+    //
+    // skeleton_program->bind();
+    // skeleton_vertexBuffer.bind();
+    // skeleton_program->setAttributeBuffer("vertex ", GL_FLOAT, 0, 4);
+    // skeleton_program->enableAttributeArray("vertex");
+    // skeleton_colorBuffer.bind();
+    // skeleton_program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
+    // skeleton_program->enableAttributeArray("color");
+    // skeleton_program->release();
+
+
     // Also bind the ground to the shadow mapping program:
     shadowMapGenerationProgram->bind();
     ground_vertexBuffer.bind();
@@ -580,6 +611,8 @@ void glShaderWindow::bindSceneToProgram()
     shadowMapGenerationProgram->enableAttributeArray( "texcoords" );
     ground_program->release();
     ground_vao.release();
+
+
 }
 
 void glShaderWindow::initializeTransformForScene()
@@ -652,15 +685,6 @@ void glShaderWindow::openSkeleton()
         openSkeletonFromBvh();
     }
     isGPGPU = false; // we do not use the GPU for matrixes computation
-    std::cout << "Loading model from skeleton\n";
-    modelMesh = new trimesh::TriMesh();
-    vector<trimesh::point> joint_vertices;
-    skeleton->fill_vertices(joint_vertices);
-    modelMesh->vertices = joint_vertices;
-    modelMesh->need_bsphere();
-    modelMesh->need_bbox();
-    modelMesh->need_normals(); // does it still work with lines ?
-    //modelMesh = trimesh::TriMesh::read(qPrintable(modelName));
     bindSceneToProgram();
     initializeTransformForScene();
 }
