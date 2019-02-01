@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include "../../trimesh2/include/Box.h"
@@ -30,6 +29,8 @@ namespace {
 
 }
 
+using namespace std;
+
 class AnimCurve {
 public :
 	AnimCurve() {};
@@ -45,6 +46,10 @@ public :
 enum RotateOrder {roXYZ=0, roYZX, roZXY, roXZY, roYXZ, roZYX};
 
 class Joint {
+
+private :
+	void printRecursivly(std::ostream& os, int *global_tab_count) const;
+
 public:
 	std::string _name;					// name of joint
 	double _offX;						// initial offset in X
@@ -88,12 +93,14 @@ public:
 			parent->_children.push_back(child);
 			child->_parent = parent;
 		}
+		else {
+			child->_parent = NULL;
+		}
 		return child;
 	}
-
+  
 	// Load from file (.bvh) :
 	static Joint* createFromFile(std::string fileName);
-
 	void animate(int iframe=0);
 
 	// Analysis of degrees of freedom :
@@ -115,5 +122,13 @@ private:
 	static void parse_frame(ifstream& file, string& buf, Joint* current);
 };
 
+	friend std::ostream& operator<<(std::ostream& os, const Joint& joint);
+
+	int nbRotation() const;
+
+	int nbTranslation() const;
+};
+
+std::ostream& operator<<(std::ostream& os, const Joint& joint);
 
 #endif

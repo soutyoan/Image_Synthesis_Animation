@@ -5,4 +5,9 @@ Makefile
 *Makefile*
 */Makefile*
 *.a
-viewer/parser
+/.vs
+/common/.vs/Maya/v15
+/common/x64/Debug
+/common/x64/Release
+/common/Maya.vcxproj
+/common/Maya.vcxproj.filters
