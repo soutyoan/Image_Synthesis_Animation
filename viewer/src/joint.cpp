@@ -2,6 +2,14 @@
 
 using namespace std;
 
+int Joint::GLOBAL_INDEX = 0;
+
+Joint::Joint(){
+	local_index = GLOBAL_INDEX;
+	GLOBAL_INDEX++;
+	// std::cout << "Index current " << local_index << endl; 
+}
+
 Joint* Joint::createFromFile(std::string fileName) {
 	Joint* root = new Joint();
 	cout << "Loading from " << fileName << endl;

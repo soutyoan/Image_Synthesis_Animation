@@ -26,13 +26,12 @@ namespace {
 	const std::string kXrot = "Xrotation";
 	const std::string kYrot = "Yrotation";
 	const std::string kZrot = "Zrotation";
-
 }
 
 using namespace std;
 
 class AnimCurve {
-public :
+public:
 	AnimCurve() {};
 	~AnimCurve() {
 		_values.clear();
@@ -51,6 +50,8 @@ private :
 	void printRecursivly(std::ostream& os, int *global_tab_count) const;
 
 public:
+	static int GLOBAL_INDEX;
+	int local_index=0;
 	std::string _name;					// name of joint
 	double _offX;						// initial offset in X
 	double _offY;						// initial offset in Y
@@ -69,7 +70,7 @@ public:
 
 public:
 	// Constructor :
-	Joint() {};
+	Joint();
 	// Destructor :
 	~Joint() {
 		_dofs.clear();

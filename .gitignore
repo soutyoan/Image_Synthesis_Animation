@@ -11,3 +11,4 @@ Makefile
 /common/x64/Release
 /common/Maya.vcxproj
 /common/Maya.vcxproj.filters
+viewer/parser
