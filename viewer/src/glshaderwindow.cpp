@@ -49,12 +49,16 @@ glShaderWindow::~glShaderWindow()
         m_program->release();
         delete m_program;
     }
+    if (skeleton) {
+        delete skeleton;
+    }
     if (ground_program) {
         ground_program->release();
         delete ground_program;
     }
-    if (skeleton) {
-        delete skeleton;
+    if (skeleton_program) {
+        skeleton_program->release();
+        delete skeleton_program;
     }
     if (shadowMapGenerationProgram) {
         shadowMapGenerationProgram->release();
@@ -92,6 +96,14 @@ glShaderWindow::~glShaderWindow()
     ground_texcoordBuffer.destroy();
     ground_vao.release();
     ground_vao.destroy();
+    skeleton_vertexBuffer.release();
+    skeleton_vertexBuffer.destroy();
+    skeleton_colorBuffer.release();
+    skeleton_colorBuffer.destroy();
+    skeleton_indexBuffer.release();
+    skeleton_indexBuffer.destroy();
+    skeleton_vao.release();
+    skeleton_vao.destroy();
     if (g_vertices) delete [] g_vertices;
     if (g_colors) delete [] g_colors;
     if (g_normals) delete [] g_normals;
@@ -100,6 +112,9 @@ glShaderWindow::~glShaderWindow()
     if (gpgpu_colors) delete [] gpgpu_colors;
     if (gpgpu_normals) delete [] gpgpu_normals;
     if (gpgpu_indices) delete [] gpgpu_indices;
+    if (s_vertices) delete [] s_vertices;
+    if (s_colors) delete [] s_colors;
+    if (s_indices) delete [] s_indices;
 }
 
 
@@ -561,35 +576,72 @@ void glShaderWindow::bindSceneToProgram()
     ground_program->enableAttributeArray( "texcoords" );
     ground_program->release();
 
-    // // Bind the skeleton part
-    // skeleton_vao.bind();
+    // Bind the skeleton part
+    skeleton_vao.bind();
+
+    s_numPoints = 3;
+    // int s_numPoints = skeleton->GLOBAL_INDEX;
+
+    if (s_vertices == 0) s_vertices = new trimesh::point[s_numPoints];
+    if (s_colors == 0) s_colors = new trimesh::point[s_numPoints];
+    if (s_indices == 0) s_indices = new int[2*(s_numPoints-1)];
+
+    s_vertices[0] = trimesh::point(0, 0, 0, 0);
+    s_vertices[1] = trimesh::point(0, 0, 0.5, 0);
+    s_vertices[2] = trimesh::point(0.5, 0.5, 0.5, 0);
+    s_colors[0] = trimesh::point(1.0,0.0,0.0,1.0);
+    s_colors[1] = trimesh::point(1.0,0.0,0.0,1.0);
+    s_colors[2] = trimesh::point(1.0,0.0,0.0,1.0);
+    s_indices[0] = 0;
+    s_indices[1] = 1;
+    s_indices[2] = 1;
+    s_indices[3] = 2;
+    cout <<"here" <<endl;
+
+    // Joint* current = skeleton;
+    // int _ind = -1;
+    // while (current!=NULL) {
+    //     float xPos = current->_offx;
+    //     float yPos = current->_offy;
+    //     float zPos = current->_offz;
+    //     if (current->_parent!=NULL) {
+    //         xPos += current->_parent->_offx;
+    //         yPos += current->_parent->_offy;
+    //         zPos += current->_parent->_offz;
+    //     }
     //
-    // // TODO set s_numPoints
+    //     s_vertices[current->local_index] = trimesh::point(xPos, yPos, zPos, 0);
+    //     s_colors[current->local_index] = trimesh::point(1.0, 1.0, 1.0, 1.0); // white color for bones
     //
-    // if (s_vertices == 0) s_vertices = new trimesh::point[s_numPoints];
-    // if (s_colors == 0) s_colors = new trimesh::point[s_numPoints];
-    // if (s_indices == 0) s_indices = new int[s_numPoints-1];
-    //
-    // // TODO : fill s_vertices, s_colors and s_indices
-    //
-    // skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    // skeleton_vertexBuffer.bind();
-    // skeleton_vertexBuffer.allocate(s_vertices, s_numPoints * sizeof(trimesh::point));
-    // skeleton_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    // skeleton_colorBuffer.bind();
-    // skeleton_colorBuffer.allocate(s_colors, s_numPoints * sizeof(trimesh::point));
-    // skeleton_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    // skeleton_indexBuffer.bind();
-    // skeleton_indexBuffer.allocate(s_indices, (s_numPoints-1) * sizeof(int));
-    //
-    // skeleton_program->bind();
-    // skeleton_vertexBuffer.bind();
-    // skeleton_program->setAttributeBuffer("vertex ", GL_FLOAT, 0, 4);
-    // skeleton_program->enableAttributeArray("vertex");
-    // skeleton_colorBuffer.bind();
-    // skeleton_program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
-    // skeleton_program->enableAttributeArray("color");
-    // skeleton_program->release();
+    //     if (current->_children.size() > 0) {
+    //         vector<Joint*>::iterator child;
+    //         for (child=current->_children.begin(); child!=current->_children.end(); child++) {
+    //             s_indices[_ind++] = current->local_index;
+    //             s_indices[_ind++] = child->local_index;
+    //         }
+    //     } else  {
+    //         current = current->_parent;
+    //     }
+    // }
+
+    skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skeleton_vertexBuffer.bind();
+    skeleton_vertexBuffer.allocate(s_vertices, s_numPoints * sizeof(trimesh::point));
+    skeleton_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skeleton_colorBuffer.bind();
+    skeleton_colorBuffer.allocate(s_colors, s_numPoints * sizeof(trimesh::point));
+    skeleton_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skeleton_indexBuffer.bind();
+    skeleton_indexBuffer.allocate(s_indices, 2*(s_numPoints-1) * sizeof(int));
+
+    skeleton_program->bind();
+    skeleton_vertexBuffer.bind();
+    skeleton_program->setAttributeBuffer("vertex ", GL_FLOAT, 0, 4);
+    skeleton_program->enableAttributeArray("vertex");
+    skeleton_colorBuffer.bind();
+    skeleton_program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
+    skeleton_program->enableAttributeArray("color");
+    skeleton_program->release();
 
 
     // Also bind the ground to the shadow mapping program:
@@ -669,7 +721,6 @@ void glShaderWindow::openScene()
 void glShaderWindow::openSkeleton()
 {
     if (modelMesh) {
-        delete(modelMesh);
         m_vertexBuffer.release();
         m_indexBuffer.release();
         m_colorBuffer.release();
@@ -937,6 +988,8 @@ void glShaderWindow::initialize()
     }
     shadowMapGenerationProgram = prepareShaderProgram(shaderPath + "h_shadowMapGeneration.vert", shaderPath + "h_shadowMapGeneration.frag");
 
+    skeleton_program = prepareShaderProgram(shaderPath + "joint_bvh.vert", shaderPath + "joint_bvh.frag");
+
     // loading texture:
     loadTexturesForShaders();
 
@@ -959,6 +1012,14 @@ void glShaderWindow::initialize()
     ground_normalBuffer.create();
     ground_texcoordBuffer.create();
     ground_vao.release();
+
+    skeleton_vao.create();
+    skeleton_vao.bind();
+    skeleton_vertexBuffer.create();
+    skeleton_colorBuffer.create();
+    skeleton_indexBuffer.create();
+    skeleton_vao.release();
+
     openScene();
 }
 
@@ -1455,6 +1516,17 @@ void glShaderWindow::render()
         glDrawElements(GL_TRIANGLES, g_numIndices, GL_UNSIGNED_INT, 0);
         ground_vao.release();
         ground_program->release();
+
+        // we also bind the skeleton rendering
+        skeleton_program->bind();
+        skeleton_program->setUniformValue("matrix", m_matrix[0]);
+        skeleton_program->setUniformValue("perspective", m_perspective);
+
+        skeleton_vao.bind();
+        cout << s_indices <<endl;
+        glDrawElements(GL_LINES, 2*(s_numPoints-1), GL_UNSIGNED_INT, s_indices);
+        skeleton_vao.release();
+        skeleton_program->release();
     }
     index_rendu ++;
 }

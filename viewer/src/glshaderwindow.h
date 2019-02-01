@@ -101,7 +101,6 @@ private:
     int g_numPoints;
     int g_numIndices;
     // Skeleton
-    int s_numPoints;
     trimesh::point *s_vertices;
     trimesh::point *s_colors;
     int *s_indices;
@@ -159,6 +158,7 @@ private:
     QOpenGLBuffer skeleton_vertexBuffer;
     QOpenGLBuffer skeleton_indexBuffer;
     QOpenGLBuffer skeleton_colorBuffer;
+    int s_numPoints;
     // Matrix for all objects
     QMatrix4x4 m_matrix[3]; // 0 = object, 1 = light, 2 = ground
     QMatrix4x4 m_perspective;
