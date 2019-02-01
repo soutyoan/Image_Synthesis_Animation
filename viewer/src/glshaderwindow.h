@@ -36,6 +36,7 @@ public slots:
     void openSceneFromFile();
     void openNewTexture();
     void openNewEnvMap();
+    void openSkeletonFromBvh();
     void saveScene();
     void toggleFullScreen();
     void saveScreenshot();
@@ -78,6 +79,9 @@ private:
     // Are we using FullRt shader?
     bool isFullRt;
 
+    // Are we animating the skeleton ?
+    bool isAnimate;
+
     // Are we using compute shaders?
     bool hasComputeShaders;
     // Model we are displaying:
@@ -86,6 +90,7 @@ private:
     QString  textureName;
     QString  envMapName;
     trimesh::TriMesh* modelMesh;
+    Joint* skeleton; // skeleton Joint class
     uchar* pixels;
     // Ground
     trimesh::point *g_vertices;

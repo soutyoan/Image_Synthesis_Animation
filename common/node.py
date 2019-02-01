@@ -1,8 +1,13 @@
 """
 Hierarchy model of the class
 """
+import maya.cmds as cm
+
 
 GLOBAL_TAB_COUNT = 0
+
+def addL(l1, l2):
+		return [x+y for x, y in zip(l1, l2)]
 
 class Node:
 
@@ -62,20 +67,21 @@ class Node:
 			raise
 
 		number_channels = int(l[1])
+
 		rotation = []
 		position = []
-		for i in range(2, 2 + number_channels):
-			if "position" in l[i]:
-				frame_numbers = [l[i][0], []]
-				for k in range(len(info_frame)):
-					frame_numbers[1].append(info_frame[k].pop(0))
-				position.append(frame_numbers)
-			if "rotation" in l[i]:
-				frame_numbers = [l[i][0], []]
-				for k in range(len(info_frame)):
-					frame_numbers[1].append(info_frame[k].pop(0))
-				rotation.append(frame_numbers)
 
+		for frame in range(len(info_frame[0])):
+			if number_channels == 6: #A CHANGER ICI
+				positionLoc = [info_frame[0][frame], info_frame[1][frame], info_frame[2][frame]]
+				position.append(positionLoc)
+				rotationLoc = [info_frame[3][frame], info_frame[4][frame], info_frame[5][frame]]
+				rotation.append(rotationLoc)
+			else:
+				rotationLoc = [info_frame[0][frame], info_frame[1][frame], info_frame[2][frame]]
+				rotation.append(rotationLoc)
+		for i in range(number_channels):
+			info_frame.pop(0)
 		return offset, position, rotation
 
 	@staticmethod
@@ -102,26 +108,27 @@ class Node:
 			to this function and we get the "filled" root node
 			in the end
 		"""
-		l = Node.readline(f)
-		while l[0] != "MOTION":
-			if l[0] == "JOINT":
-				Child = Node(l[1], parent)
-				offset, position, rotation = Node.readInfo(f, info_frame)
-				Child.translate = offset; Child.position = position; Child.rotate = rotation
-				parent.fils.append(Child)
-				parent = Child
-			elif l[0] == "End":
-				Child = Node(l[1], parent)
-				offset = Node.readInfo(f, info_frame, True)
-				Child.translate = offset
-				parent.fils.append(Child)
-				parent = Child
-			elif l[0] == "}":
-				parent = parent.parent
-			else:
-				print("Invalid input")
-				raise
+		if (len(f) != 0):
 			l = Node.readline(f)
+			while l[0] != "MOTION":
+				if l[0] == "JOINT":
+					Child = Node(l[1], parent)
+					offset, position, rotation = Node.readInfo(f, info_frame)
+					Child.translate = offset; Child.position = position; Child.rotate = rotation
+					parent.fils.append(Child)
+					parent = Child
+				elif l[0] == "End":
+					Child = Node(l[1], parent)
+					offset = Node.readInfo(f, info_frame, True)
+					Child.translate = offset
+					parent.fils.append(Child)
+					parent = Child
+				elif l[0] == "}":
+					parent = parent.parent
+				else:
+					print("Invalid input")
+					raise
+				l = Node.readline(f)
 
 	@staticmethod
 	def readline(f):
@@ -146,6 +153,7 @@ class Node:
 
 		"""
 		l = f[0].replace("\t", "")
+		l = l.replace("\r", "")
 		f.pop(0)
 		while len(l) == 0:
 			l = f[0].replace("\t", "")
@@ -178,7 +186,8 @@ class Node:
 
 		with open(file_name) as motion_info:
 			f = motion_info.read().strip()
-			f = f.split("\n")
+			f = f.splitlines()
+
 			line = Node.readline(f)
 
 			while (Node.readline(f)[0] != "MOTION"):
@@ -188,7 +197,17 @@ class Node:
 			number_of_frames = int(Node.readline(f)[1])
 			Root.frame_time = float(Node.readline(f)[2])
 
-			info_frame = [[float(j) for j in i.split(" ")] for i in f]
+			info_frame = [[float(j) for j in i.split()] for i in f]
+			tmp = []
+			for nodeID in range(len(info_frame[0])):
+				deviceFrames = []
+				for frame in range(len(info_frame)):
+					deviceFrames.append(info_frame[frame][nodeID])
+				tmp.append(deviceFrames)
+			info_frame = tmp
+
+
+
 
 
 		with open(file_name) as f: # Use file to refer to the file object
@@ -213,6 +232,87 @@ class Node:
 
 			return Root
 
+
+	def create_jointsAnimation_MAYA(self, frameTime, rotations_parent):
+	 	"""
+	 	Creates the joints structure in MAYA
+	 	"""
+		positionM = [self.translate[0], self.translate[1], self.translate[2]]
+		rotationM = [0, 0, 0]
+		#print(positionM)
+
+	 	cm.joint( name=self.name, p=positionM, r=True, roo = "zyx")
+		current_rotation = []
+
+		for newKey in range(len(self.rotate)):
+			objB = self.name
+			if len(self.rotate) != 0: #A CHANGER ICI FAUT FAIRE ATTENTION AUX NOMS ET SI ON EST A LA FIN OU NON
+				objRot =  [x-y for x, y in zip(self.rotate[newKey],rotations_parent[newKey])]
+				if len(self.position) != 0:
+					objTrans = self.position[newKey]
+				else:
+					objTrans = [0, 0, 0]
+					if self.name == "rthumb":
+						print("THU " + str(objRot))
+				cmds.setKeyframe( objB, t=newKey*frameTime,at='translateZ', v=objTrans[0] + self.translate[0])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='translateY', v=objTrans[1] + self.translate[1])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='translateX', v=objTrans[2] + self.translate[2])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='rotateZ', v=objRot[0])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='rotateY', v=objRot[1])
+				cmds.setKeyframe( objB,t=newKey*frameTime,at='rotateX', v=objRot[2])
+				current_rotation.append(self.rotate[newKey])
+			else:
+				objRot = [0, 0, 0]
+
+
+	 	for child in self.fils:
+	 		child.create_jointsAnimation_MAYA(frameTime, current_rotation)
+			cmds.select(self.name)
+
+
+
+
+
+	def createjointDEBUG(self, frameTime, global_offset):
+		positionC = addL(self.translate, global_offset[0])
+
+
+		if len(self.position) == 0:
+			if len(self.rotate) != 0:
+				cm.joint(name = self.name, p = [positionC[0], positionC[1], positionC[2]])
+				cmds.setKeyframe(self.name, t = 0, at="rotateZ", v=0)
+				cmds.setKeyframe(self.name, t = 0, at="rotateY", v=0)
+				cmds.setKeyframe(self.name, t = 0, at="rotateX", v=0)
+			else:
+				cm.joint(name = self.name, p = [positionC[0], positionC[1], positionC[2]])
+		if len(self.rotate) != 0:
+			for keyFrameid in range(len(self.rotate)):
+				positionKeyFrame = []
+
+				if len(self.position) != 0:
+					positionKeyFrame = addL(self.position[keyFrameid], self.translate)
+					if keyFrameid == 0:
+						positionC = positionKeyFrame
+						cm.joint(name = self.name, p = [positionC[0], positionC[1], positionC[2]])
+						cmds.setKeyframe(self.name, t = 0, at="rotateZ", v=0)
+						cmds.setKeyframe(self.name, t = 0, at="rotateY", v=0)
+						cmds.setKeyframe(self.name, t = 0, at="rotateX", v=0)
+					cmds.setKeyframe(self.name, t = keyFrameid + 1, at="translateZ", v=positionKeyFrame[2])
+					cmds.setKeyframe(self.name, t = keyFrameid + 1, at="translateY", v=positionKeyFrame[1])
+					cmds.setKeyframe(self.name, t = keyFrameid + 1, at="translateX", v=positionKeyFrame[0])
+				cmds.setKeyframe(self.name, t = keyFrameid + 1, at="rotateZ", v=self.rotate[keyFrameid][0])
+				cmds.setKeyframe(self.name, t = keyFrameid + 1, at="rotateY", v=self.rotate[keyFrameid][1])
+				cmds.setKeyframe(self.name, t = keyFrameid + 1, at="rotateX", v=self.rotate[keyFrameid][2])
+
+
+
+
+		for child in self.fils:
+	 		child.createjointDEBUG(frameTime,  [positionC])
+			cmds.select(self.name)
+
+
+
 	def __str__(self):
 		global GLOBAL_TAB_COUNT
 		"""
@@ -223,7 +323,10 @@ class Node:
 		for the root node (without tabs)
 		"""
 		string = ""
-		string += "   " * GLOBAL_TAB_COUNT + "JOINT " + self.name + "\n"
+		if (len(self.fils) != 0):
+			string += "   " * GLOBAL_TAB_COUNT + "JOINT " + self.name + "\n"
+		else:
+			string += "   " * GLOBAL_TAB_COUNT + "END " + self.name + "\n"
 		string += "   " * GLOBAL_TAB_COUNT + "{\n"
 
 		GLOBAL_TAB_COUNT += 1
@@ -247,3 +350,5 @@ class Node:
 		string += "   " * GLOBAL_TAB_COUNT + "}\n"
 
 		return string
+
+			

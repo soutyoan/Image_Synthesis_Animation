@@ -31,6 +31,11 @@ void setupFileMenu(QMenuBar* myMenuBar, glShaderWindow* glWindow, QApplication *
     openSceneAction->setStatusTip(myMenuBar->tr("&Opens an existing scene file"));
     glWindow->connect(openSceneAction, SIGNAL(triggered()), glWindow, SLOT(openSceneFromFile()));
     fileMenu->addAction(openSceneAction);
+    // Open a skeleton
+    QAction* openSkeletonAction = new QAction(myMenuBar->tr("&Open Skeleton"), fileMenu);
+    openSkeletonAction->setStatusTip(myMenuBar->tr("&Opens an existing skeleton file"));
+    glWindow->connect(openSkeletonAction, SIGNAL(triggered()), glWindow, SLOT(openSkeletonFromBvh()));
+    fileMenu->addAction(openSkeletonAction);
     // Load new texture
     QAction* openTextureAction = new QAction(myMenuBar->tr("&Load texture"), fileMenu);
     openTextureAction->setStatusTip(myMenuBar->tr("&Opens a new texture image file"));

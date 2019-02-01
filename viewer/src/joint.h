@@ -5,6 +5,29 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include "../../trimesh2/include/Box.h"
+
+using namespace std;
+
+namespace {
+	const std::string kChannels = "CHANNELS";
+	const std::string kEnd = "End";
+	const std::string kEndSite = "End Site";
+	const std::string kFrame = "Frame";
+	const std::string kFrames = "Frames:";
+	const std::string kHierarchy = "HIERARCHY";
+	const std::string kJoint = "JOINT";
+	const std::string kMotion = "MOTION";
+	const std::string kOffset = "OFFSET";
+	const std::string kRoot = "ROOT";
+	const std::string kXpos = "Xposition";
+	const std::string kYpos = "Yposition";
+	const std::string kZpos = "Zposition";
+	const std::string kXrot = "Xrotation";
+	const std::string kYrot = "Yrotation";
+	const std::string kZrot = "Zrotation";
+
+}
 
 using namespace std;
 
@@ -27,7 +50,7 @@ class Joint {
 private :
 	void printRecursivly(std::ostream& os, int *global_tab_count) const;
 
-public :
+public:
 	std::string _name;					// name of joint
 	double _offX;						// initial offset in X
 	double _offY;						// initial offset in Y
@@ -40,11 +63,11 @@ public :
 	double _curRy;						// current value of rotation about Y (deg)
 	double _curRz;						// current value of rotation about Z (deg)
 	int _rorder;						// order of euler angles to reconstruct rotation
-	Joint* _parent;						// parent of the current joint
-	vector<Joint*> _children;	// children of the current joint
+	std::vector<Joint*> _children;		// children of the current joint
+	Joint* _parent; 					// parent of current joint
 
 
-public :
+public:
 	// Constructor :
 	Joint() {};
 	// Destructor :
@@ -75,11 +98,29 @@ public :
 		}
 		return child;
 	}
-
+  
+	// Load from file (.bvh) :
+	static Joint* createFromFile(std::string fileName);
 	void animate(int iframe=0);
 
 	// Analysis of degrees of freedom :
 	void nbDofs();
+
+	bool fill_vertices(vector<trimesh::point>& joint_vertices);
+
+private:
+	static void parser_hierarchy(ifstream& file, string& buf);
+
+	static void parser_joints(ifstream& file, string& buf, Joint* root);
+
+	static void parser_offset(ifstream& file, string& buf, string& name, double& _offx, double& _offy, double& _offz);
+
+	static void parser_channels(ifstream& file, string& buf, Joint* current);
+
+	static void parser_motion(ifstream& file, string& buf, Joint* root);
+
+	static void parse_frame(ifstream& file, string& buf, Joint* current);
+};
 
 	friend std::ostream& operator<<(std::ostream& os, const Joint& joint);
 
@@ -89,4 +130,5 @@ public :
 };
 
 std::ostream& operator<<(std::ostream& os, const Joint& joint);
+
 #endif
