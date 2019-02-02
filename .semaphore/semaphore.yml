@@ -7,13 +7,13 @@ agent:
 
 blocks:
   - name: Pull Docker image
-      task:
-        jobs:
-        - name: Docker Hub
-          commands:
-            - checkout
-            - docker run -d antoninklopp/sia:0.1
-            - docker images
+    task:
+      jobs:
+      - name: Docker Hub
+        commands:
+          - checkout
+          - docker run -d antoninklopp/sia:0.1
+          - docker images
 
   - name: "Build"
     task:
