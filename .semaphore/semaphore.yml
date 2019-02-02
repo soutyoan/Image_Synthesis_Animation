@@ -26,7 +26,7 @@ blocks:
           - checkout
           - ls -1
           - echo $APP_ENV
-          - ./clean.sh
+          - ./clean.sh || true
           - qmake CONFIG+=myViewer
           - make
 
@@ -36,7 +36,7 @@ blocks:
       - name: RSpec
         commands:
           - checkout
-          - ./clean.sh
+          - ./clean.sh || true
           - qmake CONFIG+=tests
           - make
           - ./viewer/tests
