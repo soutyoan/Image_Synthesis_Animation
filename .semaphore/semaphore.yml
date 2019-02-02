@@ -1,19 +1,17 @@
 version: v1.0
-name: First pipeline example
+name: SIA pipeline
 agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu1804
 
 blocks:
-  - name: Pull Docker image
+  - name: Create environment
     task:
       jobs:
-      - name: Docker Hub
+      - name: Create
         commands:
           - checkout
-          - docker run -d antoninklopp/sia:0.1
-          - docker images
 
   - name: "Build"
     task:
@@ -21,57 +19,24 @@ blocks:
         - name: APP_ENV
           value: prod
       jobs:
-      - name: Docker build
+      - name: Target build
         commands:
           - checkout
+          - sudo apt-get install -y qt5-default
           - ls -1
           - echo $APP_ENV
-          - targets="$(cat GPGPU_TP.pro | grep TARGET | cut -d'=' -f 2)"
-          - for t in "${target}"
-          - do echo "$t"
-          - ./clean.sh
-          - qmake CONFIG+="$t"
+          - ./clean.sh || true
+          - qmake CONFIG+=myViewer
           - make
-          - done
 
-  - name: "Smoke tests"
-    task:
-      jobs:
-      - name: Smoke
-        commands:
-          - checkout
-          - echo "make smoke"
-
-  - name: "Unit tests"
-    task:
-      jobs:
-      - name: RSpec
-        commands:
-          - checkout
-          - echo "make rspec"
-
-      - name: Lint code
-        commands:
-          - checkout
-          - echo "make lint"
-
-      - name: Check security
-        commands:
-          - checkout
-          - echo "make security"
-
-  - name: "Integration tests"
-    task:
-      jobs:
-      - name: Cucumber
-        commands:
-          - checkout
-          - echo "make cucumber"
-
-  - name: "Push Image"
-    task:
-      jobs:
-      - name: Push
-        commands:
-          - checkout
-          - echo "make docker.push"
+  # - name: "Unit tests"
+  #   task:
+  #     jobs:
+  #     - name: RSpec
+  #       commands:
+  #         - checkout
+  #         - sudo apt-get install -y qt5-default
+  #         - ./clean.sh || true
+  #         - qmake CONFIG+=tests
+  #         - make
+  #         - ./viewer/tests
