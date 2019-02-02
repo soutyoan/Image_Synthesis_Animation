@@ -6,14 +6,13 @@ agent:
     os_image: ubuntu1804
 
 blocks:
-  - name: Pull Docker image
+  - name: Create environment
     task:
       jobs:
-      - name: Docker Hub
+      - name: Create
         commands:
           - checkout
-          - docker run -d antoninklopp/sia:0.1
-          - docker images
+          - apt-get install -y qt5-default
 
   - name: "Build"
     task:
