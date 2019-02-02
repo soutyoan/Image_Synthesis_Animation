@@ -13,3 +13,4 @@ Makefile
 /common/Maya.vcxproj.filters
 viewer/parser
 viewer/tests
+viewer/moc*
