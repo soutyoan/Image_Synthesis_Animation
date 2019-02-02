@@ -12,7 +12,7 @@ blocks:
       - name: Create
         commands:
           - checkout
-          - apt-get install -y qt5-default
+          - sudo apt-get install -y qt5-default
 
   - name: "Build"
     task:
