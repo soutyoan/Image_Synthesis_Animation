@@ -27,7 +27,7 @@ blocks:
           - ls -1
           - echo $APP_ENV
           - targets="$(cat GPGPU_TP.pro | grep TARGET | cut -d'=' -f 2)"
-          - for t in "${target}"
+          - for t in "${targets}"
           - do echo "$t"
           - ./clean.sh
           - qmake CONFIG+="$t"
