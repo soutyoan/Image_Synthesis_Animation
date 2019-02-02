@@ -17,7 +17,7 @@ private:
 
 public:
 	Weight(ifstream &filestream, int sizeVector, vector<int> indicesJoints);
-	static void createFromFile(string &filename, vector<Weight>& VerticesWeights);
+	static void createFromFile(string filename, vector<Weight>& VerticesWeights);
 	void create(ifstream &filestream, int sizeVector, vector<int> indicesJoints);
 	float getWeight(int i){return weightJoints[i];}
 

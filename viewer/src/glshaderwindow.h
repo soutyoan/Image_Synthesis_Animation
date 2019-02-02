@@ -4,6 +4,7 @@
 #include "openglwindow.h"
 #include "TriMesh.h"
 #include "joint.h"
+#include "weight.h"
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QMatrix4x4>
@@ -37,6 +38,7 @@ public slots:
     void openNewTexture();
     void openNewEnvMap();
     void openSkeletonFromBvh();
+    void openWeightsForSkeleton(); 
     void saveScene();
     void toggleFullScreen();
     void saveScreenshot();
@@ -87,6 +89,7 @@ private:
     // Model we are displaying:
     QString  workingDirectory;
     QString  modelName;
+    QString  weightsName; 
     QString  textureName;
     QString  envMapName;
     trimesh::TriMesh* modelMesh;
@@ -105,6 +108,8 @@ private:
     trimesh::point *s_vertices;
     trimesh::point *s_colors;
     int *s_indices;
+    // Weights
+    vector<Weight> VerticesWeights; 
     // GPGPU
     trimesh::point *gpgpu_vertices;
     trimesh::vec *gpgpu_normals;

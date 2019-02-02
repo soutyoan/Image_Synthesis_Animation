@@ -36,6 +36,11 @@ void setupFileMenu(QMenuBar* myMenuBar, glShaderWindow* glWindow, QApplication *
     openSkeletonAction->setStatusTip(myMenuBar->tr("&Opens an existing skeleton file"));
     glWindow->connect(openSkeletonAction, SIGNAL(triggered()), glWindow, SLOT(openSkeletonFromBvh()));
     fileMenu->addAction(openSkeletonAction);
+    // Open a weight file for the skeleton
+    QAction* openWeightsActions = new QAction(myMenuBar->tr("&Open Weights"), fileMenu);
+    openWeightsActions->setStatusTip(myMenuBar->tr("&Opens an existing weights file"));
+    glWindow->connect(openWeightsActions, SIGNAL(triggered()), glWindow, SLOT(openWeightsForSkeleton()));
+    fileMenu->addAction(openWeightsActions);
     // Load new texture
     QAction* openTextureAction = new QAction(myMenuBar->tr("&Load texture"), fileMenu);
     openTextureAction->setStatusTip(myMenuBar->tr("&Opens a new texture image file"));

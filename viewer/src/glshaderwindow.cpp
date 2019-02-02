@@ -192,6 +192,23 @@ void glShaderWindow::openSkeletonFromBvh() {
     }
 }
 
+void glShaderWindow::openWeightsForSkeleton(){
+    QFileDialog dialog(0, "Open weights file for skeleton", workingDirectory+"../models/", "*.txt");
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    QString filename;
+    int ret = dialog.exec();
+    if (ret == QDialog::Accepted) {
+        workingDirectory = dialog.directory().path() + "/";
+        weightsName = dialog.selectedFiles()[0];
+    }
+
+    if (!weightsName.isNull())
+    {
+        Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
+        renderNow();
+    }
+}
+
 void glShaderWindow::cookTorranceClicked()
 {
     blinnPhong = false;
