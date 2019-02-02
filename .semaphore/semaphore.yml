@@ -6,6 +6,15 @@ agent:
     os_image: ubuntu1804
 
 blocks:
+  - name: Pull Docker image
+      task:
+        jobs:
+        - name: Docker Hub
+          commands:
+            - checkout
+            - docker run -d antoninklopp/sia:0.1
+            - docker images
+
   - name: "Build"
     task:
       env_vars:
@@ -17,8 +26,13 @@ blocks:
           - checkout
           - ls -1
           - echo $APP_ENV
-          - echo "Docker build..."
-          - echo "done"
+          - targets="$(cat GPGPU_TP.pro | grep TARGET | cut -d'=' -f 2)"
+          - for t in "${target}"
+          - do echo "$t"
+          - ./clean.sh
+          - qmake CONFIG+="$t"
+          - make
+          - done
 
   - name: "Smoke tests"
     task:
