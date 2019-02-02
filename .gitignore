@@ -14,3 +14,4 @@ Makefile
 viewer/parser
 viewer/tests
 viewer/moc*
+.vscode/

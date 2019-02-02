@@ -53,6 +53,7 @@ public slots:
     void updateShininess(int shininessSliderValue);
     void updateEta(int etaSliderValue);
     void updateMaxBounds(int maxBoundsSliderValue);
+    void updateArticulationInfluence(int currentArticulation); 
 
 protected:
     void mousePressEvent(QMouseEvent *e);
@@ -129,6 +130,7 @@ private:
     float lightDistance;
     float groundDistance;
     int maxBounds;
+    int currentArticulation = 0; 
 
 
     // OpenGL variables encapsulated by Qt

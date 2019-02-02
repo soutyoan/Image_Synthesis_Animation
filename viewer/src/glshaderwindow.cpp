@@ -257,6 +257,11 @@ void glShaderWindow::updateMaxBounds(int maxBoundsSliderValue)
     renderNow();
 }
 
+void glShaderWindow::updateArticulationInfluence(int currentArticulationValue){
+    currentArticulation = currentArticulationValue;     
+    renderNow(); 
+}
+
 QWidget *glShaderWindow::makeAuxWindow()
 {
     if (auxWidget)
@@ -366,14 +371,33 @@ QWidget *glShaderWindow::makeAuxWindow()
 
     // TODO : add a button for skeleton animation
 
+    // Adding a button to see impact of every articulation
+    QSlider *articulationInfluenceSlider = new QSlider(Qt::Horizontal);
+    articulationInfluenceSlider->setTickPosition(QSlider::TicksBelow);
+    articulationInfluenceSlider->setTickInterval(10);
+    articulationInfluenceSlider->setMinimum(0);
+    articulationInfluenceSlider->setMaximum(100);
+    articulationInfluenceSlider->setSliderPosition(currentArticulation);
+    connect(articulationInfluenceSlider,SIGNAL(valueChanged(int)),this,SLOT(updateArticulationInfluence(int)));
+    QLabel* articulationInfluenceLabel = new QLabel("Showing influence on articulation x =");
+    QLabel* articulationInfluenceLabelValue = new QLabel();
+    articulationInfluenceLabelValue->setNum(currentArticulation);
+    connect(articulationInfluenceSlider,SIGNAL(valueChanged(int)),articulationInfluenceLabelValue,SLOT(setNum(int)));
+    QHBoxLayout *hboxArticulationInfluence= new QHBoxLayout;
+    hboxArticulationInfluence->addWidget(articulationInfluenceLabel);
+    hboxArticulationInfluence->addWidget(articulationInfluenceLabelValue);
+    outer->addLayout(hboxArticulationInfluence);
+    outer->addWidget(articulationInfluenceSlider);
+
     auxWidget->setLayout(outer);
     return auxWidget;
 }
 
 void glShaderWindow::createSSBO()
 {
-#ifndef __APPLE__
-	glGenBuffers(4, ssbo);
+#ifndef __APPLE__  
+    bool hasWeights = (VerticesWeights.size()!=0); 
+    if (hasWeights){glGenBuffers(5, ssbo);} else {glGenBuffers(4, ssbo);}
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[0]);
     // TODO: test if 4 float alignment works better
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->vertices.size() * sizeof(trimesh::point), &(modelMesh->vertices.front()), GL_STATIC_READ);
@@ -383,12 +407,22 @@ void glShaderWindow::createSSBO()
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->colors.size() * sizeof(trimesh::Color), &(modelMesh->colors.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[3]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->faces.size() * 3 * sizeof(int), &(modelMesh->faces.front()), GL_STATIC_READ);
+    if (hasWeights){
+        vector<float> currentWeights(modelMesh->vertices.size()); 
+        for (int i = 0; i < modelMesh->vertices.size(); i++){
+            float currentWeight = VerticesWeights[i].getWeight(currentArticulation);
+            currentWeights[i] = currentWeight; 
+        }
+        glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->vertices.size() * sizeof(float), &(currentWeights.front()), GL_STATIC_READ);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
+    }
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     compute_program->bind();
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo[0]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo[1]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo[2]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo[3]);
+    if (hasWeights){glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo[4]);}
 #endif
 }
 
