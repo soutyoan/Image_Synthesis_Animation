@@ -16,3 +16,4 @@ viewer/tests
 viewer/moc*
 *.user
 viewer/test_weights_parser.moc
+.vscode/
