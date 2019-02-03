@@ -3,6 +3,7 @@
 using namespace std;
 
 int Joint::GLOBAL_INDEX = 0;
+std::vector<string> Joint::list_names;
 
 Joint::Joint(){
 	local_index = GLOBAL_INDEX;
@@ -300,4 +301,13 @@ bool Joint::fill_vertices(vector<trimesh::point>& joint_vertices)
 	// TODO : Deep First Search and take the offset to be uploaded in vector of points
 	// such as point(offx, offy, offz, 1.0)
 	return true;
+}
+
+int Joint::findIndexOfJoint(string name){
+	auto it = std::find(Joint::list_names.begin(), Joint::list_names.end(), name);
+	if (it == Joint::list_names.end()) {
+	  return -1;
+	}
+  	auto index = std::distance(Joint::list_names.begin(), it);
+	return (int)index;
 }

@@ -1,7 +1,7 @@
 # if (mac OS X)
 DESTDIR = ../viewer
 # ENDIF
-QT       += core gui opengl
+QT       += core gui opengl testlib
 
 macx {
   QMAKE_CXXFLAGS += -Wno-unknown-pragmas
@@ -18,7 +18,8 @@ myViewer{
                 src/main.cpp \
                 src/openglwindow.cpp \
                 src/glshaderwindow.cpp \
-                src/joint.cpp
+                src/joint.cpp \
+                src/weight.cpp
 
     HEADERS  += \
                 src/openglwindow.h \
@@ -26,7 +27,8 @@ myViewer{
                 src/perlinNoise.h \
                 src/joint.h \
                 src/glshaderwindow-animation.h \
-                src/openglwindow-animation.h
+                src/openglwindow-animation.h \
+                src/weight.h
 
 }
 
@@ -36,10 +38,31 @@ parser {
     TEMPLATE = app
     SOURCES +=  \
                 test/test_bvh_creation.cpp \
-                src/joint.cpp
+                src/joint.cpp \
+                src/weight.cpp
 
     HEADERS  += \
                 src/joint.h \
+                src/weight.h
+
+    # install
+    # target.path = $$[QT_INSTALL_EXAMPLES]/qtestlib/tutorial1
+    # INSTALLS += target
+}
+
+tests {
+
+    TARGET = tests
+    TEMPLATE = app
+    SOURCES +=  \
+                test/test_weights_parser.cpp \
+                src/joint.cpp \
+                src/weight.cpp
+
+    HEADERS  += \
+                src/joint.h \
+                src/weight.h
+
 }
 
 
