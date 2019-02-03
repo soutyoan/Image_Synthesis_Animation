@@ -33,12 +33,12 @@ void Weight::createFromFile(string &filename, vector<Weight> &VerticesWeights){
     }
 }
 
-Weight::Weight(ifstream &filestream, int sizeVector, vector<int> indicesJoints){
+Weight::Weight(ifstream &filestream, int sizeVector,const vector<int>& indicesJoints){
     weightJoints.resize(sizeVector);
     create(filestream, sizeVector, indicesJoints);
 }
 
-void Weight::create(ifstream &filestream, int sizeVector, vector<int> indicesJoints){
+void Weight::create(ifstream &filestream, int sizeVector,const vector<int>& indicesJoints){
     float weightJ;
     for (int i = 0; i < sizeVector; i++){
         filestream >> weightJ;
