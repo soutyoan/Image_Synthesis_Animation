@@ -1,4 +1,4 @@
-QT       += core gui opengl
+QT       += core gui opengl testlib
 
 myViewer{
     TARGET = myViewer
@@ -6,6 +6,10 @@ myViewer{
 
 parser {
     TARGET = parser
+}
+
+tests {
+    TARGET = tests
 }
 
 TEMPLATE = subdirs

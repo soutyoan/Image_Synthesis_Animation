@@ -51,6 +51,7 @@ private :
 
 public:
 	static int GLOBAL_INDEX;
+	static std::vector<string> list_names;
 	int local_index=0;
 	std::string _name;					// name of joint
 	double _offX;						// initial offset in X
@@ -81,6 +82,7 @@ public:
 	static Joint* create(std::string name, double offX, double offY, double offZ, Joint* parent) {
 		Joint* child = new Joint();
 		child->_name = name;
+		list_names.push_back(name);
 		child->_offX = offX;
 		child->_offY = offY;
 		child->_offZ = offZ;
@@ -108,6 +110,8 @@ public:
 	void nbDofs();
 
 	bool fill_vertices(vector<trimesh::point>& joint_vertices);
+
+	static int findIndexOfJoint(string name);
 
 private:
 	static void parser_hierarchy(ifstream& file, string& buf);
