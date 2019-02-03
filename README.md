@@ -24,5 +24,6 @@ We are currently using multiple target for test purposes.
    Current targets are :
     1. myViewer (global)
     2. parser (parser test)
+    3. tests (tests unitaires)
 
     Execute : qmake CONFIG+=target
