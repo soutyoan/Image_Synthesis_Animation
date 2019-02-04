@@ -38,7 +38,7 @@ public slots:
     void openNewTexture();
     void openNewEnvMap();
     void openSkeletonFromBvh();
-    void openWeightsForSkeleton(); 
+    void openWeightsForSkeleton();
     void saveScene();
     void toggleFullScreen();
     void saveScreenshot();
@@ -53,7 +53,7 @@ public slots:
     void updateShininess(int shininessSliderValue);
     void updateEta(int etaSliderValue);
     void updateMaxBounds(int maxBoundsSliderValue);
-    void updateArticulationInfluence(int currentArticulation); 
+    void updateArticulationInfluence(int currentArticulation);
 
 protected:
     void mousePressEvent(QMouseEvent *e);
@@ -78,9 +78,9 @@ private:
     void mouseToTrackball(QVector2D &in, QVector3D &out);
 
     // Are we using GPGPU?
-    bool isGPGPU;
+    bool isGPGPU = false;
     // Are we using FullRt shader?
-    bool isFullRt;
+    bool isFullRt = false;
 
     // Are we animating the skeleton ?
     bool isAnimate;
@@ -90,7 +90,7 @@ private:
     // Model we are displaying:
     QString  workingDirectory;
     QString  modelName;
-    QString  weightsName; 
+    QString  weightsName;
     QString  textureName;
     QString  envMapName;
     trimesh::TriMesh* modelMesh;
@@ -110,7 +110,7 @@ private:
     trimesh::point *s_colors;
     int *s_indices;
     // Weights
-    vector<Weight> VerticesWeights; 
+    vector<Weight> VerticesWeights;
     // GPGPU
     trimesh::point *gpgpu_vertices;
     trimesh::vec *gpgpu_normals;
@@ -130,7 +130,7 @@ private:
     float lightDistance;
     float groundDistance;
     int maxBounds;
-    int currentArticulation = 0; 
+    int currentArticulation = 0;
 
 
     // OpenGL variables encapsulated by Qt

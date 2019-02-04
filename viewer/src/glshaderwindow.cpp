@@ -258,8 +258,8 @@ void glShaderWindow::updateMaxBounds(int maxBoundsSliderValue)
 }
 
 void glShaderWindow::updateArticulationInfluence(int currentArticulationValue){
-    currentArticulation = currentArticulationValue;     
-    renderNow(); 
+    currentArticulation = currentArticulationValue;
+    renderNow();
 }
 
 QWidget *glShaderWindow::makeAuxWindow()
@@ -395,8 +395,8 @@ QWidget *glShaderWindow::makeAuxWindow()
 
 void glShaderWindow::createSSBO()
 {
-#ifndef __APPLE__  
-    bool hasWeights = (VerticesWeights.size()!=0); 
+#ifndef __APPLE__
+    bool hasWeights = (VerticesWeights.size()!=0);
     if (hasWeights){glGenBuffers(5, ssbo);} else {glGenBuffers(4, ssbo);}
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[0]);
     // TODO: test if 4 float alignment works better
@@ -408,10 +408,10 @@ void glShaderWindow::createSSBO()
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[3]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->faces.size() * 3 * sizeof(int), &(modelMesh->faces.front()), GL_STATIC_READ);
     if (hasWeights){
-        vector<float> currentWeights(modelMesh->vertices.size()); 
+        vector<float> currentWeights(modelMesh->vertices.size());
         for (int i = 0; i < modelMesh->vertices.size(); i++){
             float currentWeight = VerticesWeights[i].getWeight(currentArticulation);
-            currentWeights[i] = currentWeight; 
+            currentWeights[i] = currentWeight;
         }
         glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->vertices.size() * sizeof(float), &(currentWeights.front()), GL_STATIC_READ);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
@@ -806,6 +806,7 @@ void glShaderWindow::setShader(const QString& shader)
     QString computeShader;
     isGPGPU = shader.contains("gpgpu", Qt::CaseInsensitive);
     isFullRt = shader.contains("fullrt", Qt::CaseInsensitive);
+    // cout << "fullRT " << isFullRt << " " << shader.toStdString() << endl;
     foreach (const QString &str, shaders) {
         QString suffix = str.right(str.size() - str.lastIndexOf("."));
         if (m_vertShaderSuffix.filter(suffix).size() > 0) {
