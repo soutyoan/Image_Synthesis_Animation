@@ -635,22 +635,75 @@ void glShaderWindow::bindSceneToProgram()
     skeleton_vertexBuffer.bind();
 
 
-    s_numPoints = skeleton->GLOBAL_INDEX;
+    // s_numPoints = skeleton->GLOBAL_INDEX;
+    s_numPoints = 8;
 
+    if (s_vertices == 0) s_vertices = new trimesh::point[8];
+    if (s_colors == 0) s_colors = new trimesh::point[8];
+    if (s_indices == 0) s_indices = new int[24];
+    // testing with a simple cube
+    s_vertices[0] = trimesh::point(0, 0, 0, 0);
+    s_vertices[1] = trimesh::point(0, 100, 0, 0);
+    s_vertices[2] = trimesh::point(-100, 100, 0, 0);
+    s_vertices[3] = trimesh::point(-100, 0, 0, 0);
+    s_vertices[4] = trimesh::point(0, 0, 100, 0);
+    s_vertices[5] = trimesh::point(0, 100, 100, 0);
+    s_vertices[6] = trimesh::point(-100, 100, 100, 0);
+    s_vertices[7] = trimesh::point(-100, 0, 100, 0);
+
+    for (int i=0; i<8; i++) {
+        s_colors[i] = trimesh::point(1.0, 1.0, 1.0, 1.0);
+    }
+
+    s_numIndices=0;
+    // link bottom face
+    s_indices[s_numIndices++] = 0;
+    s_indices[s_numIndices++] = 1;
+
+    s_indices[s_numIndices++] = 1;
+    s_indices[s_numIndices++] = 2;
+
+    s_indices[s_numIndices++] = 2;
+    s_indices[s_numIndices++] = 3;
+
+    s_indices[s_numIndices++] = 3;
+    s_indices[s_numIndices++] = 0;
+
+    // link up face
+    s_indices[s_numIndices++] = 4;
+    s_indices[s_numIndices++] = 5;
+
+    s_indices[s_numIndices++] = 5;
+    s_indices[s_numIndices++] = 6;
+
+    s_indices[s_numIndices++] = 6;
+    s_indices[s_numIndices++] = 7;
+
+    s_indices[s_numIndices++] = 7;
+    s_indices[s_numIndices++] = 4;
+
+    // link the two faces
+    s_indices[s_numIndices++] = 0;
+    s_indices[s_numIndices++] = 4;
+
+    s_indices[s_numIndices++] = 1;
+    s_indices[s_numIndices++] = 5;
+
+    s_indices[s_numIndices++] = 2;
+    s_indices[s_numIndices++] = 6;
+
+    s_indices[s_numIndices++] = 3;
+    s_indices[s_numIndices++] = 7;
     // s_numPoints = 2;
 
-    skeleton->displayJoint();
+    // skeleton->displayJoint();
 
-    cout<<"s_numPoints = "<<s_numPoints<<endl;
-
-
-
-    if (s_vertices == 0) s_vertices = new trimesh::point[s_numPoints];
-    if (s_colors == 0) s_colors = new trimesh::point[s_numPoints];
-    if (s_indices == 0) s_indices = new int[2*(s_numPoints-1)];
+    // cout<<"s_numPoints = "<<s_numPoints<<endl;
 
 
-    s_numIndices = 0;
+
+
+
 
     // s_vertices[0] = trimesh::point(0, 0, 0, 0);
     // s_vertices[1] = trimesh::point(0, 1, 0, 0);
@@ -660,7 +713,7 @@ void glShaderWindow::bindSceneToProgram()
     // s_indices[s_numIndices++] = 0;
     // s_indices[s_numIndices++] = 1;
 
-    fillValuesFromJoints(skeleton);
+    // fillValuesFromJoints(skeleton);
 
     cout<<"s_numIndices = "<<s_numIndices<<endl;
 
