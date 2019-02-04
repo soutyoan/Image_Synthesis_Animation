@@ -133,7 +133,9 @@ int main( int argc, char* argv[] )
 {
     setlocale(LC_ALL,"C");
     QApplication app(argc, argv);
-    QString sceneName = "teapot.ply";
+    QString sceneName = "skin.off";
+    QString skeletonName = "walk1.bvh";
+    QString weightsName = "weights.txt";
     QString textureName = "wildtextures-seamless-wood-planks.jpg";
     QString envMapName = "pisa.png";
 
@@ -169,7 +171,7 @@ int main( int argc, char* argv[] )
 #else
     appPath = appPath + "/models/";
 #endif
-    window->setWorkingDirectory(appPath, sceneName, textureName, envMapName);
+    window->setWorkingDirectory(appPath, sceneName, textureName, envMapName, skeletonName, weightsName);
     // Embedding a QWindow in a QWidget, only way to combine it with widgets
     QWidget * container = QWidget::createWindowContainer(window);
 

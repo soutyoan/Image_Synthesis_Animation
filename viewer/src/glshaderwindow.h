@@ -28,7 +28,7 @@ public:
     void initialize();
     void render();
     void resize(int x, int y);
-    void setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap);
+    void setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap, QString& skeletonName, QString& weightsName);
     inline const QString& getWorkingDirectory() { return workingDirectory;};
     inline const QStringList& fragShaderSuffix() { return m_fragShaderSuffix;};
     inline const QStringList& vertShaderSuffix() { return m_vertShaderSuffix;};
@@ -75,6 +75,7 @@ private:
     void loadTexturesForShaders();
     void openScene();
     void openSkeleton();
+    void openWeights();
     void mouseToTrackball(QVector2D &in, QVector3D &out);
 
     // Are we using GPGPU?
@@ -90,6 +91,7 @@ private:
     // Model we are displaying:
     QString  workingDirectory;
     QString  modelName;
+    QString  skeletonName;
     QString  weightsName;
     QString  textureName;
     QString  envMapName;
@@ -132,6 +134,7 @@ private:
     int maxBounds;
     int currentArticulation = 0;
 
+    QString shaderName;
 
     // OpenGL variables encapsulated by Qt
     QOpenGLShaderProgram *m_program;

@@ -181,14 +181,12 @@ void glShaderWindow::openSkeletonFromBvh() {
     int ret = dialog.exec();
     if (ret == QDialog::Accepted) {
         workingDirectory = dialog.directory().path() + "/";
-        modelName = dialog.selectedFiles()[0];
+        skeletonName = dialog.selectedFiles()[0];
     }
 
-    if (!modelName.isNull())
+    if (!skeletonName.isNull())
     {
-        skeleton = Joint::createFromFile(modelName.toStdString());
         openSkeleton();
-        renderNow();
     }
 }
 
@@ -202,11 +200,19 @@ void glShaderWindow::openWeightsForSkeleton(){
         weightsName = dialog.selectedFiles()[0];
     }
 
+    if (skeleton == NULL){
+        std::cerr << "Input a skeleton before weights" << endl;
+        return;
+    }
+
     if (!weightsName.isNull())
     {
-        Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
         renderNow();
     }
+}
+
+void glShaderWindow::openWeights(){
+    Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
 }
 
 void glShaderWindow::cookTorranceClicked()
@@ -259,7 +265,14 @@ void glShaderWindow::updateMaxBounds(int maxBoundsSliderValue)
 
 void glShaderWindow::updateArticulationInfluence(int currentArticulationValue){
     currentArticulation = currentArticulationValue;
-    renderNow();
+    if (modelMesh->colors.size() != modelMesh->vertices.size()){
+        modelMesh->colors.resize(modelMesh->vertices.size());
+    }
+    for (int i = 0; i < modelMesh->vertices.size(); i++){
+        float currentWeight = VerticesWeights[i].getWeight(currentArticulation);
+        modelMesh->colors[i] = trimesh::Color(currentWeight, 0.0, 0.0);
+    }
+    setShader(shaderName);
 }
 
 QWidget *glShaderWindow::makeAuxWindow()
@@ -397,7 +410,7 @@ void glShaderWindow::createSSBO()
 {
 #ifndef __APPLE__
     bool hasWeights = (VerticesWeights.size()!=0);
-    if (hasWeights){glGenBuffers(5, ssbo);} else {glGenBuffers(4, ssbo);}
+    glGenBuffers(4, ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[0]);
     // TODO: test if 4 float alignment works better
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->vertices.size() * sizeof(trimesh::point), &(modelMesh->vertices.front()), GL_STATIC_READ);
@@ -407,22 +420,12 @@ void glShaderWindow::createSSBO()
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->colors.size() * sizeof(trimesh::Color), &(modelMesh->colors.front()), GL_STATIC_READ);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[3]);
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->faces.size() * 3 * sizeof(int), &(modelMesh->faces.front()), GL_STATIC_READ);
-    if (hasWeights){
-        vector<float> currentWeights(modelMesh->vertices.size());
-        for (int i = 0; i < modelMesh->vertices.size(); i++){
-            float currentWeight = VerticesWeights[i].getWeight(currentArticulation);
-            currentWeights[i] = currentWeight;
-        }
-        glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->vertices.size() * sizeof(float), &(currentWeights.front()), GL_STATIC_READ);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[4]);
-    }
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     compute_program->bind();
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ssbo[0]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ssbo[1]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo[2]);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ssbo[3]);
-    if (hasWeights){glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ssbo[4]);}
 #endif
 }
 
@@ -700,6 +703,11 @@ void glShaderWindow::openScene()
     modelMesh->need_bbox();
     modelMesh->need_normals();
     modelMesh->need_faces();
+    cerr << "OPENED MESH " << endl;
+    openSkeleton();
+    cerr << "OPENED SKELETON " << endl;
+    openWeights();
+    cerr << "OPENED WEIGHTS " << endl;
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
             modelMesh->bsphere.center[2]);
@@ -719,23 +727,12 @@ void glShaderWindow::openScene()
 
 void glShaderWindow::openSkeleton()
 {
-    if (modelMesh) {
-        delete(modelMesh);
-        m_vertexBuffer.release();
-        m_indexBuffer.release();
-        m_colorBuffer.release();
-        m_normalBuffer.release();
-        m_texcoordBuffer.release();
-        m_vao.release();
-    }
     if (!skeleton) {
         QMessageBox::warning(0, tr("qViewer"),
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
         openSkeletonFromBvh();
     }
-    isGPGPU = false; // we do not use the GPU for matrixes computation
-    bindSceneToProgram();
-    initializeTransformForScene();
+    skeleton = Joint::createFromFile(skeletonName.toStdString());
 }
 
 void glShaderWindow::saveScene()
@@ -830,6 +827,7 @@ void glShaderWindow::setShader(const QString& shader)
         hasComputeShaders = false;
         // TODO: release SSBO
     }
+    shaderName = shader;
     bindSceneToProgram();
     loadTexturesForShaders();
     renderNow();
@@ -977,7 +975,7 @@ void glShaderWindow::initialize()
         delete(m_program);
     }
 	QString shaderPath = workingDirectory + "../shaders/";
-    m_program = prepareShaderProgram(shaderPath + "1_simple.vert", shaderPath + "1_simple.frag");
+    m_program = prepareShaderProgram(shaderPath + "2_phong.vert", shaderPath + "2_phong.frag");
     if (ground_program) {
         ground_program->release();
         delete(ground_program);
@@ -1088,12 +1086,14 @@ QOpenGLShaderProgram* glShaderWindow::prepareComputeProgram(const QString& compu
     return program;
 }
 
-void glShaderWindow::setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap)
+void glShaderWindow::setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap, QString& mySkeletonName, QString& myWeightsName)
 {
     workingDirectory = myPath;
     modelName = myPath + myName;
     textureName = myPath + "../textures/" + texture;
     envMapName = myPath + "../textures/" + envMap;
+    skeletonName = myPath + mySkeletonName;
+    weightsName = myPath + myWeightsName;
 }
 
 void glShaderWindow::mouseToTrackball(QVector2D &mousePosition, QVector3D &spacePosition)
