@@ -4,6 +4,7 @@
 #include "openglwindow.h"
 #include "TriMesh.h"
 #include "joint.h"
+#include "weight.h"
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QMatrix4x4>
@@ -27,7 +28,7 @@ public:
     void initialize();
     void render();
     void resize(int x, int y);
-    void setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap);
+    void setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap, QString& skeletonName, QString& weightsName);
     inline const QString& getWorkingDirectory() { return workingDirectory;};
     inline const QStringList& fragShaderSuffix() { return m_fragShaderSuffix;};
     inline const QStringList& vertShaderSuffix() { return m_vertShaderSuffix;};
@@ -37,6 +38,7 @@ public slots:
     void openNewTexture();
     void openNewEnvMap();
     void openSkeletonFromBvh();
+    void openWeightsForSkeleton();
     void saveScene();
     void toggleFullScreen();
     void saveScreenshot();
@@ -51,6 +53,7 @@ public slots:
     void updateShininess(int shininessSliderValue);
     void updateEta(int etaSliderValue);
     void updateMaxBounds(int maxBoundsSliderValue);
+    void updateArticulationInfluence(int currentArticulation);
 
 protected:
     void mousePressEvent(QMouseEvent *e);
@@ -72,12 +75,13 @@ private:
     void loadTexturesForShaders();
     void openScene();
     void openSkeleton();
+    void openWeights();
     void mouseToTrackball(QVector2D &in, QVector3D &out);
 
     // Are we using GPGPU?
-    bool isGPGPU;
+    bool isGPGPU = false;
     // Are we using FullRt shader?
-    bool isFullRt;
+    bool isFullRt = false;
 
     // Are we animating the skeleton ?
     bool isAnimate;
@@ -87,6 +91,8 @@ private:
     // Model we are displaying:
     QString  workingDirectory;
     QString  modelName;
+    QString  skeletonName;
+    QString  weightsName;
     QString  textureName;
     QString  envMapName;
     trimesh::TriMesh* modelMesh;
@@ -104,6 +110,8 @@ private:
     trimesh::point *s_vertices;
     trimesh::point *s_colors;
     int *s_indices;
+    // Weights
+    vector<Weight> VerticesWeights;
     // GPGPU
     trimesh::point *gpgpu_vertices;
     trimesh::vec *gpgpu_normals;
@@ -123,7 +131,9 @@ private:
     float lightDistance;
     float groundDistance;
     int maxBounds;
+    int currentArticulation = 0;
 
+    QString shaderName;
 
     // OpenGL variables encapsulated by Qt
     QOpenGLShaderProgram *m_program;

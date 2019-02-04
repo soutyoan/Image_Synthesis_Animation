@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #include "joint.h"
-
+#include "TriMesh.h"
 
 using namespace std;
 
@@ -17,9 +17,10 @@ private:
 
 public:
     Weight(ifstream &filestream, int sizeVector,const vector<int>& indicesJoints);
-	static void createFromFile(string &filename, vector<Weight>& VerticesWeights);
-    void create(ifstream &filestream, int sizeVector,const vector<int>& indicesJoints);
+	static void createFromFile(string filename, vector<Weight>& VerticesWeights);
+    void create(ifstream &filestream, int sizeVector, const vector<int>& indicesJoints);
 	float getWeight(int i){return weightJoints[i];}
+
 
 };
 

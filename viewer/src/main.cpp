@@ -36,6 +36,11 @@ void setupFileMenu(QMenuBar* myMenuBar, glShaderWindow* glWindow, QApplication *
     openSkeletonAction->setStatusTip(myMenuBar->tr("&Opens an existing skeleton file"));
     glWindow->connect(openSkeletonAction, SIGNAL(triggered()), glWindow, SLOT(openSkeletonFromBvh()));
     fileMenu->addAction(openSkeletonAction);
+    // Open a weight file for the skeleton
+    QAction* openWeightsActions = new QAction(myMenuBar->tr("&Open Weights"), fileMenu);
+    openWeightsActions->setStatusTip(myMenuBar->tr("&Opens an existing weights file"));
+    glWindow->connect(openWeightsActions, SIGNAL(triggered()), glWindow, SLOT(openWeightsForSkeleton()));
+    fileMenu->addAction(openWeightsActions);
     // Load new texture
     QAction* openTextureAction = new QAction(myMenuBar->tr("&Load texture"), fileMenu);
     openTextureAction->setStatusTip(myMenuBar->tr("&Opens a new texture image file"));
@@ -128,7 +133,9 @@ int main( int argc, char* argv[] )
 {
     setlocale(LC_ALL,"C");
     QApplication app(argc, argv);
-    QString sceneName = "teapot.ply";
+    QString sceneName = "skin.off";
+    QString skeletonName = "walk1.bvh";
+    QString weightsName = "weights.txt";
     QString textureName = "wildtextures-seamless-wood-planks.jpg";
     QString envMapName = "pisa.png";
 
@@ -164,7 +171,7 @@ int main( int argc, char* argv[] )
 #else
     appPath = appPath + "/models/";
 #endif
-    window->setWorkingDirectory(appPath, sceneName, textureName, envMapName);
+    window->setWorkingDirectory(appPath, sceneName, textureName, envMapName, skeletonName, weightsName);
     // Embedding a QWindow in a QWidget, only way to combine it with widgets
     QWidget * container = QWidget::createWindowContainer(window);
 
