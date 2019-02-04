@@ -230,6 +230,10 @@ void glShaderWindow::openWeightsForSkeleton(){
 void glShaderWindow::openWeights(){
     Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
     std::cerr << "CREATED FROM FILE " << VerticesWeights.size() << endl;
+    vector<QMatrix4x4> offsetMatrices;
+    std::vector<QMatrix4x4> matrices = skeleton->getTransformationMatrices(offsetMatrices);
+    calculateNewPosition(matrices, offsetMatrices);
+
 }
 
 void glShaderWindow::cookTorranceClicked()
@@ -1593,13 +1597,18 @@ void glShaderWindow::render()
     index_rendu ++;
 }
 
-void glShaderWindow::calculateNewPosition(){
+void glShaderWindow::calculateNewPosition(vector<QMatrix4x4>& transformMatrices, vector<QMatrix4x4>& offsetMatrices){
     for (int i = 0; i < modelMesh->vertices.size(); i++){
         trimesh::point current = modelMesh->vertices[i];
         Weight currentWeight = VerticesWeights[i];
         trimesh::point newPoint;
         for (int j = 0; j < currentWeight.size(); j++){
             if (currentWeight.getWeight(j) != 0){
+                QVector3D tmpVec(current[0], current[1], current[2]);
+
+                QVector3D wVec = offsetMatrices[j] * transformMatrices[j] * offsetMatrices[j].inverted() * tmpVec;
+                newPoint += currentWeight.getWeight(j) * trimesh::point(wVec[0],
+                        wVec[1], wVec[2], 1);
 
             }
         }
