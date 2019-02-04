@@ -638,91 +638,74 @@ void glShaderWindow::bindSceneToProgram()
     // s_numPoints = skeleton->GLOBAL_INDEX;
     s_numPoints = 8;
 
-    if (s_vertices == 0) s_vertices = new trimesh::point[8];
-    if (s_colors == 0) s_colors = new trimesh::point[8];
-    if (s_indices == 0) s_indices = new int[24];
+    int number = 100;
+
+    if (s_vertices == 0) s_vertices = new trimesh::point[s_numPoints];
+    if (s_colors == 0) s_colors = new trimesh::point[s_numPoints];
+    if (s_indices == 0) s_indices = new int[36];
+    if (s_normals == 0) s_normals = new trimesh::vec[s_numPoints];
+    if (s_texcoords == 0) s_texcoords = new trimesh::vec2[s_numPoints];
     // testing with a simple cube
-    s_vertices[0] = trimesh::point(0, 0, 0, 0);
-    s_vertices[1] = trimesh::point(0, 100, 0, 0);
-    s_vertices[2] = trimesh::point(-100, 100, 0, 0);
-    s_vertices[3] = trimesh::point(-100, 0, 0, 0);
-    s_vertices[4] = trimesh::point(0, 0, 100, 0);
-    s_vertices[5] = trimesh::point(0, 100, 100, 0);
-    s_vertices[6] = trimesh::point(-100, 100, 100, 0);
-    s_vertices[7] = trimesh::point(-100, 0, 100, 0);
+    s_vertices[0] = trimesh::point(0,       0,      0,      1);
+    s_vertices[1] = trimesh::point(number,  0,      0,      1);
+    s_vertices[2] = trimesh::point(number,  number, 0,      1);
+    s_vertices[3] = trimesh::point(0,       number, 0,      1);
+    s_vertices[4] = trimesh::point(0,       0,      number, 1);
+    s_vertices[5] = trimesh::point(number,  0,      number, 1);
+    s_vertices[6] = trimesh::point(number,  number, number, 1);
+    s_vertices[7] = trimesh::point(0,       number, number, 1);
+
+
+    s_colors[0] = trimesh::point(0.0, 0.0, 0.0, 1.0);
+    s_colors[1] = trimesh::point(1.0, 0.0, 0.0, 1.0);
+    s_colors[2] = trimesh::point(0.0, 1.0, 0.0, 1.0);
+    s_colors[3] = trimesh::point(1.0, 1.0, 0.0, 1.0);
+    s_colors[4] = trimesh::point(0.0, 0.0, 1.0, 1.0);
+    s_colors[5] = trimesh::point(1.0, 0.0, 1.0, 1.0);
+    s_colors[6] = trimesh::point(0.0, 1.0, 1.0, 1.0);
+    s_colors[7] = trimesh::point(1.0, 1.0, 1.0, 1.0);
 
     for (int i=0; i<8; i++) {
-        s_colors[i] = trimesh::point(1.0, 1.0, 1.0, 1.0);
+        // s_colors[i] = trimesh::point(0.0, 1.0, 1.0, 1.0);
+        s_normals[i] = trimesh::point(1.0, 1.0, 1.0, 0.0);
+        s_texcoords[i] = trimesh::vec2(1.0, 1.0);
     }
 
     s_numIndices=0;
     // link bottom face
-    s_indices[s_numIndices++] = 0;
-    s_indices[s_numIndices++] = 1;
-
-    s_indices[s_numIndices++] = 1;
-    s_indices[s_numIndices++] = 2;
-
-    s_indices[s_numIndices++] = 2;
-    s_indices[s_numIndices++] = 3;
-
-    s_indices[s_numIndices++] = 3;
-    s_indices[s_numIndices++] = 0;
+    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 1;s_indices[s_numIndices++] = 2;
+    s_indices[s_numIndices++] = 3;s_indices[s_numIndices++] = 2;s_indices[s_numIndices++] = 0;
+    s_indices[s_numIndices++] = 1;s_indices[s_numIndices++] = 2;s_indices[s_numIndices++] = 6;
+    s_indices[s_numIndices++] = 1;s_indices[s_numIndices++] = 6;s_indices[s_numIndices++] = 5;
 
     // link up face
-    s_indices[s_numIndices++] = 4;
-    s_indices[s_numIndices++] = 5;
+    s_indices[s_numIndices++] = 4;s_indices[s_numIndices++] = 5;s_indices[s_numIndices++] = 6;
+    s_indices[s_numIndices++] = 4;s_indices[s_numIndices++] = 6;s_indices[s_numIndices++] = 7;
+    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 3;s_indices[s_numIndices++] = 7;
+    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 7;s_indices[s_numIndices++] = 4;
 
-    s_indices[s_numIndices++] = 5;
-    s_indices[s_numIndices++] = 6;
-
-    s_indices[s_numIndices++] = 6;
-    s_indices[s_numIndices++] = 7;
-
-    s_indices[s_numIndices++] = 7;
-    s_indices[s_numIndices++] = 4;
-
-    // link the two faces
-    s_indices[s_numIndices++] = 0;
-    s_indices[s_numIndices++] = 4;
-
-    s_indices[s_numIndices++] = 1;
-    s_indices[s_numIndices++] = 5;
-
-    s_indices[s_numIndices++] = 2;
-    s_indices[s_numIndices++] = 6;
-
-    s_indices[s_numIndices++] = 3;
-    s_indices[s_numIndices++] = 7;
-    // s_numPoints = 2;
+    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 1;s_indices[s_numIndices++] = 5;
+    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 4;s_indices[s_numIndices++] = 5;
+    s_indices[s_numIndices++] = 3;s_indices[s_numIndices++] = 2;s_indices[s_numIndices++] = 6;
+    s_indices[s_numIndices++] = 3;s_indices[s_numIndices++] = 7;s_indices[s_numIndices++] = 6;
 
     // skeleton->displayJoint();
 
-    // cout<<"s_numPoints = "<<s_numPoints<<endl;
-
-
-
-
-
-
-    // s_vertices[0] = trimesh::point(0, 0, 0, 0);
-    // s_vertices[1] = trimesh::point(0, 1, 0, 0);
-    // s_colors[0] = trimesh::point(1.0, 1.0, 1.0, 1.0);
-    // s_colors[1] = trimesh::point(1.0, 1.0, 1.0, 1.0);
-    //
-    // s_indices[s_numIndices++] = 0;
-    // s_indices[s_numIndices++] = 1;
-
     // fillValuesFromJoints(skeleton);
-
-    cout<<"s_numIndices = "<<s_numIndices<<endl;
+    cerr<<"s_numIndices = "<<s_numIndices<<endl;
 
     skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_vertexBuffer.bind();
     skeleton_vertexBuffer.allocate(s_vertices, s_numPoints * sizeof(trimesh::point));
+    skeleton_normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skeleton_normalBuffer.bind();
+    skeleton_normalBuffer.allocate(s_normals, s_numPoints * sizeof(trimesh::vec));
     skeleton_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_colorBuffer.bind();
     skeleton_colorBuffer.allocate(s_colors, s_numPoints * sizeof(trimesh::point));
+    skeleton_texcoordBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skeleton_texcoordBuffer.bind();
+    skeleton_texcoordBuffer.allocate(s_texcoords, s_numPoints * sizeof(trimesh::vec2));
     skeleton_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_indexBuffer.bind();
     skeleton_indexBuffer.allocate(s_indices, s_numIndices * sizeof(int));
@@ -734,28 +717,16 @@ void glShaderWindow::bindSceneToProgram()
     skeleton_colorBuffer.bind();
     skeleton_program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
     skeleton_program->enableAttributeArray("color");
+    skeleton_normalBuffer.bind();
+    skeleton_program->setAttributeBuffer( "normal", GL_FLOAT, 0, 4 );
+    skeleton_program->enableAttributeArray( "normal" );
+    skeleton_program->setUniformValue("noColor", false);
+    skeleton_texcoordBuffer.bind();
+    skeleton_program->setAttributeBuffer( "texcoords", GL_FLOAT, 0, 2 );
+    skeleton_program->enableAttributeArray( "texcoords" );
     skeleton_program->release();
 
-
-    // Also bind the ground to the shadow mapping program:
-    shadowMapGenerationProgram->bind();
-    ground_vertexBuffer.bind();
-    shadowMapGenerationProgram->setAttributeBuffer( "vertex", GL_FLOAT, 0, 4 );
-    shadowMapGenerationProgram->enableAttributeArray( "vertex" );
-    shadowMapGenerationProgram->release();
-    ground_colorBuffer.bind();
-    shadowMapGenerationProgram->setAttributeBuffer( "color", GL_FLOAT, 0, 4 );
-    shadowMapGenerationProgram->enableAttributeArray( "color" );
-    ground_normalBuffer.bind();
-    shadowMapGenerationProgram->setAttributeBuffer( "normal", GL_FLOAT, 0, 4 );
-    shadowMapGenerationProgram->enableAttributeArray( "normal" );
-    ground_texcoordBuffer.bind();
-    shadowMapGenerationProgram->setAttributeBuffer( "texcoords", GL_FLOAT, 0, 2 );
-    shadowMapGenerationProgram->enableAttributeArray( "texcoords" );
-    ground_program->release();
-    ground_vao.release();
-
-
+    skeleton_vao.release();
 }
 
 void glShaderWindow::fillValuesFromJoints(Joint* current)
@@ -1132,7 +1103,9 @@ void glShaderWindow::initialize()
     skeleton_vao.bind();
     skeleton_vertexBuffer.create();
     skeleton_colorBuffer.create();
+    skeleton_normalBuffer.create();
     skeleton_indexBuffer.create();
+    skeleton_texcoordBuffer.create();
     skeleton_vao.release();
 
     openScene();
