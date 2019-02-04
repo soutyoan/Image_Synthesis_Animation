@@ -77,7 +77,7 @@ private:
     void openSkeleton();
     void openWeights();
     void mouseToTrackball(QVector2D &in, QVector3D &out);
-    void fillValuesFromJoints(Joint* current);
+    void fillValuesFromJoints(Joint* current, float& xPos, float& yPos, float& zPos);
 
     // Are we using GPGPU?
     bool isGPGPU = false;

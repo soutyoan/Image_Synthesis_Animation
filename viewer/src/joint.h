@@ -109,8 +109,6 @@ public:
 	// Analysis of degrees of freedom :
 	void nbDofs();
 
-	bool fill_vertices(vector<trimesh::point>& joint_vertices);
-
 	static int findIndexOfJoint(string name);
 
 	void displayJoint();

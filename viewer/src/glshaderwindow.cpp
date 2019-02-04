@@ -635,59 +635,52 @@ void glShaderWindow::bindSceneToProgram()
     skeleton_vertexBuffer.bind();
 
 
-    // s_numPoints = skeleton->GLOBAL_INDEX;
-    s_numPoints = 8;
+    s_numPoints = skeleton->GLOBAL_INDEX-1;
+    cout <<"s_numPoints : "<<s_numPoints<<endl;
+    // s_numPoints = 8;
 
-    int number = 100;
+    // int number = 100;
 
     if (s_vertices == 0) s_vertices = new trimesh::point[s_numPoints];
     if (s_colors == 0) s_colors = new trimesh::point[s_numPoints];
-    if (s_indices == 0) s_indices = new int[36];
-    if (s_normals == 0) s_normals = new trimesh::vec[s_numPoints];
-    if (s_texcoords == 0) s_texcoords = new trimesh::vec2[s_numPoints];
+    if (s_indices == 0) s_indices = new int[2*(s_numPoints-1)];
+    // if (s_normals == 0) s_normals = new trimesh::vec[s_numPoints];
+    // if (s_texcoords == 0) s_texcoords = new trimesh::vec2[s_numPoints];
     // testing with a simple cube
-    s_vertices[0] = trimesh::point(0,       0,      0,      1);
-    s_vertices[1] = trimesh::point(number,  0,      0,      1);
-    s_vertices[2] = trimesh::point(number,  number, 0,      1);
-    s_vertices[3] = trimesh::point(0,       number, 0,      1);
-    s_vertices[4] = trimesh::point(0,       0,      number, 1);
-    s_vertices[5] = trimesh::point(number,  0,      number, 1);
-    s_vertices[6] = trimesh::point(number,  number, number, 1);
-    s_vertices[7] = trimesh::point(0,       number, number, 1);
+    // s_vertices[0] = trimesh::point(0,       0,      0,      1);
+    // s_vertices[1] = trimesh::point(number,  0,      0,      1);
+    // s_vertices[2] = trimesh::point(number,  number, 0,      1);
+    // s_vertices[3] = trimesh::point(0,       number, 0,      1);
+    // s_vertices[4] = trimesh::point(0,       0,      number, 1);
+    // s_vertices[5] = trimesh::point(number,  0,      number, 1);
+    // s_vertices[6] = trimesh::point(number,  number, number, 1);
+    // s_vertices[7] = trimesh::point(0,       number, number, 1);
 
 
-    s_colors[0] = trimesh::point(0.0, 0.0, 0.0, 1.0);
-    s_colors[1] = trimesh::point(1.0, 0.0, 0.0, 1.0);
-    s_colors[2] = trimesh::point(0.0, 1.0, 0.0, 1.0);
-    s_colors[3] = trimesh::point(1.0, 1.0, 0.0, 1.0);
-    s_colors[4] = trimesh::point(0.0, 0.0, 1.0, 1.0);
-    s_colors[5] = trimesh::point(1.0, 0.0, 1.0, 1.0);
-    s_colors[6] = trimesh::point(0.0, 1.0, 1.0, 1.0);
-    s_colors[7] = trimesh::point(1.0, 1.0, 1.0, 1.0);
+    // s_colors[0] = trimesh::point(0.0, 0.0, 0.0, 1.0);
+    // s_colors[1] = trimesh::point(1.0, 0.0, 0.0, 1.0);
+    // s_colors[2] = trimesh::point(0.0, 1.0, 0.0, 1.0);
+    // s_colors[3] = trimesh::point(1.0, 1.0, 0.0, 1.0);
+    // s_colors[4] = trimesh::point(0.0, 0.0, 1.0, 1.0);
+    // s_colors[5] = trimesh::point(1.0, 0.0, 1.0, 1.0);
+    // s_colors[6] = trimesh::point(0.0, 1.0, 1.0, 1.0);
+    // s_colors[7] = trimesh::point(1.0, 1.0, 1.0, 1.0);
 
-    for (int i=0; i<8; i++) {
-        // s_colors[i] = trimesh::point(0.0, 1.0, 1.0, 1.0);
-        s_normals[i] = trimesh::point(1.0, 1.0, 1.0, 0.0);
-        s_texcoords[i] = trimesh::vec2(1.0, 1.0);
-    }
+    // for (int i=0; i<8; i++) {
+    //     // s_colors[i] = trimesh::point(0.0, 1.0, 1.0, 1.0);
+    //     s_normals[i] = trimesh::point(1.0, 1.0, 1.0, 0.0);
+    //     s_texcoords[i] = trimesh::vec2(1.0, 1.0);
+    // }
 
     s_numIndices=0;
+
+    float xPos=0.0;
+    float yPos=0.0;
+    float zPos=0.0;
+
+    fillValuesFromJoints(skeleton, xPos, yPos, zPos);
     // link bottom face
-    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 1;s_indices[s_numIndices++] = 2;
-    s_indices[s_numIndices++] = 3;s_indices[s_numIndices++] = 2;s_indices[s_numIndices++] = 0;
-    s_indices[s_numIndices++] = 1;s_indices[s_numIndices++] = 2;s_indices[s_numIndices++] = 6;
-    s_indices[s_numIndices++] = 1;s_indices[s_numIndices++] = 6;s_indices[s_numIndices++] = 5;
 
-    // link up face
-    s_indices[s_numIndices++] = 4;s_indices[s_numIndices++] = 5;s_indices[s_numIndices++] = 6;
-    s_indices[s_numIndices++] = 4;s_indices[s_numIndices++] = 6;s_indices[s_numIndices++] = 7;
-    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 3;s_indices[s_numIndices++] = 7;
-    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 7;s_indices[s_numIndices++] = 4;
-
-    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 1;s_indices[s_numIndices++] = 5;
-    s_indices[s_numIndices++] = 0;s_indices[s_numIndices++] = 4;s_indices[s_numIndices++] = 5;
-    s_indices[s_numIndices++] = 3;s_indices[s_numIndices++] = 2;s_indices[s_numIndices++] = 6;
-    s_indices[s_numIndices++] = 3;s_indices[s_numIndices++] = 7;s_indices[s_numIndices++] = 6;
 
     // skeleton->displayJoint();
 
@@ -697,15 +690,15 @@ void glShaderWindow::bindSceneToProgram()
     skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_vertexBuffer.bind();
     skeleton_vertexBuffer.allocate(s_vertices, s_numPoints * sizeof(trimesh::point));
-    skeleton_normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    skeleton_normalBuffer.bind();
-    skeleton_normalBuffer.allocate(s_normals, s_numPoints * sizeof(trimesh::vec));
+    // skeleton_normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    // skeleton_normalBuffer.bind();
+    // skeleton_normalBuffer.allocate(s_normals, s_numPoints * sizeof(trimesh::vec));
     skeleton_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_colorBuffer.bind();
     skeleton_colorBuffer.allocate(s_colors, s_numPoints * sizeof(trimesh::point));
-    skeleton_texcoordBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    skeleton_texcoordBuffer.bind();
-    skeleton_texcoordBuffer.allocate(s_texcoords, s_numPoints * sizeof(trimesh::vec2));
+    // skeleton_texcoordBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    // skeleton_texcoordBuffer.bind();
+    // skeleton_texcoordBuffer.allocate(s_texcoords, s_numPoints * sizeof(trimesh::vec2));
     skeleton_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_indexBuffer.bind();
     skeleton_indexBuffer.allocate(s_indices, s_numIndices * sizeof(int));
@@ -717,36 +710,34 @@ void glShaderWindow::bindSceneToProgram()
     skeleton_colorBuffer.bind();
     skeleton_program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
     skeleton_program->enableAttributeArray("color");
-    skeleton_normalBuffer.bind();
-    skeleton_program->setAttributeBuffer( "normal", GL_FLOAT, 0, 4 );
-    skeleton_program->enableAttributeArray( "normal" );
-    skeleton_program->setUniformValue("noColor", false);
-    skeleton_texcoordBuffer.bind();
-    skeleton_program->setAttributeBuffer( "texcoords", GL_FLOAT, 0, 2 );
-    skeleton_program->enableAttributeArray( "texcoords" );
+    // skeleton_normalBuffer.bind();
+    // skeleton_program->setAttributeBuffer( "normal", GL_FLOAT, 0, 4 );
+    // skeleton_program->enableAttributeArray( "normal" );
+    // skeleton_program->setUniformValue("noColor", false);
+    // skeleton_texcoordBuffer.bind();
+    // skeleton_program->setAttributeBuffer( "texcoords", GL_FLOAT, 0, 2 );
+    // skeleton_program->enableAttributeArray( "texcoords" );
     skeleton_program->release();
 
     skeleton_vao.release();
 }
 
-void glShaderWindow::fillValuesFromJoints(Joint* current)
+void glShaderWindow::fillValuesFromJoints(Joint* current, float& xPos, float& yPos, float& zPos)
 {
-    float xPos = current->_offX;
-    float yPos = current->_offY;
-    float zPos = current->_offZ;
-    if (current->_parent!=NULL) {
-        xPos+=current->_parent->_offX;
-        yPos+=current->_parent->_offY;
-        zPos+=current->_parent->_offZ;
-    }
-    cout<<"Filling current point "<<trimesh::point(xPos, yPos, zPos, 0)<<endl;
-    s_vertices[current->local_index] = trimesh::point(xPos, yPos, zPos, 0);
-    s_colors[current->local_index] = trimesh::point(1.0, 1.0, 1.0, 1.0);
+    xPos += current->_offX;
+    yPos += current->_offY;
+    zPos += current->_offZ;
+    cout<<"Filling current point "<<trimesh::point(xPos, yPos, zPos, 1)<<endl;
+    s_vertices[current->local_index-1] = trimesh::point(xPos, yPos, zPos, 1);
+    s_colors[current->local_index-1] = trimesh::point(1.0, 1.0, 1.0, 1.0);
     for (int i=0; i<current->_children.size(); i++) {
-        s_indices[s_numIndices++] = current->local_index;
-        s_indices[s_numIndices++] = current->_children[i]->local_index;
-        cout<<"New segment ("<<current->local_index<<", "<<current->_children[i]->local_index<<")"<<endl;
-        fillValuesFromJoints(current->_children[i]);
+        s_indices[s_numIndices++] = current->local_index-1;
+        s_indices[s_numIndices++] = current->_children[i]->local_index-1;
+        cout<<"New segment ("<<current->local_index-1<<", "<<current->_children[i]->local_index-1<<")"<<endl;
+        fillValuesFromJoints(current->_children[i], xPos, yPos, zPos);
+        xPos -= current->_offX;
+        yPos -= current->_offY;
+        zPos -= current->_offZ;
     }
 }
 
@@ -1103,9 +1094,9 @@ void glShaderWindow::initialize()
     skeleton_vao.bind();
     skeleton_vertexBuffer.create();
     skeleton_colorBuffer.create();
-    skeleton_normalBuffer.create();
+    // skeleton_normalBuffer.create();
     skeleton_indexBuffer.create();
-    skeleton_texcoordBuffer.create();
+    // skeleton_texcoordBuffer.create();
     skeleton_vao.release();
 
     openScene();
