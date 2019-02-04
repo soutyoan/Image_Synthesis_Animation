@@ -222,12 +222,14 @@ void glShaderWindow::openWeightsForSkeleton(){
 
     if (!weightsName.isNull())
     {
-        renderNow();
+        VerticesWeights.clear();
+        openWeights();
     }
 }
 
 void glShaderWindow::openWeights(){
     Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
+    std::cerr << "CREATED FROM FILE " << VerticesWeights.size() << endl;
 }
 
 void glShaderWindow::cookTorranceClicked()
@@ -650,7 +652,6 @@ void glShaderWindow::bindSceneToProgram()
     s_indices[1] = 1;
     s_indices[2] = 1;
     s_indices[3] = 2;
-    cout <<"here" <<endl;
 
     // Joint* current = skeleton;
     // int _ind = -1;
@@ -759,6 +760,12 @@ void glShaderWindow::openScene()
     openSkeleton();
     cerr << "OPENED SKELETON " << endl;
     openWeights();
+    vector<Weight> weightsVec;
+    vector<trimesh::point> jointPosition = skeleton->exportPositions();
+    cout << "Weights size " << jointPosition.size() << endl;
+    Weight::createRigidWeights(modelMesh->vertices, jointPosition, weightsVec);
+    cout << "Weights size " << weightsVec.size() << endl;
+    Weight::writeWeightsToFile(weightsVec);
     cerr << "OPENED WEIGHTS " << endl;
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
@@ -1579,7 +1586,6 @@ void glShaderWindow::render()
         skeleton_program->setUniformValue("perspective", m_perspective);
 
         skeleton_vao.bind();
-        cout << s_indices <<endl;
         glDrawElements(GL_LINES, 2*(s_numPoints-1), GL_UNSIGNED_INT, s_indices);
         skeleton_vao.release();
         skeleton_program->release();

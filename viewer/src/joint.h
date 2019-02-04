@@ -115,10 +115,10 @@ public:
 
 	static int findIndexOfJoint(string name);
 
-	vector<trimesh::point> exportPositions(); 
+	vector<trimesh::point> exportPositions();
 
 	void exportChildPositions(QMatrix4x4& matriceTransformation,
-			QVector3D positionRoot, vector<trimesh::point> &positions);
+			QVector3D& positionRoot, vector<trimesh::point> &positions);
 
 private:
 	static void parser_hierarchy(ifstream& file, string& buf);

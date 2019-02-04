@@ -54,8 +54,18 @@ void Weight::writeWeightsToFile(const vector<Weight> &verticesWeights){
 
     ofstream weightsFile;
     weightsFile.open ("new_weights.txt");
+    cerr << "TEST" << endl;
+
+    weightsFile << "id ";
+
+    for (int i = 0; i < Joint::list_names.size(); i++){
+        weightsFile << Joint::list_names[i] << " ";
+    }
+
+    weightsFile << endl;
 
     for (int i = 0; i < verticesWeights.size(); i++){
+        weightsFile << i << " ";
         for (int j = 0; j < verticesWeights[i].size(); j++){
             weightsFile << verticesWeights[i].getWeight(j) << " ";
         }
@@ -76,6 +86,8 @@ void Weight::createRigidWeights(const vector<trimesh::point> &vertices, const ve
         for (int j = 0; j < numberArticulations; j++){
             weightsVector[j] = (j==index) ? 1 : 0;
         }
+        Weight w(weightsVector);
+        verticesWeights.push_back(w);
     }
 }
 
@@ -83,7 +95,7 @@ int Weight::findClosestArticulation(const trimesh::point &currentPoint, const ve
     int closestIndex = 0;
     float closest = trimesh::dist(articulationPositions[0], currentPoint);
     for (int i = 1; i < articulationPositions.size(); i++){
-        float newDistance = trimesh::dist(articulationPositions[0], currentPoint);
+        float newDistance = trimesh::dist(articulationPositions[i], currentPoint);
         if (newDistance < closest){
             closest = newDistance;
             closestIndex = i;

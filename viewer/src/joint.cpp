@@ -335,7 +335,7 @@ vector<trimesh::point> Joint::exportPositions(){
 	return positions;
 }
 
-void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D positionRoot, vector<trimesh::point> &positions){
+void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D& positionRoot, vector<trimesh::point> &positions){
 	for (int i = 0; i < this->_children.size(); i++){
 		QMatrix4x4 matrix;
 		matrix = matriceTransformation;
@@ -345,7 +345,7 @@ void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D po
 		matrix.rotate(_curRy, 0, 1, 0);
 		matrix.rotate(_curRz, 0, 0, 1); // frame rotation
 		QVector3D positionChild;
-		positionRoot = matrix * positionRoot;
+		positionChild = matrix * QVector3D(0, 0, 0);
 		float x = float(positionChild.x());
 		float y = float(positionChild.y());
 		float z = float(positionChild.z());
