@@ -1,0 +1,42 @@
+version: v1.0
+name: SIA pipeline
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+
+blocks:
+  - name: Create environment
+    task:
+      jobs:
+      - name: Create
+        commands:
+          - checkout
+
+  - name: "Build"
+    task:
+      env_vars:
+        - name: APP_ENV
+          value: prod
+      jobs:
+      - name: Target build
+        commands:
+          - checkout
+          - sudo apt-get install -y qt5-default
+          - ls -1
+          - echo $APP_ENV
+          - ./clean.sh || true
+          - qmake CONFIG+=myViewer
+          - make
+
+  - name: "Unit tests"
+    task:
+      jobs:
+      - name: RSpec
+        commands:
+          - checkout
+          - sudo apt-get install -y qt5-default
+          - ./clean.sh || true
+          - qmake CONFIG+=tests
+          - make
+          - ./viewer/tests
