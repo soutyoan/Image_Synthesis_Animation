@@ -29,7 +29,7 @@ glShaderWindow::glShaderWindow(QWindow *parent)
       environmentMap(0), texture(0), permTexture(0), pixels(0), mouseButton(Qt::NoButton), auxWidget(0),
       isGPGPU(false), hasComputeShaders(false), blinnPhong(true), transparent(true), eta(1.5), lightIntensity(1.0f), shininess(50.0f), lightDistance(5.0f), groundDistance(0.78),
       maxBounds(0), shadowMap_fboId(0), shadowMap_rboId(0), shadowMap_textureId(0), fullScreenSnapshots(false), computeResult(0),
-      m_indexBuffer(QOpenGLBuffer::IndexBuffer), ground_indexBuffer(QOpenGLBuffer::IndexBuffer)
+      m_indexBuffer(QOpenGLBuffer::IndexBuffer), ground_indexBuffer(QOpenGLBuffer::IndexBuffer), skeleton_indexBuffer(QOpenGLBuffer::IndexBuffer)
 {
     // Default values you might want to tinker with
     shadowMapDimension = 2048;
@@ -49,9 +49,9 @@ glShaderWindow::~glShaderWindow()
         m_program->release();
         delete m_program;
     }
-    if (skeleton) {
-        delete skeleton;
-    }
+    // if (skeleton!=NULL) {
+    //     delete skeleton;
+    // }
     if (ground_program) {
         ground_program->release();
         delete ground_program;
@@ -431,7 +431,6 @@ void glShaderWindow::bindSceneToProgram()
     if (!isGPGPU) m_vertexBuffer.allocate(&(modelMesh->vertices.front()), modelMesh->vertices.size() * sizeof(trimesh::point));
     else m_vertexBuffer.allocate(gpgpu_vertices, 4 * sizeof(trimesh::point));
 
-    // drawing lines for skeleton i.e no faces
     m_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     m_indexBuffer.bind();
     if (!isGPGPU) m_indexBuffer.allocate(&(modelMesh->faces.front()), m_numFaces * 3 * sizeof(int));
@@ -578,51 +577,70 @@ void glShaderWindow::bindSceneToProgram()
 
     // Bind the skeleton part
     skeleton_vao.bind();
+    skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skeleton_vertexBuffer.bind();
 
-    s_numPoints = 3;
-    // int s_numPoints = skeleton->GLOBAL_INDEX;
+    s_numPoints = 4;
+
+
+    // if (skeleton) {
+    //     int s_numPoints = skeleton->GLOBAL_INDEX;
+    //     cout<<s_numPoints<<endl;
+    // }
 
     if (s_vertices == 0) s_vertices = new trimesh::point[s_numPoints];
     if (s_colors == 0) s_colors = new trimesh::point[s_numPoints];
     if (s_indices == 0) s_indices = new int[2*(s_numPoints-1)];
 
     s_vertices[0] = trimesh::point(0, 0, 0, 0);
-    s_vertices[1] = trimesh::point(0, 0, 0.5, 0);
-    s_vertices[2] = trimesh::point(0.5, 0.5, 0.5, 0);
+    s_vertices[1] = trimesh::point(1, 0, 0, 0);
+    s_vertices[2] = trimesh::point(0, 1, 0, 0);
+    s_vertices[3] = trimesh::point(0, 0, 1, 0);
     s_colors[0] = trimesh::point(1.0,0.0,0.0,1.0);
-    s_colors[1] = trimesh::point(1.0,0.0,0.0,1.0);
-    s_colors[2] = trimesh::point(1.0,0.0,0.0,1.0);
-    s_indices[0] = 0;
-    s_indices[1] = 1;
-    s_indices[2] = 1;
-    s_indices[3] = 2;
-    cout <<"here" <<endl;
+    s_colors[1] = trimesh::point(0.0,1.0,0.0,1.0);
+    s_colors[2] = trimesh::point(0.0,0.0,1.0,1.0);
+    s_colors[3] = trimesh::point(0.0,1.0,1.0,1.0);
 
-    // Joint* current = skeleton;
-    // int _ind = -1;
-    // while (current!=NULL) {
-    //     float xPos = current->_offx;
-    //     float yPos = current->_offy;
-    //     float zPos = current->_offz;
-    //     if (current->_parent!=NULL) {
-    //         xPos += current->_parent->_offx;
-    //         yPos += current->_parent->_offy;
-    //         zPos += current->_parent->_offz;
-    //     }
-    //
-    //     s_vertices[current->local_index] = trimesh::point(xPos, yPos, zPos, 0);
-    //     s_colors[current->local_index] = trimesh::point(1.0, 1.0, 1.0, 1.0); // white color for bones
-    //
-    //     if (current->_children.size() > 0) {
-    //         vector<Joint*>::iterator child;
-    //         for (child=current->_children.begin(); child!=current->_children.end(); child++) {
-    //             s_indices[_ind++] = current->local_index;
-    //             s_indices[_ind++] = child->local_index;
+    s_numIndices = 0;
+
+    s_indices[s_numIndices++] = 0;
+    s_indices[s_numIndices++] = 1;
+    s_indices[s_numIndices++] = 0;
+    s_indices[s_numIndices++] = 2;
+    s_indices[s_numIndices++] = 0;
+    s_indices[s_numIndices++] = 3;
+
+    // if (skeleton) {
+    //     Joint* current = skeleton;
+    //     int _ind = 0;
+    //     while (current!=NULL) {
+    //         float xPos = current->_offX;
+    //         float yPos = current->_offY;
+    //         float zPos = current->_offZ;
+    //         if (current->_parent!=NULL) {
+    //             xPos += current->_parent->_offX;
+    //             yPos += current->_parent->_offY;
+    //             zPos += current->_parent->_offZ;
     //         }
-    //     } else  {
-    //         current = current->_parent;
+    //
+    //         s_vertices[current->local_index] = trimesh::point(xPos, yPos, zPos, 0);
+    //         s_colors[current->local_index] = trimesh::point(1.0, 1.0, 1.0, 1.0); // white color for bones
+    //
+    //         if (current->_children.size() > 0) {
+    //             vector<Joint*>::iterator child;
+    //             for (child=current->_children.begin(); child!=current->_children.end(); child++) {
+    //                 s_indices[_ind++] = current->local_index;
+    //                 s_indices[_ind++] = (*child)->local_index;
+    //             }
+    //         } else  {
+    //             current = current->_parent;
+    //         }
     //     }
     // }
+
+
+
+
 
     skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_vertexBuffer.bind();
@@ -632,11 +650,11 @@ void glShaderWindow::bindSceneToProgram()
     skeleton_colorBuffer.allocate(s_colors, s_numPoints * sizeof(trimesh::point));
     skeleton_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_indexBuffer.bind();
-    skeleton_indexBuffer.allocate(s_indices, 2*(s_numPoints-1) * sizeof(int));
+    skeleton_indexBuffer.allocate(s_indices, s_numIndices * sizeof(int));
 
     skeleton_program->bind();
     skeleton_vertexBuffer.bind();
-    skeleton_program->setAttributeBuffer("vertex ", GL_FLOAT, 0, 4);
+    skeleton_program->setAttributeBuffer("vertex", GL_FLOAT, 0, 4);
     skeleton_program->enableAttributeArray("vertex");
     skeleton_colorBuffer.bind();
     skeleton_program->setAttributeBuffer("color", GL_FLOAT, 0, 4);
@@ -733,7 +751,7 @@ void glShaderWindow::openSkeleton()
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
         openSkeletonFromBvh();
     }
-    isGPGPU = false; // we do not use the GPU for matrixes computation
+    // isGPGPU = false; // we do not use the GPU for matrixes computation
     bindSceneToProgram();
     initializeTransformForScene();
 }
@@ -1517,16 +1535,17 @@ void glShaderWindow::render()
         ground_vao.release();
         ground_program->release();
 
-        // we also bind the skeleton rendering
-        skeleton_program->bind();
-        skeleton_program->setUniformValue("matrix", m_matrix[0]);
-        skeleton_program->setUniformValue("perspective", m_perspective);
 
-        skeleton_vao.bind();
-        cout << s_indices <<endl;
-        glDrawElements(GL_LINES, 2*(s_numPoints-1), GL_UNSIGNED_INT, s_indices);
-        skeleton_vao.release();
-        skeleton_program->release();
     }
+    // we also bind the skeleton rendering
+    skeleton_program->bind();
+    // m_matrix[0].setToIdentity();
+    skeleton_program->setUniformValue("matrix", m_matrix[0]);
+    skeleton_program->setUniformValue("perspective", m_perspective);
+
+    skeleton_vao.bind();
+    glDrawElements(GL_LINES, s_numIndices, GL_UNSIGNED_INT, 0);
+    skeleton_vao.release();
+    skeleton_program->release();
     index_rendu ++;
 }

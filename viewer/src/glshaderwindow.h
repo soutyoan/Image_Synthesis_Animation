@@ -104,6 +104,8 @@ private:
     trimesh::point *s_vertices;
     trimesh::point *s_colors;
     int *s_indices;
+    int s_numPoints;
+    int s_numIndices;
     // GPGPU
     trimesh::point *gpgpu_vertices;
     trimesh::vec *gpgpu_normals;
@@ -158,7 +160,6 @@ private:
     QOpenGLBuffer skeleton_vertexBuffer;
     QOpenGLBuffer skeleton_indexBuffer;
     QOpenGLBuffer skeleton_colorBuffer;
-    int s_numPoints;
     // Matrix for all objects
     QMatrix4x4 m_matrix[3]; // 0 = object, 1 = light, 2 = ground
     QMatrix4x4 m_perspective;
