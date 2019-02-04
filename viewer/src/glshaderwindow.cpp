@@ -196,15 +196,38 @@ void glShaderWindow::openSkeletonFromBvh() {
     int ret = dialog.exec();
     if (ret == QDialog::Accepted) {
         workingDirectory = dialog.directory().path() + "/";
-        modelName = dialog.selectedFiles()[0];
+        skeletonName = dialog.selectedFiles()[0];
     }
 
-    if (!modelName.isNull())
+    if (!skeletonName.isNull())
     {
-        skeleton = Joint::createFromFile(modelName.toStdString());
         openSkeleton();
+    }
+}
+
+void glShaderWindow::openWeightsForSkeleton(){
+    QFileDialog dialog(0, "Open weights file for skeleton", workingDirectory+"../models/", "*.txt");
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    QString filename;
+    int ret = dialog.exec();
+    if (ret == QDialog::Accepted) {
+        workingDirectory = dialog.directory().path() + "/";
+        weightsName = dialog.selectedFiles()[0];
+    }
+
+    if (skeleton == NULL){
+        std::cerr << "Input a skeleton before weights" << endl;
+        return;
+    }
+
+    if (!weightsName.isNull())
+    {
         renderNow();
     }
+}
+
+void glShaderWindow::openWeights(){
+    Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
 }
 
 void glShaderWindow::cookTorranceClicked()
@@ -253,6 +276,18 @@ void glShaderWindow::updateMaxBounds(int maxBoundsSliderValue)
 {
     maxBounds = maxBoundsSliderValue;
     renderNow();
+}
+
+void glShaderWindow::updateArticulationInfluence(int currentArticulationValue){
+    currentArticulation = currentArticulationValue;
+    if (modelMesh->colors.size() != modelMesh->vertices.size()){
+        modelMesh->colors.resize(modelMesh->vertices.size());
+    }
+    for (int i = 0; i < modelMesh->vertices.size(); i++){
+        float currentWeight = VerticesWeights[i].getWeight(currentArticulation);
+        modelMesh->colors[i] = trimesh::Color(currentWeight, 0.0, 0.0);
+    }
+    setShader(shaderName);
 }
 
 QWidget *glShaderWindow::makeAuxWindow()
@@ -364,6 +399,24 @@ QWidget *glShaderWindow::makeAuxWindow()
 
     // TODO : add a button for skeleton animation
 
+    // Adding a button to see impact of every articulation
+    QSlider *articulationInfluenceSlider = new QSlider(Qt::Horizontal);
+    articulationInfluenceSlider->setTickPosition(QSlider::TicksBelow);
+    articulationInfluenceSlider->setTickInterval(10);
+    articulationInfluenceSlider->setMinimum(0);
+    articulationInfluenceSlider->setMaximum(100);
+    articulationInfluenceSlider->setSliderPosition(currentArticulation);
+    connect(articulationInfluenceSlider,SIGNAL(valueChanged(int)),this,SLOT(updateArticulationInfluence(int)));
+    QLabel* articulationInfluenceLabel = new QLabel("Showing influence on articulation x =");
+    QLabel* articulationInfluenceLabelValue = new QLabel();
+    articulationInfluenceLabelValue->setNum(currentArticulation);
+    connect(articulationInfluenceSlider,SIGNAL(valueChanged(int)),articulationInfluenceLabelValue,SLOT(setNum(int)));
+    QHBoxLayout *hboxArticulationInfluence= new QHBoxLayout;
+    hboxArticulationInfluence->addWidget(articulationInfluenceLabel);
+    hboxArticulationInfluence->addWidget(articulationInfluenceLabelValue);
+    outer->addLayout(hboxArticulationInfluence);
+    outer->addWidget(articulationInfluenceSlider);
+
     auxWidget->setLayout(outer);
     return auxWidget;
 }
@@ -371,7 +424,8 @@ QWidget *glShaderWindow::makeAuxWindow()
 void glShaderWindow::createSSBO()
 {
 #ifndef __APPLE__
-	glGenBuffers(4, ssbo);
+    bool hasWeights = (VerticesWeights.size()!=0);
+    glGenBuffers(4, ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo[0]);
     // TODO: test if 4 float alignment works better
     glBufferData(GL_SHADER_STORAGE_BUFFER, modelMesh->vertices.size() * sizeof(trimesh::point), &(modelMesh->vertices.front()), GL_STATIC_READ);
@@ -719,6 +773,11 @@ void glShaderWindow::openScene()
     modelMesh->need_bbox();
     modelMesh->need_normals();
     modelMesh->need_faces();
+    cerr << "OPENED MESH " << endl;
+    openSkeleton();
+    cerr << "OPENED SKELETON " << endl;
+    openWeights();
+    cerr << "OPENED WEIGHTS " << endl;
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
             modelMesh->bsphere.center[2]);
@@ -738,22 +797,15 @@ void glShaderWindow::openScene()
 
 void glShaderWindow::openSkeleton()
 {
-    if (modelMesh) {
-        m_vertexBuffer.release();
-        m_indexBuffer.release();
-        m_colorBuffer.release();
-        m_normalBuffer.release();
-        m_texcoordBuffer.release();
-        m_vao.release();
-    }
     if (!skeleton) {
         QMessageBox::warning(0, tr("qViewer"),
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
         openSkeletonFromBvh();
     }
-    // isGPGPU = false; // we do not use the GPU for matrixes computation
-    bindSceneToProgram();
-    initializeTransformForScene();
+    skeleton = Joint::createFromFile(skeletonName.toStdString());
+    // for (int i = 0; i < Joint::list_names.size(); i++){
+    //     std::cerr << Joint::list_names[i] << " " << i << endl;
+    // }
 }
 
 void glShaderWindow::saveScene()
@@ -824,6 +876,7 @@ void glShaderWindow::setShader(const QString& shader)
     QString computeShader;
     isGPGPU = shader.contains("gpgpu", Qt::CaseInsensitive);
     isFullRt = shader.contains("fullrt", Qt::CaseInsensitive);
+    // cout << "fullRT " << isFullRt << " " << shader.toStdString() << endl;
     foreach (const QString &str, shaders) {
         QString suffix = str.right(str.size() - str.lastIndexOf("."));
         if (m_vertShaderSuffix.filter(suffix).size() > 0) {
@@ -847,6 +900,7 @@ void glShaderWindow::setShader(const QString& shader)
         hasComputeShaders = false;
         // TODO: release SSBO
     }
+    shaderName = shader;
     bindSceneToProgram();
     loadTexturesForShaders();
     renderNow();
@@ -994,7 +1048,7 @@ void glShaderWindow::initialize()
         delete(m_program);
     }
 	QString shaderPath = workingDirectory + "../shaders/";
-    m_program = prepareShaderProgram(shaderPath + "1_simple.vert", shaderPath + "1_simple.frag");
+    m_program = prepareShaderProgram(shaderPath + "2_phong.vert", shaderPath + "2_phong.frag");
     if (ground_program) {
         ground_program->release();
         delete(ground_program);
@@ -1115,12 +1169,14 @@ QOpenGLShaderProgram* glShaderWindow::prepareComputeProgram(const QString& compu
     return program;
 }
 
-void glShaderWindow::setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap)
+void glShaderWindow::setWorkingDirectory(QString& myPath, QString& myName, QString& texture, QString& envMap, QString& mySkeletonName, QString& myWeightsName)
 {
     workingDirectory = myPath;
     modelName = myPath + myName;
     textureName = myPath + "../textures/" + texture;
     envMapName = myPath + "../textures/" + envMap;
+    skeletonName = myPath + mySkeletonName;
+    weightsName = myPath + myWeightsName;
 }
 
 void glShaderWindow::mouseToTrackball(QVector2D &mousePosition, QVector3D &spacePosition)

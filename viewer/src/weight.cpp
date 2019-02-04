@@ -1,6 +1,6 @@
 #include "weight.h"
 
-void Weight::createFromFile(string &filename, vector<Weight> &VerticesWeights){
+void Weight::createFromFile(string filename, vector<Weight> &VerticesWeights){
     ifstream file(filename.data());
     string buf;
     file >> buf;
