@@ -113,6 +113,8 @@ public:
 
 	static int findIndexOfJoint(string name);
 
+	void displayJoint();
+
 private:
 	static void parser_hierarchy(ifstream& file, string& buf);
 

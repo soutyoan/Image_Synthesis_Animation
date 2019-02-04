@@ -5,7 +5,7 @@ ROOT elbow
 	CHANNELS 6 Xposition Yposition Zposition Zrotation Yrotation Xrotation
 	JOINT wrist
 	{
-		OFFSET -5.0 -0.0 0.0
+		OFFSET -5.0 0.0 0.0
 		CHANNELS 3 Zrotation Yrotation Xrotation
 		End Site
 		{

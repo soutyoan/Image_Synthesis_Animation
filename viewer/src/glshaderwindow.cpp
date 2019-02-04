@@ -634,67 +634,35 @@ void glShaderWindow::bindSceneToProgram()
     skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_vertexBuffer.bind();
 
-    s_numPoints = 4;
+
+    s_numPoints = skeleton->GLOBAL_INDEX;
+
+    // s_numPoints = 2;
+
+    skeleton->displayJoint();
+
+    cout<<"s_numPoints = "<<s_numPoints<<endl;
 
 
-    // if (skeleton) {
-    //     int s_numPoints = skeleton->GLOBAL_INDEX;
-    //     cout<<s_numPoints<<endl;
-    // }
 
     if (s_vertices == 0) s_vertices = new trimesh::point[s_numPoints];
     if (s_colors == 0) s_colors = new trimesh::point[s_numPoints];
     if (s_indices == 0) s_indices = new int[2*(s_numPoints-1)];
 
-    s_vertices[0] = trimesh::point(0, 0, 0, 0);
-    s_vertices[1] = trimesh::point(1, 0, 0, 0);
-    s_vertices[2] = trimesh::point(0, 1, 0, 0);
-    s_vertices[3] = trimesh::point(0, 0, 1, 0);
-    s_colors[0] = trimesh::point(1.0,0.0,0.0,1.0);
-    s_colors[1] = trimesh::point(0.0,1.0,0.0,1.0);
-    s_colors[2] = trimesh::point(0.0,0.0,1.0,1.0);
-    s_colors[3] = trimesh::point(0.0,1.0,1.0,1.0);
 
     s_numIndices = 0;
 
-    s_indices[s_numIndices++] = 0;
-    s_indices[s_numIndices++] = 1;
-    s_indices[s_numIndices++] = 0;
-    s_indices[s_numIndices++] = 2;
-    s_indices[s_numIndices++] = 0;
-    s_indices[s_numIndices++] = 3;
-
-    // if (skeleton) {
-    //     Joint* current = skeleton;
-    //     int _ind = 0;
-    //     while (current!=NULL) {
-    //         float xPos = current->_offX;
-    //         float yPos = current->_offY;
-    //         float zPos = current->_offZ;
-    //         if (current->_parent!=NULL) {
-    //             xPos += current->_parent->_offX;
-    //             yPos += current->_parent->_offY;
-    //             zPos += current->_parent->_offZ;
-    //         }
+    // s_vertices[0] = trimesh::point(0, 0, 0, 0);
+    // s_vertices[1] = trimesh::point(0, 1, 0, 0);
+    // s_colors[0] = trimesh::point(1.0, 1.0, 1.0, 1.0);
+    // s_colors[1] = trimesh::point(1.0, 1.0, 1.0, 1.0);
     //
-    //         s_vertices[current->local_index] = trimesh::point(xPos, yPos, zPos, 0);
-    //         s_colors[current->local_index] = trimesh::point(1.0, 1.0, 1.0, 1.0); // white color for bones
-    //
-    //         if (current->_children.size() > 0) {
-    //             vector<Joint*>::iterator child;
-    //             for (child=current->_children.begin(); child!=current->_children.end(); child++) {
-    //                 s_indices[_ind++] = current->local_index;
-    //                 s_indices[_ind++] = (*child)->local_index;
-    //             }
-    //         } else  {
-    //             current = current->_parent;
-    //         }
-    //     }
-    // }
+    // s_indices[s_numIndices++] = 0;
+    // s_indices[s_numIndices++] = 1;
 
+    fillValuesFromJoints(skeleton);
 
-
-
+    cout<<"s_numIndices = "<<s_numIndices<<endl;
 
     skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_vertexBuffer.bind();
@@ -737,6 +705,27 @@ void glShaderWindow::bindSceneToProgram()
 
 }
 
+void glShaderWindow::fillValuesFromJoints(Joint* current)
+{
+    float xPos = current->_offX;
+    float yPos = current->_offY;
+    float zPos = current->_offZ;
+    if (current->_parent!=NULL) {
+        xPos+=current->_parent->_offX;
+        yPos+=current->_parent->_offY;
+        zPos+=current->_parent->_offZ;
+    }
+    cout<<"Filling current point "<<trimesh::point(xPos, yPos, zPos, 0)<<endl;
+    s_vertices[current->local_index] = trimesh::point(xPos, yPos, zPos, 0);
+    s_colors[current->local_index] = trimesh::point(1.0, 1.0, 1.0, 1.0);
+    for (int i=0; i<current->_children.size(); i++) {
+        s_indices[s_numIndices++] = current->local_index;
+        s_indices[s_numIndices++] = current->_children[i]->local_index;
+        cout<<"New segment ("<<current->local_index<<", "<<current->_children[i]->local_index<<")"<<endl;
+        fillValuesFromJoints(current->_children[i]);
+    }
+}
+
 void glShaderWindow::initializeTransformForScene()
 {
     // Set standard transformation and light source
@@ -776,7 +765,7 @@ void glShaderWindow::openScene()
     cerr << "OPENED MESH " << endl;
     openSkeleton();
     cerr << "OPENED SKELETON " << endl;
-    openWeights();
+    // openWeights();
     cerr << "OPENED WEIGHTS " << endl;
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
@@ -803,6 +792,7 @@ void glShaderWindow::openSkeleton()
         openSkeletonFromBvh();
     }
     skeleton = Joint::createFromFile(skeletonName.toStdString());
+    cout << "Joint good"<<endl;
     // for (int i = 0; i < Joint::list_names.size(); i++){
     //     std::cerr << Joint::list_names[i] << " " << i << endl;
     // }

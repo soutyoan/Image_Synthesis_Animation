@@ -311,3 +311,11 @@ int Joint::findIndexOfJoint(string name){
   	auto index = std::distance(Joint::list_names.begin(), it);
 	return (int)index;
 }
+
+void Joint::displayJoint()
+{
+	cout<<this->_name<<endl;
+	for (int _i=0; _i<this->_children.size(); _i++) {
+		this->_children[_i]->displayJoint();
+	}
+}
