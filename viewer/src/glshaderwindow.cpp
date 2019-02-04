@@ -733,6 +733,9 @@ void glShaderWindow::openSkeleton()
         openSkeletonFromBvh();
     }
     skeleton = Joint::createFromFile(skeletonName.toStdString());
+    // for (int i = 0; i < Joint::list_names.size(); i++){
+    //     std::cerr << Joint::list_names[i] << " " << i << endl;
+    // }
 }
 
 void glShaderWindow::saveScene()
