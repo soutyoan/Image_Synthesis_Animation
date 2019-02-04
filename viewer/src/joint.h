@@ -80,6 +80,8 @@ public:
 		_children.clear();
 	}
 
+	void getTransformationMatrices(vector<QMatrix4x4>& transformMatrices); // A appliquer sur le root 
+
 	// Create from data :
 	static Joint* create(std::string name, double offX, double offY, double offZ, Joint* parent) {
 		Joint* child = new Joint();

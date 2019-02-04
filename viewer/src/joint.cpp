@@ -312,6 +312,20 @@ int Joint::findIndexOfJoint(string name){
 	return (int)index;
 }
 
+void Joint::getTransformationMatrices(vector<QMatrix4x4>& transformMatrices){
+	QMatrix4x4 matrix;
+	matrix.translate(_offX, _offY, _offZ); // global offset
+	matrix.translate(_curTx, _curTy, _curTz); // frame translation
+	matrix.rotate(_curRx, 1, 0, 0);
+	matrix.rotate(_curRy, 0, 1, 0);
+	matrix.rotate(_curRz, 0, 0, 1); // frame rotation
+	transformMatrices.push_back(matrix);
+	for (int i = 0; i < this->_children.size(); i++){
+		this->_children[i]->getTransformationMatrices(transformMatrices);
+	}
+}
+
+
 vector<trimesh::point> Joint::exportPositions(){
 	if (_parent != NULL){
 		std::cerr << "You can only call this method on root" << endl;
@@ -353,4 +367,8 @@ void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D& p
 		positions.push_back(currentPosition);
 		_children[i]->exportChildPositions(matrix, positionRoot, positions);
 	}
+}
+
+void getTransformationMatrices(vector<QMatrix4x4>& transformMatrices){
+
 }

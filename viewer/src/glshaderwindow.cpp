@@ -1592,3 +1592,18 @@ void glShaderWindow::render()
     }
     index_rendu ++;
 }
+
+void glShaderWindow::calculateNewPosition(){
+    for (int i = 0; i < modelMesh->vertices.size(); i++){
+        trimesh::point current = modelMesh->vertices[i];
+        Weight currentWeight = VerticesWeights[i];
+        trimesh::point newPoint;
+        for (int j = 0; j < currentWeight.size(); j++){
+            if (currentWeight.getWeight(j) != 0){
+
+            }
+        }
+
+        modelMesh->vertices[i] = newPoint;
+    }
+}

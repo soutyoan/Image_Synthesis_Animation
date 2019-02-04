@@ -32,6 +32,7 @@ public:
     inline const QString& getWorkingDirectory() { return workingDirectory;};
     inline const QStringList& fragShaderSuffix() { return m_fragShaderSuffix;};
     inline const QStringList& vertShaderSuffix() { return m_vertShaderSuffix;};
+    void calculateNewPosition(); // Calculates the position of the vertices thanks to bvh file
 
 public slots:
     void openSceneFromFile();
