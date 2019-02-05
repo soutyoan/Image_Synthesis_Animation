@@ -321,7 +321,8 @@ vector<QMatrix4x4> Joint::getTransformationMatrices(std::vector<QMatrix4x4>& off
     QMatrix4x4 worldMatrix;
     QMatrix4x4 bindedMatrix;
     bindedMatrix.translate(_offX, _offY, _offZ); // global offset
-    worldMatrix.translate(_offX, _offY, _offZ); // global offset
+    worldMatrix.translate(_dofs[0]._values[0], _dofs[1]._values[0], _dofs[2]._values[0]);
+    worldMatrix.rotate(_dofs[3]._values[0], _dofs[4]._values[0], _dofs[5]._values[0]);
     offsetMatrices.push_back(bindedMatrix);
     matrices.push_back(worldMatrix);
     getChildTransformationMatrices(worldMatrix, bindedMatrix, matrices, offsetMatrices);
@@ -336,9 +337,11 @@ void Joint::getChildTransformationMatrices(QMatrix4x4& matriceTransformation, QM
         bindedMatrix.translate(_offX, _offY, _offZ); // global offset
         worldMatrix = matriceTransformation;
         worldMatrix.translate(_offX, _offY, _offZ);
-//        worldMatrix.rotate(_dofs[2]._values[0], 1, 0, 0);
-//        worldMatrix.rotate(_dofs[1]._values[0], 0, 1, 0);
-//        worldMatrix.rotate(_dofs[0]._values[0], 0, 0, 1); // frame rotation
+        if (_dofs.size() != 0){
+            worldMatrix.rotate(_dofs[2]._values[0], 1, 0, 0);
+            worldMatrix.rotate(_dofs[1]._values[0], 0, 1, 0);
+            worldMatrix.rotate(_dofs[0]._values[0], 0, 0, 1); // frame rotation
+        }
         matrices.push_back(worldMatrix);
         offsetMatrices.push_back(bindedMatrix);
         _children[i]->getChildTransformationMatrices(worldMatrix, bindedMatrix, matrices, offsetMatrices);
