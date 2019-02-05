@@ -318,31 +318,34 @@ vector<QMatrix4x4> Joint::getTransformationMatrices(std::vector<QMatrix4x4>& off
         return vector<QMatrix4x4>();
     }
     vector<QMatrix4x4> matrices;
-    QMatrix4x4 matrix;
-    QMatrix4x4 offsetMatrix;
-    offsetMatrix.translate(_offX, _offY, _offZ); // global offset
-//    matrix.translate(_dofs[0]._values[0], _dofs[1]._values[0], _dofs[2]._values[0]); // frame translation
-    offsetMatrix.rotate(_dofs[3]._values[0], 1, 0, 0);
-    offsetMatrix.rotate(_dofs[4]._values[0], 0, 1, 0);
-    offsetMatrix.rotate(_dofs[5]._values[0], 0, 0, 1); // frame rotation
-    matrices.push_back(matrix);
-    offsetMatrices.push_back(offsetMatrix);
-    getChildTransformationMatrices(offsetMatrix, matrices, offsetMatrices);
+    QMatrix4x4 worldMatrix;
+    QMatrix4x4 bindedMatrix;
+    bindedMatrix.translate(_offX, _offY, _offZ); // global offset
+//    worldMatrix.translate(_dofs[0]._values[0], _dofs[1]._values[0], _dofs[2]._values[0]); // frame translation
+//    worldMatrix.rotate(_dofs[3]._values[0], 1, 0, 0);
+//    worldMatrix.rotate(_dofs[4]._values[0], 0, 1, 0);
+//    worldMatrix.rotate(_dofs[5]._values[0], 0, 0, 1); // frame rotation
+//    matrices.push_back(worldMatrix);
+    worldMatrix.translate(_offX, _offY, _offZ); // global offset
+    offsetMatrices.push_back(bindedMatrix);
+    getChildTransformationMatrices(worldMatrix, bindedMatrix, matrices, offsetMatrices);
     return matrices;
 }
 
-void Joint::getChildTransformationMatrices(QMatrix4x4& matriceTransformation, vector<QMatrix4x4> &matrices, std::vector<QMatrix4x4>& offsetMatrices){
+void Joint::getChildTransformationMatrices(QMatrix4x4& matriceTransformation, QMatrix4x4& bindedMatrixP, vector<QMatrix4x4> &matrices, std::vector<QMatrix4x4>& offsetMatrices){
     for (int i = 0; i < this->_children.size(); i++){
-        QMatrix4x4 matrixrot;
-        QMatrix4x4 offsetMatrix;
-        offsetMatrix = matriceTransformation;
-        offsetMatrix.translate(_offX, _offY, _offZ); // global offset
-        matrixrot.rotate(_dofs[2]._values[0], 1, 0, 0);
-        matrixrot.rotate(_dofs[1]._values[0], 0, 1, 0);
-        matrixrot.rotate(_dofs[0]._values[0], 0, 0, 1); // frame rotation
-        matrices.push_back(matrixrot);
-        offsetMatrices.push_back(offsetMatrix);
-        _children[i]->getChildTransformationMatrices(offsetMatrix, matrices, offsetMatrices);
+        QMatrix4x4 worldMatrix;
+        QMatrix4x4 bindedMatrix;
+        bindedMatrix = bindedMatrixP;
+        bindedMatrix.translate(_offX, _offY, _offZ); // global offset
+        worldMatrix = matriceTransformation;
+        worldMatrix.translate(_offX, _offY, _offZ);
+//        worldMatrix.rotate(_dofs[2]._values[0], 1, 0, 0);
+//        worldMatrix.rotate(_dofs[1]._values[0], 0, 1, 0);
+//        worldMatrix.rotate(_dofs[0]._values[0], 0, 0, 1); // frame rotation
+        matrices.push_back(worldMatrix);
+        offsetMatrices.push_back(bindedMatrix);
+        _children[i]->getChildTransformationMatrices(worldMatrix, bindedMatrix, matrices, offsetMatrices);
     }
 }
 
@@ -354,10 +357,10 @@ vector<trimesh::point> Joint::exportPositions(){
 	vector<trimesh::point> positions;
 	QMatrix4x4 matrix;
 	matrix.translate(_offX, _offY, _offZ); // global offset
-	matrix.translate(_curTx, _curTy, _curTz); // frame translation
-	matrix.rotate(_curRx, 1, 0, 0);
-	matrix.rotate(_curRy, 0, 1, 0);
-	matrix.rotate(_curRz, 0, 0, 1); // frame rotation
+//	matrix.translate(_curTx, _curTy, _curTz); // frame translation
+//	matrix.rotate(_curRx, 1, 0, 0);
+//	matrix.rotate(_curRy, 0, 1, 0);
+//	matrix.rotate(_curRz, 0, 0, 1); // frame rotation
 	QVector3D positionRoot;
 	positionRoot = matrix * QVector3D(0, 0, 0);
 	float x = float(positionRoot.x());
@@ -374,10 +377,10 @@ void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D& p
 		QMatrix4x4 matrix;
 		matrix = matriceTransformation;
 		matrix.translate(_offX, _offY, _offZ); // global offset
-		matrix.translate(_curTx, _curTy, _curTz); // frame translation
-		matrix.rotate(_curRx, 1, 0, 0);
-		matrix.rotate(_curRy, 0, 1, 0);
-		matrix.rotate(_curRz, 0, 0, 1); // frame rotation
+//		matrix.translate(_curTx, _curTy, _curTz); // frame translation
+//		matrix.rotate(_curRx, 1, 0, 0);
+//		matrix.rotate(_curRy, 0, 1, 0);
+//		matrix.rotate(_curRz, 0, 0, 1); // frame rotation
 		QVector3D positionChild;
 		positionChild = matrix * QVector3D(0, 0, 0);
 		float x = float(positionChild.x());
