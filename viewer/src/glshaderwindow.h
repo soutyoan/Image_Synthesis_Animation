@@ -76,7 +76,7 @@ private:
     void loadTexturesForShaders();
     void openScene();
     void openSkeleton();
-    void openWeights();
+    void openWeights(int frame=10);
     void mouseToTrackball(QVector2D &in, QVector3D &out);
 
     // Are we using GPGPU?
