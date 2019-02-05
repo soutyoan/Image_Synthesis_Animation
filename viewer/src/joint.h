@@ -50,9 +50,9 @@ private :
 	void printRecursivly(std::ostream& os, int *global_tab_count) const;
 
 public:
-	static int GLOBAL_INDEX;
+	static int GLOBAL_INDEX;			// size of the total skeleton
 	static std::vector<string> list_names;
-	int local_index=0;
+	int local_index=0;					// locale index indicating order of appearance
 	std::string _name;					// name of joint
 	double _offX;						// initial offset in X
 	double _offY;						// initial offset in Y
@@ -112,6 +112,8 @@ public:
 	static int findIndexOfJoint(string name);
 
 	void displayJoint();
+
+	
 
 private:
 	static void parser_hierarchy(ifstream& file, string& buf);
