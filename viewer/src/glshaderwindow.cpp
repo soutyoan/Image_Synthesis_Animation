@@ -1606,6 +1606,27 @@ void glShaderWindow::calculateNewPosition(vector<QMatrix4x4>& transformMatrices,
         for (int j = 0; j < currentWeight.size(); j++){
             if (currentWeight.getWeight(j) != 0){
                 QVector3D tmpVec(current[0], current[1], current[2]);
+//                if (transformMatrices[j] != offsetMatrices[j]){
+//                    QMatrix4x4 hello1 = transformMatrices[j];
+//                    QMatrix4x4 hello2 = offsetMatrices[j];
+//                    std::cout << hello1(0, 0) << " " << hello2(0, 0) << endl;
+//                    std::cout << hello1(0, 1) << " " << hello2(0, 1) << endl;
+//                    std::cout << hello1(0, 2) << " " << hello2(0, 2) << endl;
+//                    std::cout << hello1(0, 3) << " " << hello2(0, 3) << endl;
+//                    std::cout << hello1(1, 0) << " " << hello2(1, 0) << endl;
+//                    std::cout << hello1(1, 1) << " " << hello2(1, 1) << endl;
+//                    std::cout << hello1(1, 2) << " " << hello2(1, 2) << endl;
+//                    std::cout << hello1(1, 3) << " " << hello2(1, 3) << endl;
+//                    std::cout << hello1(2, 0) << " " << hello2(2, 0) << endl;
+//                    std::cout << hello1(2, 1) << " " << hello2(2, 1) << endl;
+//                    std::cout << hello1(2, 2) << " " << hello2(2, 2) << endl;
+//                    std::cout << hello1(2, 3) << " " << hello2(2, 3) << endl;
+//                    std::cout << hello1(3, 0) << " " << hello2(3, 0) << endl;
+//                    std::cout << hello1(3, 1) << " " << hello2(3, 1) << endl;
+//                    std::cout << hello1(3, 2) << " " << hello2(3, 2) << endl;
+//                    std::cout << hello1(3, 3) << " " << hello2(3, 3) << endl;
+
+//                }
 
                 QVector3D wVec =  transformMatrices[j] * offsetMatrices[j].inverted() * tmpVec;
                 newPoint += currentWeight.getWeight(j) * trimesh::point(wVec[0],
@@ -1614,7 +1635,6 @@ void glShaderWindow::calculateNewPosition(vector<QMatrix4x4>& transformMatrices,
             }
         }
 
-        // cout << "new " << newPoint << "old " << modelMesh->vertices[i] << endl;
 
         modelMesh->vertices[i] = newPoint;
     }
