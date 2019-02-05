@@ -45,8 +45,6 @@
 #include <QOpenGLFunctions_4_1_Core>
 #endif
 
-
-
 QT_BEGIN_NAMESPACE
 class QPainter;
 class QOpenGLContext;

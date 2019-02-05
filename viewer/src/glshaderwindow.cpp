@@ -227,13 +227,14 @@ void glShaderWindow::openWeightsForSkeleton(){
     }
 }
 
-void glShaderWindow::openWeights(){
+void glShaderWindow::openWeights(int frame){
+    VerticesWeights.clear();
     Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
     std::cerr << "CREATED FROM FILE " << VerticesWeights.size() << endl;
     vector<QMatrix4x4> offsetMatrices;
+    skeleton->animate(frame);
     std::vector<QMatrix4x4> matrices = skeleton->getTransformationMatrices(offsetMatrices);
-//    calculateNewPosition(matrices, offsetMatrices);
-
+    calculateNewPosition(matrices, offsetMatrices);
 }
 
 void glShaderWindow::cookTorranceClicked()
@@ -1612,6 +1613,8 @@ void glShaderWindow::calculateNewPosition(vector<QMatrix4x4>& transformMatrices,
 
             }
         }
+
+        // cout << "new " << newPoint << "old " << modelMesh->vertices[i] << endl;
 
         modelMesh->vertices[i] = newPoint;
     }

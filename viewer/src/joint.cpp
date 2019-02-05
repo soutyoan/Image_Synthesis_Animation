@@ -391,4 +391,3 @@ void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D& p
 		_children[i]->exportChildPositions(matrix, positionRoot, positions);
 	}
 }
-
