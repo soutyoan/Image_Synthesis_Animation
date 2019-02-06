@@ -77,6 +77,7 @@ private:
     void openSkeleton();
     void openWeights();
     void mouseToTrackball(QVector2D &in, QVector3D &out);
+    void fillValuesFromJoints(Joint* current, float& xPos, float& yPos, float& zPos, int frame);
 
     // Are we using GPGPU?
     bool isGPGPU = false;
@@ -109,7 +110,11 @@ private:
     // Skeleton
     trimesh::point *s_vertices;
     trimesh::point *s_colors;
+    trimesh::vec2 *s_texcoords;
+    trimesh::vec *s_normals;
     int *s_indices;
+    int s_numPoints;
+    int s_numIndices;
     // Weights
     vector<Weight> VerticesWeights;
     // GPGPU
@@ -168,7 +173,8 @@ private:
     QOpenGLBuffer skeleton_vertexBuffer;
     QOpenGLBuffer skeleton_indexBuffer;
     QOpenGLBuffer skeleton_colorBuffer;
-    int s_numPoints;
+    QOpenGLBuffer skeleton_texcoordBuffer;
+    QOpenGLBuffer skeleton_normalBuffer;
     // Matrix for all objects
     QMatrix4x4 m_matrix[3]; // 0 = object, 1 = light, 2 = ground
     QMatrix4x4 m_perspective;
