@@ -79,6 +79,8 @@ private:
     void openWeights(int frame=10);
     void mouseToTrackball(QVector2D &in, QVector3D &out);
 
+    int FRAME=0;
+
     // Are we using GPGPU?
     bool isGPGPU = false;
     // Are we using FullRt shader?

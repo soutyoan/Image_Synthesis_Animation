@@ -80,9 +80,10 @@ public:
 		_children.clear();
 	}
 
-    vector<QMatrix4x4> getTransformationMatrices(std::vector<QMatrix4x4>& offsetMatrices); // A appliquer sur le root
+    void getTransformationMatrices(std::vector<QMatrix4x4>& bindedMatrices, std::vector<QMatrix4x4>& transformMatrices); // A appliquer sur le root
 
-    void getChildTransformationMatrices(QMatrix4x4& matriceTransformation, QMatrix4x4& bindedMatrix, vector<QMatrix4x4> &positions, std::vector<QMatrix4x4>& offsetMatrices);
+    void getChildTransformationMatrices(std::vector<QMatrix4x4>& bindedMatrices,std::vector<QMatrix4x4>& transformMatrices,
+                                        QMatrix4x4 parentPosition, QMatrix4x4 parentRotation);
 
 	// Create from data :
 	static Joint* create(std::string name, double offX, double offY, double offZ, Joint* parent) {

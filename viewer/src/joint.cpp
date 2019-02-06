@@ -312,39 +312,31 @@ int Joint::findIndexOfJoint(string name){
 	return (int)index;
 }
 
-vector<QMatrix4x4> Joint::getTransformationMatrices(std::vector<QMatrix4x4>& offsetMatrices){
-    if (_parent != NULL){
-        std::cerr << "You can only call this method on root" << endl;
-        return vector<QMatrix4x4>();
-    }
-    vector<QMatrix4x4> matrices;
-    QMatrix4x4 worldMatrix;
-    QMatrix4x4 bindedMatrix;
-    bindedMatrix.translate(_offX, _offY, _offZ); // global offset
-    worldMatrix.translate(_dofs[0]._values[0], _dofs[1]._values[0], _dofs[2]._values[0]);
-    worldMatrix.rotate(_dofs[3]._values[0], _dofs[4]._values[0], _dofs[5]._values[0]);
-    offsetMatrices.push_back(bindedMatrix);
-    matrices.push_back(worldMatrix);
-    getChildTransformationMatrices(worldMatrix, bindedMatrix, matrices, offsetMatrices);
-    return matrices;
+void Joint::getTransformationMatrices(std::vector<QMatrix4x4>& bindedMatrices, std::vector<QMatrix4x4>& transformMatrices){
+    QMatrix4x4 positionOffset;
+    QMatrix4x4 rotation;
+    getChildTransformationMatrices(bindedMatrices, transformMatrices, positionOffset, rotation);
 }
 
-void Joint::getChildTransformationMatrices(QMatrix4x4& matriceTransformation, QMatrix4x4& bindedMatrixP, vector<QMatrix4x4> &matrices, std::vector<QMatrix4x4>& offsetMatrices){
-    for (int i = 0; i < this->_children.size(); i++){
-        QMatrix4x4 worldMatrix;
-        QMatrix4x4 bindedMatrix;
-        bindedMatrix = bindedMatrixP;
-        bindedMatrix.translate(_offX, _offY, _offZ); // global offset
-        worldMatrix = matriceTransformation;
-        worldMatrix.translate(_offX, _offY, _offZ);
-        if (_dofs.size() != 0){
-            worldMatrix.rotate(_dofs[2]._values[0], 1, 0, 0);
-            worldMatrix.rotate(_dofs[1]._values[0], 0, 1, 0);
-            worldMatrix.rotate(_dofs[0]._values[0], 0, 0, 1); // frame rotation
-        }
-        matrices.push_back(worldMatrix);
-        offsetMatrices.push_back(bindedMatrix);
-        _children[i]->getChildTransformationMatrices(worldMatrix, bindedMatrix, matrices, offsetMatrices);
+void Joint::getChildTransformationMatrices(std::vector<QMatrix4x4>& bindedMatrices,std::vector<QMatrix4x4>& transformMatrices,
+                                    QMatrix4x4 parentPosition, QMatrix4x4 parentTransformation){
+    QMatrix4x4 childPosition;
+    QMatrix4x4 childTransformation;
+    childPosition = parentPosition;
+    childTransformation = parentTransformation;
+    childPosition.translate(_offX, _offY, _offZ);
+    childTransformation = parentTransformation;
+    if (_parent != NULL){
+        childTransformation.rotate(this->_parent->_curRx, 1, 0, 0);
+        childTransformation.rotate(this->_parent->_curRy, 0, 1, 0);
+        childTransformation.rotate(this->_parent->_curRz, 0, 0, 1);
+    }
+    childTransformation.translate(_offX, _offY, _offZ);
+    childTransformation.translate(_curTx, _curTy, _curTz);
+    bindedMatrices.push_back(childPosition);
+    transformMatrices.push_back(childTransformation);
+    for (int i = 0; i < _children.size(); i++){
+        _children[i]->getChildTransformationMatrices(bindedMatrices, transformMatrices, childPosition, childTransformation);
     }
 }
 
