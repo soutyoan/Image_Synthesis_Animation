@@ -649,11 +649,17 @@ void glShaderWindow::bindSceneToProgram()
 
     s_numIndices=0;
 
-    float xPos=0.0;
-    float yPos=0.0;
-    float zPos=0.0;
+    // animation update
+    // skeleton->animate(0);
+    QMatrix4x4 transform;
+    // transform.setToIdentity();
+    vector<trimesh::point> _vert;
 
-    fillValuesFromJoints(skeleton, xPos, yPos, zPos, 0);
+    skeleton->exportPositions(transform, _vert);
+
+    cout<<"Size of vector "<<_vert.size()<<endl;
+
+    fillValuesFromJoints(skeleton, _vert);
 
     cerr<<"s_numIndices = "<<s_numIndices<<endl;
 
@@ -680,23 +686,15 @@ void glShaderWindow::bindSceneToProgram()
     skeleton_vao.release();
 }
 
-void glShaderWindow::fillValuesFromJoints(Joint* current, float& xPos, float& yPos, float& zPos, int frame)
+void glShaderWindow::fillValuesFromJoints(Joint* current, const vector<trimesh::point>& _vert)
 {
-    xPos += current->_offX;
-    yPos += current->_offY;
-    zPos += current->_offZ;
-    // cout<<"Filling current point "<<trimesh::point(xPos, yPos, zPos, 1)<<endl;
-    s_vertices[current->local_index-1] = trimesh::point(xPos, yPos, zPos, 1);
     s_colors[current->local_index-1] = trimesh::point(1.0, 1.0, 1.0, 1.0);
+    s_vertices[current->local_index-1] = _vert[current->local_index-1];
     for (int i=0; i<current->_children.size(); i++) {
         s_indices[s_numIndices++] = current->local_index-1;
         s_indices[s_numIndices++] = current->_children[i]->local_index-1;
-        // cout<<"New segment ("<<current->local_index-1<<", "<<current->_children[i]->local_index-1<<")"<<endl;
-        fillValuesFromJoints(current->_children[i], xPos, yPos, zPos, frame);
+        fillValuesFromJoints(current->_children[i], _vert);
     }
-    xPos -= current->_offX;
-    yPos -= current->_offY;
-    zPos -= current->_offZ;
 }
 
 void glShaderWindow::initializeTransformForScene()
@@ -765,13 +763,13 @@ void glShaderWindow::openSkeleton()
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
         openSkeletonFromBvh();
     }
+    // if (skeleton) {
+    //     delete skeleton;
+    // }
     skeleton = Joint::createFromFile(skeletonName.toStdString());
     cout << "Joint good"<<endl;
     bindSceneToProgram();
-    // initializeTransformForScene();
-    // for (int i = 0; i < Joint::list_names.size(); i++){
-    //     std::cerr << Joint::list_names[i] << " " << i << endl;
-    // }
+    initializeTransformForScene();
 }
 
 void glShaderWindow::saveScene()

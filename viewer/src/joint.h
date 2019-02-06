@@ -115,6 +115,8 @@ public:
 
 	vector<trimesh::point> exportPositions();
 
+	void exportPositions(QMatrix4x4& transform, vector<trimesh::point>& positions);
+
 	void exportChildPositions(QMatrix4x4& matriceTransformation,
 			QVector3D& positionRoot, vector<trimesh::point> &positions);
 

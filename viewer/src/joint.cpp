@@ -12,6 +12,7 @@ Joint::Joint(){
 }
 
 Joint* Joint::createFromFile(std::string fileName) {
+	Joint::GLOBAL_INDEX = 0;
 	Joint* root = new Joint();
 	cout << "Loading from " << fileName << endl;
 
@@ -332,20 +333,44 @@ vector<trimesh::point> Joint::exportPositions(){
 
 void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D& positionRoot, vector<trimesh::point> &positions){
 	for (int i = 0; i < this->_children.size(); i++){
-		QMatrix4x4 matrix;
-		matrix = matriceTransformation;
-		matrix.translate(_offX, _offY, _offZ); // global offset
-		matrix.translate(_curTx, _curTy, _curTz); // frame translation
-		matrix.rotate(_curRx, 1, 0, 0);
-		matrix.rotate(_curRy, 0, 1, 0);
-		matrix.rotate(_curRz, 0, 0, 1); // frame rotation
+		matriceTransformation.translate(_offX, _offY, _offZ); // global offset
+		matriceTransformation.translate(_curTx, _curTy, _curTz); // frame translation
+		matriceTransformation.rotate(_curRx, 1, 0, 0);
+		matriceTransformation.rotate(_curRy, 0, 1, 0);
+		matriceTransformation.rotate(_curRz, 0, 0, 1); // frame rotation
 		QVector3D positionChild;
-		positionChild = matrix * QVector3D(0, 0, 0);
+		positionChild = matriceTransformation * QVector3D(0, 0, 0);
 		float x = float(positionChild.x());
 		float y = float(positionChild.y());
 		float z = float(positionChild.z());
 		trimesh::point currentPosition(x, y, z, 1);
 		positions.push_back(currentPosition);
-		_children[i]->exportChildPositions(matrix, positionRoot, positions);
+		_children[i]->exportChildPositions(matriceTransformation, positionRoot, positions);
 	}
+	matriceTransformation.rotate(-_curRz, 0, 0, 1);
+	matriceTransformation.rotate(-_curRy, 0, 1, 0);
+	matriceTransformation.rotate(-_curRx, 1, 0, 0);
+	matriceTransformation.translate(-_curTx, -_curTy, -_curTz);
+	matriceTransformation.translate(-_offX, -_offY, -_offZ);
+}
+
+void Joint::exportPositions(QMatrix4x4& transform, vector<trimesh::point>& positions)
+{
+	transform.translate(_offX, _offY, _offZ);
+	// transform.rotate(_curRx, 1, 0, 0);
+	// transform.rotate(_curRy, 0, 1, 0);
+	// transform.rotate(_curRz, 0, 0, 1);
+	QVector3D pos = transform * QVector3D(0, 0, 0);
+	float x = float(pos.x());
+	float y = float(pos.y());
+	float z = float(pos.z());
+	trimesh::point vertex(x, y, z, 1.0);
+	positions.push_back(vertex);
+	for (int i=0; i<this->_children.size(); i++) {
+		this->_children[i]->exportPositions(transform, positions);
+	}
+	// transform.rotate(-_curRz, 0, 0, 1);
+	// transform.rotate(-_curRy, 0, 1, 0);
+	// transform.rotate(-_curRx, 1, 0, 0);
+	transform.translate(-_offX, -_offY, -_offZ);
 }

@@ -89,7 +89,7 @@ private:
     void openSkeleton();
     void openWeights();
     void mouseToTrackball(QVector2D &in, QVector3D &out);
-    void fillValuesFromJoints(Joint* current, float& xPos, float& yPos, float& zPos, int frame);
+    void fillValuesFromJoints(Joint* current, const vector<trimesh::point>& _vert);
 
     // Are we using GPGPU?
     bool isGPGPU = false;
