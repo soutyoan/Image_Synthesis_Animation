@@ -1565,7 +1565,7 @@ void glShaderWindow::render()
 
 
     if (getAnimating()) {
-        usleep(skeleton->FRAME_RATE);
+        usleep(500);
         QMatrix4x4 transform;
         vector<trimesh::point> _vert;
         frame++;
