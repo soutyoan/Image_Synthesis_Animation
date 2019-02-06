@@ -75,10 +75,7 @@ public:
 	// Constructor :
 	Joint();
 	// Destructor :
-	~Joint() {
-		_dofs.clear();
-		_children.clear();
-	}
+	~Joint(); 
 
     vector<QMatrix4x4> getTransformationMatrices(std::vector<QMatrix4x4>& offsetMatrices); // A appliquer sur le root
 
