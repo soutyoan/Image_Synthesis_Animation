@@ -232,7 +232,7 @@ void glShaderWindow::openWeights(int frame){
     Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
     std::cerr << "CREATED FROM FILE " << VerticesWeights.size() << "frame " << FRAME << endl;
     vector<QMatrix4x4> offsetMatrices;
-    skeleton->animate(100);
+    skeleton->animate(FRAME);
     std::vector<QMatrix4x4> transformMatrices;
     skeleton->getTransformationMatrices(transformMatrices, offsetMatrices);
     calculateNewPosition(offsetMatrices, transformMatrices);
@@ -488,7 +488,7 @@ void glShaderWindow::bindSceneToProgram()
         }
     } else m_numFaces = modelMesh->faces.size();
 
-    m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vertexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     m_vertexBuffer.bind();
     if (!isGPGPU) m_vertexBuffer.allocate(&(modelMesh->vertices.front()), modelMesh->vertices.size() * sizeof(trimesh::point));
     else m_vertexBuffer.allocate(gpgpu_vertices, 4 * sizeof(trimesh::point));
@@ -758,6 +758,7 @@ void glShaderWindow::openScene()
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
         openSceneFromFile();
     }
+    initVertices = modelMesh->vertices;
     modelMesh->need_bsphere();
     modelMesh->need_bbox();
     modelMesh->need_normals();
@@ -1438,6 +1439,19 @@ void glShaderWindow::render()
     lightCoordMatrix.lookAt(lightPosition, m_center, QVector3D(0, 1.0, 0));
     lightPerspective = m_perspective;
 
+    if (getAnimating()){
+        FRAME = (FRAME + 1)%skeleton->_dofs[0].size();
+        skeleton->animate(FRAME);
+
+        std::vector<QMatrix4x4> offsetMatrices;
+        std::vector<QMatrix4x4> transformMatrices;
+        skeleton->getTransformationMatrices(transformMatrices, offsetMatrices);
+        calculateNewPosition(offsetMatrices, transformMatrices);
+
+        m_vertexBuffer.bind();
+        m_vertexBuffer.write(0, &(modelMesh->vertices.front()), modelMesh->vertices.size() * sizeof(trimesh::point));
+    }
+
     //std::cerr<<lightCoordMatrix(0, 0);
 
     if (isGPGPU || hasComputeShaders) {
@@ -1501,6 +1515,7 @@ void glShaderWindow::render()
         // TODO_shadowMapping: you must initialize these two matrices.
         shadowMapGenerationProgram->setUniformValue("matrix", lightCoordMatrix);
         shadowMapGenerationProgram->setUniformValue("perspective", lightPerspective);
+
         // Draw the entire scene:
         m_vao.bind();
         glDrawElements(GL_TRIANGLES, 3 * m_numFaces, GL_UNSIGNED_INT, 0);
@@ -1601,7 +1616,7 @@ void glShaderWindow::render()
 
 void glShaderWindow::calculateNewPosition(vector<QMatrix4x4>& transformMatrices, vector<QMatrix4x4>& offsetMatrices){
     for (int i = 0; i < modelMesh->vertices.size(); i++){
-        trimesh::point current = modelMesh->vertices[i];
+        trimesh::point current = initVertices[i];
         Weight currentWeight = VerticesWeights[i];
         trimesh::point newPoint;
         for (int j = 0; j < currentWeight.size(); j++){

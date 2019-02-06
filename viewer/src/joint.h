@@ -41,6 +41,7 @@ public:
 public :
 	std::string name;					// name of dof
 	std::vector<double> _values;		// different keyframes = animation curve
+    int size(){return _values.size(); }
 };
 
 

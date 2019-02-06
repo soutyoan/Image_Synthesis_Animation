@@ -80,6 +80,7 @@ private:
     void mouseToTrackball(QVector2D &in, QVector3D &out);
 
     int FRAME=0;
+    vector<trimesh::point> initVertices;
 
     // Are we using GPGPU?
     bool isGPGPU = false;
