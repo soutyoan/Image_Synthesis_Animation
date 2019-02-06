@@ -14,7 +14,7 @@ private slots:
 
 void TestWeights::testValues()
 {
-    Joint::createFromFile("viewer/models/walk1.bvh");
+    Joint* j = Joint::createFromFile("viewer/models/walk1.bvh");
     vector<Weight> VerticesWeights;
     string filename = "viewer/models/weights.txt";
     Weight::createFromFile(filename, VerticesWeights);
@@ -22,6 +22,8 @@ void TestWeights::testValues()
     QVERIFY(VerticesWeights[0].getWeight(0) == 0);
     QVERIFY(VerticesWeights[2807].getWeight(9) - 0.999999 < EPS);
     QVERIFY(VerticesWeights[2836].getWeight(10) - 0.205937 < EPS);
+
+    delete j; 
 }
 
 QTEST_MAIN(TestWeights)

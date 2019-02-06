@@ -382,3 +382,11 @@ void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D& p
 		_children[i]->exportChildPositions(matrix, positionRoot, positions);
 	}
 }
+
+Joint::~Joint() {
+	for (int i = 0; i < _children.size(); i++){
+		delete _children[i];
+	}
+	_dofs.clear();
+	_children.clear();
+}
