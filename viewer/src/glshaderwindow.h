@@ -18,6 +18,8 @@
 #include <QMouseEvent>
 #include <QTimer>
 
+#include <unistd.h>
+
 
 class glShaderWindow : public OpenGLWindow
 {
@@ -90,7 +92,7 @@ private:
     void openSkeleton();
     void openWeights(int frame=10);
     void mouseToTrackball(QVector2D &in, QVector3D &out);
-    void fillValuesFromJoints(Joint* current, float& xPos, float& yPos, float& zPos, int frame);
+    void fillValuesFromJoints(Joint* current, const vector<trimesh::point>& _vert);
 
     int FRAME=0;
     vector<trimesh::point> initVertices;
@@ -100,8 +102,6 @@ private:
     // Are we using FullRt shader?
     bool isFullRt = false;
 
-    // Are we animating the skeleton ?
-    bool isAnimate;
 
     // Are we using compute shaders?
     bool hasComputeShaders;
@@ -128,6 +128,7 @@ private:
     trimesh::point *s_colors;
     trimesh::vec2 *s_texcoords;
     trimesh::vec *s_normals;
+    int frame;
     int *s_indices;
     int s_numPoints;
     int s_numIndices;
