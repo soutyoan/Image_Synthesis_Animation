@@ -223,7 +223,7 @@ void glShaderWindow::openWeightsForSkeleton(){
     if (!weightsName.isNull())
     {
         VerticesWeights.clear();
-//        openWeights();
+        openWeights();
     }
 }
 
@@ -768,8 +768,8 @@ void glShaderWindow::openScene()
     cerr << "OPENED SKELETON " << endl;
     openWeights();
     vector<Weight> weightsVec;
-    vector<trimesh::point> jointPosition = skeleton->exportPositions();
-    cout << "Weights size " << jointPosition.size() << endl;
+    vector<trimesh::point> jointPosition = skeleton->exportMiddleArticulations();
+    cerr << "Weights size " << jointPosition.size() << endl;
     Weight::createRigidWeights(modelMesh->vertices, jointPosition, weightsVec);
     cout << "Weights size " << weightsVec.size() << endl;
     Weight::writeWeightsToFile(weightsVec);

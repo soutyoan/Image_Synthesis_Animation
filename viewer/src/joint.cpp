@@ -383,6 +383,52 @@ void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D& p
 	}
 }
 
+vector<trimesh::point> Joint::exportMiddleArticulations(){
+    if (_parent != NULL){
+        std::cerr << "You can only call this method on root" << endl;
+        return vector<trimesh::point>();
+    }
+    vector<trimesh::point> positions;
+    QMatrix4x4 matrix;
+    QVector3D positionRoot;
+    exportChildMiddleArticulations(matrix, positionRoot, positions);
+    return positions;
+}
+
+void Joint::exportChildMiddleArticulations(QMatrix4x4& matriceTransformation, QVector3D& positionRoot, vector<trimesh::point> &positions){
+    QMatrix4x4 matrix;
+    matrix = matriceTransformation;
+    matrix.translate(_offX, _offY, _offZ); // global offset
+    QVector3D positionChild;
+    positionChild = matrix * QVector3D(0, 0, 0);
+    float x = float(positionChild.x());
+    float y = float(positionChild.y());
+    float z = float(positionChild.z());
+    trimesh::point currentPosition(x, y, z, 1);
+
+    if (this->_children.size() > 1){
+        positions.push_back(currentPosition);
+    } else if (this->_children.size() == 1){
+        Joint *child = _children[0];
+        QMatrix4x4 matrixChild;
+        matrixChild = matrix;
+        matrixChild.translate(child->_offX, child->_offY, child->_offZ); // global offset
+        QVector3D positionChild;
+        positionChild = matrixChild * QVector3D(0, 0, 0);
+        float childX = float(positionChild.x());
+        float childY = float(positionChild.y());
+        float childZ = float(positionChild.z());
+        trimesh::point currentPosition((x + childX)/2, (y + childY)/2, (z + childZ)/2, 1);
+        positions.push_back(currentPosition);
+    } else {
+        positions.push_back(trimesh::point(100000, 100000, 100000, 1));
+    }
+
+    for (int i = 0; i < this->_children.size(); i++){
+        _children[i]->exportChildMiddleArticulations(matrix, positionRoot, positions);
+    }
+}
+
 Joint::~Joint() {
 	for (int i = 0; i < _children.size(); i++){
 		delete _children[i];

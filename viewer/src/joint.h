@@ -123,6 +123,11 @@ public:
 	void exportChildPositions(QMatrix4x4& matriceTransformation,
 			QVector3D& positionRoot, vector<trimesh::point> &positions);
 
+    vector<trimesh::point> exportMiddleArticulations();
+
+    void exportChildMiddleArticulations(QMatrix4x4& matriceTransformation,
+            QVector3D& positionRoot, vector<trimesh::point> &positions);
+
 private:
 	static void parser_hierarchy(ifstream& file, string& buf);
 
