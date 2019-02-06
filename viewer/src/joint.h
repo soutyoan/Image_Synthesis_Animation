@@ -54,7 +54,7 @@ private :
 
 public:
 	static int GLOBAL_INDEX;			// size of the total skeleton
-	static float FRAME_RATE;
+    static float FRAME_TIME;
 	static std::vector<string> list_names;
 	int local_index=0;					// locale index indicating order of appearance
 	std::string _name;					// name of joint
