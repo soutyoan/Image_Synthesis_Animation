@@ -75,7 +75,7 @@ public:
 
 public slots:
     void renderLater();
-    void renderNow();
+    virtual void renderNow();
 
     void renderAlternance();
 

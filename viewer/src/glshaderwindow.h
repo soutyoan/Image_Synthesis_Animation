@@ -16,6 +16,7 @@
 #include <QtGui/QOpenGLFunctions>
 #include <QtGui/QScreen>
 #include <QMouseEvent>
+#include <QTimer>
 
 
 class glShaderWindow : public OpenGLWindow
@@ -33,6 +34,17 @@ public:
     inline const QStringList& fragShaderSuffix() { return m_fragShaderSuffix;};
     inline const QStringList& vertShaderSuffix() { return m_vertShaderSuffix;};
     void calculateNewPosition(vector<QMatrix4x4>& transformMatrices, vector<QMatrix4x4>& offsetMatrix); // Calculates the position of the vertices thanks to bvh file
+
+    // Override of parent
+    void renderNow(){
+        OpenGLWindow::renderNow();
+
+        // Rendu en alternance uniquement si on utilise le
+        // shader fullRt
+        if (glShaderWindow::isFullRt){
+            QTimer::singleShot(0, this, SLOT(renderAlternance()));
+        }
+    }
 
 public slots:
     void openSceneFromFile();
@@ -78,6 +90,7 @@ private:
     void openSkeleton();
     void openWeights(int frame=10);
     void mouseToTrackball(QVector2D &in, QVector3D &out);
+    void fillValuesFromJoints(Joint* current, float& xPos, float& yPos, float& zPos, int frame);
 
     int FRAME=0;
     vector<trimesh::point> initVertices;
@@ -113,7 +126,11 @@ private:
     // Skeleton
     trimesh::point *s_vertices;
     trimesh::point *s_colors;
+    trimesh::vec2 *s_texcoords;
+    trimesh::vec *s_normals;
     int *s_indices;
+    int s_numPoints;
+    int s_numIndices;
     // Weights
     vector<Weight> VerticesWeights;
     // GPGPU
@@ -172,7 +189,8 @@ private:
     QOpenGLBuffer skeleton_vertexBuffer;
     QOpenGLBuffer skeleton_indexBuffer;
     QOpenGLBuffer skeleton_colorBuffer;
-    int s_numPoints;
+    QOpenGLBuffer skeleton_texcoordBuffer;
+    QOpenGLBuffer skeleton_normalBuffer;
     // Matrix for all objects
     QMatrix4x4 m_matrix[3]; // 0 = object, 1 = light, 2 = ground
     QMatrix4x4 m_perspective;

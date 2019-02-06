@@ -133,8 +133,9 @@ int main( int argc, char* argv[] )
 {
     setlocale(LC_ALL,"C");
     QApplication app(argc, argv);
-    QString sceneName = "skin.off";
-    QString skeletonName = "walk1.bvh";
+    QString sceneName
+    = "skin.off";
+    QString skeletonName = "sensors.bvh";
     QString weightsName = "weights.txt";
     QString textureName = "wildtextures-seamless-wood-planks.jpg";
     QString envMapName = "pisa.png";

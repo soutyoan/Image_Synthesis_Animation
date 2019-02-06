@@ -296,12 +296,6 @@ int Joint::nbTranslation() const{
 	return result;
 }
 
-bool Joint::fill_vertices(vector<trimesh::point>& joint_vertices)
-{
-	// TODO : Deep First Search and take the offset to be uploaded in vector of points
-	// such as point(offx, offy, offz, 1.0)
-	return true;
-}
 
 int Joint::findIndexOfJoint(string name){
 	auto it = std::find(Joint::list_names.begin(), Joint::list_names.end(), name);
@@ -344,6 +338,7 @@ void Joint::getChildTransformationMatrices(std::vector<QMatrix4x4>& bindedMatric
         _children[i]->getChildTransformationMatrices(bindedMatrices, transformMatrices, childPosition, childTransformation);
     }
 }
+
 
 vector<trimesh::point> Joint::exportPositions(){
 	if (_parent != NULL){

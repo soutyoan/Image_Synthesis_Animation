@@ -53,9 +53,9 @@ private :
 	void printRecursivly(std::ostream& os, int *global_tab_count) const;
 
 public:
-	static int GLOBAL_INDEX;
+	static int GLOBAL_INDEX;			// size of the total skeleton
 	static std::vector<string> list_names;
-	int local_index=0;
+	int local_index=0;					// locale index indicating order of appearance
 	std::string _name;					// name of joint
 	double _offX;						// initial offset in X
 	double _offY;						// initial offset in Y
@@ -114,8 +114,6 @@ public:
 	// Analysis of degrees of freedom :
 	void nbDofs();
 
-	bool fill_vertices(vector<trimesh::point>& joint_vertices);
-
 	static int findIndexOfJoint(string name);
 
 	vector<trimesh::point> exportPositions();
@@ -127,6 +125,7 @@ public:
 
     void exportChildMiddleArticulations(QMatrix4x4& matriceTransformation,
             QVector3D& positionRoot, vector<trimesh::point> &positions);
+
 
 private:
 	static void parser_hierarchy(ifstream& file, string& buf);
