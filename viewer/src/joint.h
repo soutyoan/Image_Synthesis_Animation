@@ -6,6 +6,8 @@
 #include <iostream>
 #include <fstream>
 #include "../../trimesh2/include/Box.h"
+#include <QMatrix4x4>
+#include <QVector3D>
 
 using namespace std;
 
@@ -111,9 +113,11 @@ public:
 
 	static int findIndexOfJoint(string name);
 
-	void displayJoint();
+	vector<trimesh::point> exportPositions();
 
-	
+	void exportChildPositions(QMatrix4x4& matriceTransformation,
+			QVector3D& positionRoot, vector<trimesh::point> &positions);
+
 
 private:
 	static void parser_hierarchy(ifstream& file, string& buf);

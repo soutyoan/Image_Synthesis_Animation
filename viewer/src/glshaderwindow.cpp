@@ -222,12 +222,14 @@ void glShaderWindow::openWeightsForSkeleton(){
 
     if (!weightsName.isNull())
     {
-        renderNow();
+        VerticesWeights.clear();
+        openWeights();
     }
 }
 
 void glShaderWindow::openWeights(){
     Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
+    std::cerr << "CREATED FROM FILE " << VerticesWeights.size() << endl;
 }
 
 void glShaderWindow::cookTorranceClicked()
@@ -655,6 +657,7 @@ void glShaderWindow::bindSceneToProgram()
 
     cerr<<"s_numIndices = "<<s_numIndices<<endl;
 
+
     skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     skeleton_vertexBuffer.bind();
     skeleton_vertexBuffer.allocate(s_vertices, s_numPoints * sizeof(trimesh::point));
@@ -736,6 +739,7 @@ void glShaderWindow::openScene()
     openSkeleton();
     cerr << "OPENED SKELETON " << endl;
     // openWeights();
+
     cerr << "OPENED WEIGHTS " << endl;
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
@@ -1554,7 +1558,6 @@ void glShaderWindow::render()
         glDrawElements(GL_TRIANGLES, g_numIndices, GL_UNSIGNED_INT, 0);
         ground_vao.release();
         ground_program->release();
-
 
     }
     // we also bind the skeleton rendering
