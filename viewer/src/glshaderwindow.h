@@ -71,7 +71,7 @@ public:
         if (getAnimating()){
             struct timespec start;
             clock_gettime(CLOCK_MONOTONIC, &start);
-            timeLastFrame = start.tv_sec + start.tv_nsec/1000000000.0;
+            timeLastFrame = start.tv_sec + start.tv_nsec/1000000000.0 - FRAME * Joint::FRAME_TIME;
         }
     }
 
