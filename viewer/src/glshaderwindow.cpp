@@ -227,9 +227,15 @@ void glShaderWindow::openWeightsForSkeleton(){
     }
 }
 
-void glShaderWindow::openWeights(){
+void glShaderWindow::openWeights(int frame){
+    VerticesWeights.clear();
     Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
-    std::cerr << "CREATED FROM FILE " << VerticesWeights.size() << endl;
+    std::cerr << "CREATED FROM FILE " << VerticesWeights.size() << "frame " << FRAME << endl;
+    vector<QMatrix4x4> offsetMatrices;
+    skeleton->animate(FRAME);
+    std::vector<QMatrix4x4> transformMatrices;
+    skeleton->getTransformationMatrices(transformMatrices, offsetMatrices);
+    calculateNewPosition(offsetMatrices, transformMatrices);
 }
 
 void glShaderWindow::cookTorranceClicked()
@@ -482,7 +488,7 @@ void glShaderWindow::bindSceneToProgram()
         }
     } else m_numFaces = modelMesh->faces.size();
 
-    m_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vertexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     m_vertexBuffer.bind();
     if (!isGPGPU) m_vertexBuffer.allocate(&(modelMesh->vertices.front()), modelMesh->vertices.size() * sizeof(trimesh::point));
     else m_vertexBuffer.allocate(gpgpu_vertices, 4 * sizeof(trimesh::point));
@@ -731,6 +737,7 @@ void glShaderWindow::openScene()
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
         openSceneFromFile();
     }
+    initVertices = modelMesh->vertices;
     modelMesh->need_bsphere();
     modelMesh->need_bbox();
     modelMesh->need_normals();
@@ -738,8 +745,13 @@ void glShaderWindow::openScene()
     cerr << "OPENED MESH " << endl;
     openSkeleton();
     cerr << "OPENED SKELETON " << endl;
-    // openWeights();
-
+    openWeights();
+    vector<Weight> weightsVec;
+    vector<trimesh::point> jointPosition = skeleton->exportMiddleArticulations();
+    cerr << "Weights size " << jointPosition.size() << endl;
+    Weight::createRigidWeights(modelMesh->vertices, jointPosition, weightsVec);
+    cout << "Weights size " << weightsVec.size() << endl;
+    Weight::writeWeightsToFile(weightsVec);
     cerr << "OPENED WEIGHTS " << endl;
     m_center = QVector3D(modelMesh->bsphere.center[0],
             modelMesh->bsphere.center[1],
@@ -1411,6 +1423,19 @@ void glShaderWindow::render()
     lightCoordMatrix.lookAt(lightPosition, m_center, QVector3D(0, 1.0, 0));
     lightPerspective = m_perspective;
 
+    if (getAnimating()){
+        FRAME = (FRAME + 1)%skeleton->_dofs[0].size();
+        skeleton->animate(FRAME);
+
+        std::vector<QMatrix4x4> offsetMatrices;
+        std::vector<QMatrix4x4> transformMatrices;
+        skeleton->getTransformationMatrices(transformMatrices, offsetMatrices);
+        calculateNewPosition(offsetMatrices, transformMatrices);
+
+        m_vertexBuffer.bind();
+        m_vertexBuffer.write(0, &(modelMesh->vertices.front()), modelMesh->vertices.size() * sizeof(trimesh::point));
+    }
+
     //std::cerr<<lightCoordMatrix(0, 0);
 
     if (isGPGPU || hasComputeShaders) {
@@ -1474,6 +1499,7 @@ void glShaderWindow::render()
         // TODO_shadowMapping: you must initialize these two matrices.
         shadowMapGenerationProgram->setUniformValue("matrix", lightCoordMatrix);
         shadowMapGenerationProgram->setUniformValue("perspective", lightPerspective);
+
         // Draw the entire scene:
         m_vao.bind();
         glDrawElements(GL_TRIANGLES, 3 * m_numFaces, GL_UNSIGNED_INT, 0);
@@ -1571,4 +1597,46 @@ void glShaderWindow::render()
     skeleton_vao.release();
     skeleton_program->release();
     index_rendu ++;
+}
+
+void glShaderWindow::calculateNewPosition(vector<QMatrix4x4>& transformMatrices, vector<QMatrix4x4>& offsetMatrices){
+    for (int i = 0; i < modelMesh->vertices.size(); i++){
+        trimesh::point current = initVertices[i];
+        Weight currentWeight = VerticesWeights[i];
+        trimesh::point newPoint;
+        for (int j = 0; j < currentWeight.size(); j++){
+            if (currentWeight.getWeight(j) != 0){
+                QVector3D tmpVec(current[0], current[1], current[2]);
+//                if (transformMatrices[j] != offsetMatrices[j]){
+//                    QMatrix4x4 hello1 = transformMatrices[j];
+//                    QMatrix4x4 hello2 = offsetMatrices[j];
+//                    std::cout << hello1(0, 0) << " " << hello2(0, 0) << endl;
+//                    std::cout << hello1(0, 1) << " " << hello2(0, 1) << endl;
+//                    std::cout << hello1(0, 2) << " " << hello2(0, 2) << endl;
+//                    std::cout << hello1(0, 3) << " " << hello2(0, 3) << endl;
+//                    std::cout << hello1(1, 0) << " " << hello2(1, 0) << endl;
+//                    std::cout << hello1(1, 1) << " " << hello2(1, 1) << endl;
+//                    std::cout << hello1(1, 2) << " " << hello2(1, 2) << endl;
+//                    std::cout << hello1(1, 3) << " " << hello2(1, 3) << endl;
+//                    std::cout << hello1(2, 0) << " " << hello2(2, 0) << endl;
+//                    std::cout << hello1(2, 1) << " " << hello2(2, 1) << endl;
+//                    std::cout << hello1(2, 2) << " " << hello2(2, 2) << endl;
+//                    std::cout << hello1(2, 3) << " " << hello2(2, 3) << endl;
+//                    std::cout << hello1(3, 0) << " " << hello2(3, 0) << endl;
+//                    std::cout << hello1(3, 1) << " " << hello2(3, 1) << endl;
+//                    std::cout << hello1(3, 2) << " " << hello2(3, 2) << endl;
+//                    std::cout << hello1(3, 3) << " " << hello2(3, 3) << endl;
+
+//                }
+
+                QVector3D wVec =  transformMatrices[j] * offsetMatrices[j].inverted() * tmpVec ;
+                newPoint += currentWeight.getWeight(j) * trimesh::point(wVec[0],
+                        wVec[1], wVec[2], 1);
+
+            }
+        }
+
+
+        modelMesh->vertices[i] = newPoint;
+    }
 }

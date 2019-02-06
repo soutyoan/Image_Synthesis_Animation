@@ -41,6 +41,7 @@ public:
 public :
 	std::string name;					// name of dof
 	std::vector<double> _values;		// different keyframes = animation curve
+    int size(){return _values.size(); }
 };
 
 
@@ -75,10 +76,12 @@ public:
 	// Constructor :
 	Joint();
 	// Destructor :
-	~Joint() {
-		_dofs.clear();
-		_children.clear();
-	}
+	~Joint(); 
+
+    void getTransformationMatrices(std::vector<QMatrix4x4>& bindedMatrices, std::vector<QMatrix4x4>& transformMatrices); // A appliquer sur le root
+
+    void getChildTransformationMatrices(std::vector<QMatrix4x4>& bindedMatrices,std::vector<QMatrix4x4>& transformMatrices,
+                                        QMatrix4x4 parentPosition, QMatrix4x4 parentRotation);
 
 	// Create from data :
 	static Joint* create(std::string name, double offX, double offY, double offZ, Joint* parent) {
@@ -117,6 +120,11 @@ public:
 
 	void exportChildPositions(QMatrix4x4& matriceTransformation,
 			QVector3D& positionRoot, vector<trimesh::point> &positions);
+
+    vector<trimesh::point> exportMiddleArticulations();
+
+    void exportChildMiddleArticulations(QMatrix4x4& matriceTransformation,
+            QVector3D& positionRoot, vector<trimesh::point> &positions);
 
 
 private:
