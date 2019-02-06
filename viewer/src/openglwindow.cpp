@@ -170,8 +170,6 @@ void OpenGLWindow::renderNow()
 
     if (m_animating)
         renderLater();
-
-    QTimer::singleShot(0, this, SLOT(renderAlternance()));
 }
 //! [4]
 

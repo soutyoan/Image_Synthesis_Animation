@@ -16,6 +16,7 @@
 #include <QtGui/QOpenGLFunctions>
 #include <QtGui/QScreen>
 #include <QMouseEvent>
+#include <QTimer>
 
 
 class glShaderWindow : public OpenGLWindow
@@ -32,6 +33,17 @@ public:
     inline const QString& getWorkingDirectory() { return workingDirectory;};
     inline const QStringList& fragShaderSuffix() { return m_fragShaderSuffix;};
     inline const QStringList& vertShaderSuffix() { return m_vertShaderSuffix;};
+
+    // Override of parent
+    void renderNow(){
+        OpenGLWindow::renderNow();
+
+        // Rendu en alternance uniquement si on utilise le
+        // shader fullRt
+        if (glShaderWindow::isFullRt){
+            QTimer::singleShot(0, this, SLOT(renderAlternance()));
+        }
+    }
 
 public slots:
     void openSceneFromFile();
