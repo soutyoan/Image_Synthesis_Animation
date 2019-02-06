@@ -329,6 +329,8 @@ QWidget *glShaderWindow::makeAuxWindow()
     buttons->addWidget(groupBox2);
     outer->addLayout(buttons);
 
+    // TODO : add a button for skeleton animation
+
     // light source intensity
     QSlider* lightSlider = new QSlider(Qt::Horizontal);
     lightSlider->setTickPosition(QSlider::TicksBelow);
@@ -399,7 +401,7 @@ QWidget *glShaderWindow::makeAuxWindow()
     outer->addLayout(hboxMaxBounds);
     outer->addWidget(maxBoundsSlider);
 
-    // TODO : add a button for skeleton animation
+
 
     // Adding a button to see impact of every articulation
     QSlider *articulationInfluenceSlider = new QSlider(Qt::Horizontal);
@@ -650,6 +652,7 @@ void glShaderWindow::bindSceneToProgram()
     s_numIndices=0;
 
     // animation update
+    frame = 0;
     // skeleton->animate(0);
     QMatrix4x4 transform;
     // transform.setToIdentity();
@@ -664,13 +667,13 @@ void glShaderWindow::bindSceneToProgram()
     cerr<<"s_numIndices = "<<s_numIndices<<endl;
 
 
-    skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     skeleton_vertexBuffer.bind();
     skeleton_vertexBuffer.allocate(s_vertices, s_numPoints * sizeof(trimesh::point));
-    skeleton_colorBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skeleton_colorBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     skeleton_colorBuffer.bind();
     skeleton_colorBuffer.allocate(s_colors, s_numPoints * sizeof(trimesh::point));
-    skeleton_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    skeleton_indexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     skeleton_indexBuffer.bind();
     skeleton_indexBuffer.allocate(s_indices, s_numIndices * sizeof(int));
 
@@ -763,9 +766,6 @@ void glShaderWindow::openSkeleton()
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
         openSkeletonFromBvh();
     }
-    // if (skeleton) {
-    //     delete skeleton;
-    // }
     skeleton = Joint::createFromFile(skeletonName.toStdString());
     cout << "Joint good"<<endl;
     bindSceneToProgram();
@@ -1560,10 +1560,25 @@ void glShaderWindow::render()
     }
     // we also bind the skeleton rendering
     skeleton_program->bind();
-    // m_matrix[0].setToIdentity();
     skeleton_program->setUniformValue("matrix", m_matrix[0]);
     skeleton_program->setUniformValue("perspective", m_perspective);
 
+
+    if (getAnimating()) {
+        usleep(skeleton->FRAME_RATE);
+        QMatrix4x4 transform;
+        vector<trimesh::point> _vert;
+        frame++;
+        if (frame==skeleton->_dofs[0]._values.size()) frame=0;
+        skeleton->animate(frame);
+        skeleton->exportPositions(transform, _vert);
+        s_numIndices = 0;
+        fillValuesFromJoints(skeleton, _vert);
+        skeleton_vertexBuffer.bind();
+        skeleton_vertexBuffer.write(0, s_vertices, s_numPoints*sizeof(trimesh::point));
+        skeleton_indexBuffer.bind();
+        skeleton_indexBuffer.write(0, s_indices, s_numIndices*sizeof(int));
+    }
     skeleton_vao.bind();
     glDrawElements(GL_LINES, s_numIndices, GL_UNSIGNED_INT, 0);
     skeleton_vao.release();

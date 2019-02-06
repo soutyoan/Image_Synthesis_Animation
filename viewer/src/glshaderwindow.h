@@ -18,6 +18,8 @@
 #include <QMouseEvent>
 #include <QTimer>
 
+#include <unistd.h>
+
 
 class glShaderWindow : public OpenGLWindow
 {
@@ -96,8 +98,6 @@ private:
     // Are we using FullRt shader?
     bool isFullRt = false;
 
-    // Are we animating the skeleton ?
-    bool isAnimate;
 
     // Are we using compute shaders?
     bool hasComputeShaders;
@@ -124,6 +124,7 @@ private:
     trimesh::point *s_colors;
     trimesh::vec2 *s_texcoords;
     trimesh::vec *s_normals;
+    int frame;
     int *s_indices;
     int s_numPoints;
     int s_numIndices;

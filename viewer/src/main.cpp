@@ -135,7 +135,7 @@ int main( int argc, char* argv[] )
     QApplication app(argc, argv);
     QString sceneName
     = "skin.off";
-    QString skeletonName = "run1.bvh";
+    QString skeletonName = "walk1.bvh";
     QString weightsName = "weights.txt";
     QString textureName = "wildtextures-seamless-wood-planks.jpg";
     QString envMapName = "pisa.png";
