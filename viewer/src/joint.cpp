@@ -326,13 +326,18 @@ void Joint::getChildTransformationMatrices(std::vector<QMatrix4x4>& bindedMatric
     childTransformation = parentTransformation;
     childPosition.translate(_offX, _offY, _offZ);
     childTransformation = parentTransformation;
-    if (_parent != NULL){
-        childTransformation.rotate(this->_parent->_curRz, 0, 0, 1);
-        childTransformation.rotate(this->_parent->_curRy, 0, 1, 0);
-        childTransformation.rotate(this->_parent->_curRx, 1, 0, 0);
-    }
+//    if (_parent != NULL){
+//        childTransformation.rotate(this->_parent->_curRz, 0, 0, 1);
+//        childTransformation.rotate(this->_parent->_curRy, 0, 1, 0);
+//        childTransformation.rotate(this->_parent->_curRx, 1, 0, 0);
+//    }
     childTransformation.translate(_offX, _offY, _offZ);
     childTransformation.translate(_curTx, _curTy, _curTz);
+
+    childTransformation.rotate(_curRz, 0, 0, 1);
+    childTransformation.rotate(_curRy, 0, 1, 0);
+    childTransformation.rotate(_curRx, 1, 0, 0);
+
     bindedMatrices.push_back(childPosition);
     transformMatrices.push_back(childTransformation);
     for (int i = 0; i < _children.size(); i++){
