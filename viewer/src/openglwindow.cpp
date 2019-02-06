@@ -185,6 +185,6 @@ void OpenGLWindow::setAnimating(bool animating)
 
 void OpenGLWindow::toggleAnimating() {
 	m_animating = !m_animating;
-	m_update_pending = false;
+    m_update_pending = false;
 	renderNow();
 }

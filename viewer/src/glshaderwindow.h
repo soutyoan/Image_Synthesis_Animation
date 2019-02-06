@@ -19,6 +19,7 @@
 #include <QTimer>
 
 #include <unistd.h>
+#include <time.h>
 
 
 class glShaderWindow : public OpenGLWindow
@@ -39,12 +40,38 @@ public:
 
     // Override of parent
     void renderNow(){
+
+        if (getAnimating()){
+
+            struct timespec start;
+            clock_gettime(CLOCK_MONOTONIC, &start);
+            double elapsed = start.tv_sec +  - timeLastFrame + (start.tv_nsec) / 1000000000.0;
+
+            if ((int)(elapsed / Joint::FRAME_TIME) <= FRAME){
+                // cerr << "WAITING" << endl;
+
+                renderLater();
+                return;
+            } else if ((int)(elapsed / Joint::FRAME_TIME) > FRAME){
+                frame = (int)(elapsed / Joint::FRAME_TIME);
+            }
+        }
+
         OpenGLWindow::renderNow();
 
         // Rendu en alternance uniquement si on utilise le
         // shader fullRt
         if (glShaderWindow::isFullRt){
             QTimer::singleShot(0, this, SLOT(renderAlternance()));
+        }
+    }
+
+    void toggleAnimating(){
+        OpenGLWindow::toggleAnimating();
+        if (getAnimating()){
+            struct timespec start;
+            clock_gettime(CLOCK_MONOTONIC, &start);
+            timeLastFrame = start.tv_sec + start.tv_nsec/1000000000.0;
         }
     }
 
@@ -90,9 +117,11 @@ private:
     void loadTexturesForShaders();
     void openScene();
     void openSkeleton();
-    void openWeights(int frame=10);
+    void openWeights();
     void mouseToTrackball(QVector2D &in, QVector3D &out);
     void fillValuesFromJoints(Joint* current, const vector<trimesh::point>& _vert);
+
+    clock_t tStart;
 
     int FRAME=0;
     vector<trimesh::point> initVertices;

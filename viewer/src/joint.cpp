@@ -3,7 +3,7 @@
 using namespace std;
 
 int Joint::GLOBAL_INDEX = 0;
-float Joint::FRAME_RATE = 0.0;
+float Joint::FRAME_TIME = 0.0;
 std::vector<string> Joint::list_names;
 
 Joint::Joint(){
@@ -162,7 +162,7 @@ void Joint::parser_motion(ifstream& file, string& buf, Joint* root) {
 	file>>buf;
 	double _rate;
 	file>>_rate;
-	Joint::FRAME_RATE = _rate;
+    Joint::FRAME_TIME = _rate;
 	file>>buf;
 	for (int frame=0; frame<nb_frames; frame++) {
 		// cout<<"frame "<<frame<<endl;

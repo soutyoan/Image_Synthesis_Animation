@@ -40,6 +40,8 @@ glShaderWindow::glShaderWindow(QWindow *parent)
     m_fragShaderSuffix << "*.frag" << "*.fs";
     m_vertShaderSuffix << "*.vert" << "*.vs";
     m_compShaderSuffix << "*.comp" << "*.cs";
+
+    tStart = clock();
 }
 
 glShaderWindow::~glShaderWindow()
@@ -227,7 +229,7 @@ void glShaderWindow::openWeightsForSkeleton(){
     }
 }
 
-void glShaderWindow::openWeights(int frame){
+void glShaderWindow::openWeights(){
     VerticesWeights.clear();
     Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
     std::cerr << "CREATED FROM FILE " << VerticesWeights.size() << "frame " << FRAME << endl;
@@ -1280,7 +1282,7 @@ void glShaderWindow::keyPressEvent(QKeyEvent* e)
 	switch (key)
 	{
 	case Qt::Key_Space:
-		toggleAnimating();
+        toggleAnimating();
 		break;
 	default:
 		break;
@@ -1422,7 +1424,14 @@ void glShaderWindow::render()
     lightPerspective = m_perspective;
 
     if (getAnimating()){
-        FRAME = (FRAME + 1)%skeleton->_dofs[0].size();
+        if (FRAME + 1 >= skeleton->_dofs[0].size()){
+            FRAME = 0;
+            struct timespec start;
+            clock_gettime(CLOCK_MONOTONIC, &start);
+            timeLastFrame = start.tv_sec + start.tv_nsec/1000000000.0;
+        } else {
+            FRAME++;
+        }
         skeleton->animate(FRAME);
 
         std::vector<QMatrix4x4> offsetMatrices;
@@ -1591,12 +1600,8 @@ void glShaderWindow::render()
 
 
     if (getAnimating()) {
-        usleep(500);
         QMatrix4x4 transform;
         vector<trimesh::point> _vert;
-        frame++;
-        if (frame==skeleton->_dofs[0]._values.size()) frame=0;
-        skeleton->animate(frame);
         skeleton->exportPositions(transform, _vert);
         s_numIndices = 0;
         fillValuesFromJoints(skeleton, _vert);
