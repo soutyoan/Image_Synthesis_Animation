@@ -35,6 +35,7 @@ public:
     inline const QString& getWorkingDirectory() { return workingDirectory;};
     inline const QStringList& fragShaderSuffix() { return m_fragShaderSuffix;};
     inline const QStringList& vertShaderSuffix() { return m_vertShaderSuffix;};
+    void calculateNewPosition(vector<QMatrix4x4>& transformMatrices, vector<QMatrix4x4>& offsetMatrix); // Calculates the position of the vertices thanks to bvh file
 
     // Override of parent
     void renderNow(){
@@ -89,9 +90,12 @@ private:
     void loadTexturesForShaders();
     void openScene();
     void openSkeleton();
-    void openWeights();
+    void openWeights(int frame=10);
     void mouseToTrackball(QVector2D &in, QVector3D &out);
     void fillValuesFromJoints(Joint* current, const vector<trimesh::point>& _vert);
+
+    int FRAME=0;
+    vector<trimesh::point> initVertices;
 
     // Are we using GPGPU?
     bool isGPGPU = false;

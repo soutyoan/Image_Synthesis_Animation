@@ -310,6 +310,39 @@ int Joint::findIndexOfJoint(string name){
 	return (int)index;
 }
 
+void Joint::getTransformationMatrices(std::vector<QMatrix4x4>& bindedMatrices, std::vector<QMatrix4x4>& transformMatrices){
+    QMatrix4x4 positionOffset;
+    QMatrix4x4 rotation;
+    getChildTransformationMatrices(bindedMatrices, transformMatrices, positionOffset, rotation);
+}
+
+void Joint::getChildTransformationMatrices(std::vector<QMatrix4x4>& bindedMatrices,std::vector<QMatrix4x4>& transformMatrices,
+                                    QMatrix4x4 parentPosition, QMatrix4x4 parentTransformation){
+    QMatrix4x4 childPosition;
+    QMatrix4x4 childTransformation;
+    childPosition = parentPosition;
+    childTransformation = parentTransformation;
+    childPosition.translate(_offX, _offY, _offZ);
+    childTransformation = parentTransformation;
+//    if (_parent != NULL){
+//        childTransformation.rotate(this->_parent->_curRz, 0, 0, 1);
+//        childTransformation.rotate(this->_parent->_curRy, 0, 1, 0);
+//        childTransformation.rotate(this->_parent->_curRx, 1, 0, 0);
+//    }
+    childTransformation.translate(_offX, _offY, _offZ);
+    childTransformation.translate(_curTx, _curTy, _curTz);
+
+    childTransformation.rotate(_curRz, 0, 0, 1);
+    childTransformation.rotate(_curRy, 0, 1, 0);
+    childTransformation.rotate(_curRx, 1, 0, 0);
+
+    bindedMatrices.push_back(childPosition);
+    transformMatrices.push_back(childTransformation);
+    for (int i = 0; i < _children.size(); i++){
+        _children[i]->getChildTransformationMatrices(bindedMatrices, transformMatrices, childPosition, childTransformation);
+    }
+}
+
 
 vector<trimesh::point> Joint::exportPositions(){
 	if (_parent != NULL){
@@ -319,10 +352,10 @@ vector<trimesh::point> Joint::exportPositions(){
 	vector<trimesh::point> positions;
 	QMatrix4x4 matrix;
 	matrix.translate(_offX, _offY, _offZ); // global offset
-	matrix.translate(_curTx, _curTy, _curTz); // frame translation
-	matrix.rotate(_curRx, 1, 0, 0);
-	matrix.rotate(_curRy, 0, 1, 0);
-	matrix.rotate(_curRz, 0, 0, 1); // frame rotation
+//	matrix.translate(_curTx, _curTy, _curTz); // frame translation
+//	matrix.rotate(_curRx, 1, 0, 0);
+//	matrix.rotate(_curRy, 0, 1, 0);
+//	matrix.rotate(_curRz, 0, 0, 1); // frame rotation
 	QVector3D positionRoot;
 	positionRoot = matrix * QVector3D(0, 0, 0);
 	float x = float(positionRoot.x());
@@ -336,11 +369,10 @@ vector<trimesh::point> Joint::exportPositions(){
 
 void Joint::exportChildPositions(QMatrix4x4& matriceTransformation, QVector3D& positionRoot, vector<trimesh::point> &positions){
 	for (int i = 0; i < this->_children.size(); i++){
-		matriceTransformation.translate(_offX, _offY, _offZ); // global offset
-		matriceTransformation.translate(_curTx, _curTy, _curTz); // frame translation
-		matriceTransformation.rotate(_curRx, 1, 0, 0);
-		matriceTransformation.rotate(_curRy, 0, 1, 0);
-		matriceTransformation.rotate(_curRz, 0, 0, 1); // frame rotation
+
+		QMatrix4x4 matrix;
+		matrix = matriceTransformation;
+		matrix.translate(_offX, _offY, _offZ); // global offset
 		QVector3D positionChild;
 		positionChild = matriceTransformation * QVector3D(0, 0, 0);
 		float x = float(positionChild.x());
@@ -378,4 +410,58 @@ void Joint::exportPositions(QMatrix4x4& transform, vector<trimesh::point>& posit
 	transform.rotate(-_curRz, 0, 0, 1);
 	transform.translate(-_curTx, -_curTy, -_curTz);
 	transform.translate(-_offX, -_offY, -_offZ);
+}
+
+vector<trimesh::point> Joint::exportMiddleArticulations(){
+    if (_parent != NULL){
+        std::cerr << "You can only call this method on root" << endl;
+        return vector<trimesh::point>();
+    }
+    vector<trimesh::point> positions;
+    QMatrix4x4 matrix;
+    QVector3D positionRoot;
+    exportChildMiddleArticulations(matrix, positionRoot, positions);
+    return positions;
+}
+
+void Joint::exportChildMiddleArticulations(QMatrix4x4& matriceTransformation, QVector3D& positionRoot, vector<trimesh::point> &positions){
+    QMatrix4x4 matrix;
+    matrix = matriceTransformation;
+    matrix.translate(_offX, _offY, _offZ); // global offset
+    QVector3D positionChild;
+    positionChild = matrix * QVector3D(0, 0, 0);
+    float x = float(positionChild.x());
+    float y = float(positionChild.y());
+    float z = float(positionChild.z());
+    trimesh::point currentPosition(x, y, z, 1);
+
+    if (this->_children.size() > 1){
+        positions.push_back(currentPosition);
+    } else if (this->_children.size() == 1){
+        Joint *child = _children[0];
+        QMatrix4x4 matrixChild;
+        matrixChild = matrix;
+        matrixChild.translate(child->_offX, child->_offY, child->_offZ); // global offset
+        QVector3D positionChild;
+        positionChild = matrixChild * QVector3D(0, 0, 0);
+        float childX = float(positionChild.x());
+        float childY = float(positionChild.y());
+        float childZ = float(positionChild.z());
+        trimesh::point currentPosition((x + childX)/2, (y + childY)/2, (z + childZ)/2, 1);
+        positions.push_back(currentPosition);
+    } else {
+        positions.push_back(trimesh::point(100000, 100000, 100000, 1));
+    }
+
+    for (int i = 0; i < this->_children.size(); i++){
+        _children[i]->exportChildMiddleArticulations(matrix, positionRoot, positions);
+    }
+}
+
+Joint::~Joint() {
+	for (int i = 0; i < _children.size(); i++){
+		delete _children[i];
+	}
+	_dofs.clear();
+	_children.clear();
 }
