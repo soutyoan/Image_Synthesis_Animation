@@ -641,9 +641,9 @@ void glShaderWindow::bindSceneToProgram()
 
     // int number = 100;
 
-    if (s_vertices == 0) s_vertices = new trimesh::point[s_numPoints];
-    if (s_colors == 0) s_colors = new trimesh::point[s_numPoints];
-    if (s_indices == 0) s_indices = new int[2*(s_numPoints-1)];
+    s_vertices = new trimesh::point[s_numPoints];
+    s_colors = new trimesh::point[s_numPoints];
+    s_indices = new int[2*(s_numPoints-1)];
 
     s_numIndices=0;
 
@@ -756,13 +756,15 @@ void glShaderWindow::openScene()
 
 void glShaderWindow::openSkeleton()
 {
-    if (!skeleton) {
+    if (skeletonName.isNull()) {
         QMessageBox::warning(0, tr("qViewer"),
                              tr("Could not load file ") + modelName, QMessageBox::Ok);
         openSkeletonFromBvh();
     }
     skeleton = Joint::createFromFile(skeletonName.toStdString());
     cout << "Joint good"<<endl;
+    bindSceneToProgram();
+    // initializeTransformForScene();
     // for (int i = 0; i < Joint::list_names.size(); i++){
     //     std::cerr << Joint::list_names[i] << " " << i << endl;
     // }
