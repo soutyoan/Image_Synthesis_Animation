@@ -1,6 +1,7 @@
 #!usr/bin/env python3
 import math as m
 import numpy as np
+from pyquaternion import Quaternion
 
 """
 Python script to convert .ascii files from Xsens sensors to .bvh files
@@ -79,11 +80,11 @@ def fill_data(elbow_data, wrist_data):
             l2_values = l2.split('\t')
             eq_values = [l1_values[i] for i in range(4, 8)] # quaternion values
             wq_values = [l2_values[i] for i in range(4, 8)] # quaternion values
-            matA = quat_to_rotMat(float(eq_values[0]), float(eq_values[1]), float(eq_values[2]), float(eq_values[3]))
-            matB = quat_to_rotMat(float(wq_values[0]), float(wq_values[1]), float(wq_values[2]), float(wq_values[3]))
-            elbow_angles, wrist_angles = globRot_to_locRot(matA, matB)
-            elbow_values.append(elbow_angles)
-            wrist_values.append(wrist_angles)
+            eq_Q = Quaternion(float(eq_values[0]), float(eq_values[1]), float(eq_values[2]), float(eq_values[3]))
+            wq_Q = Quaternion(float(wq_values[0]), float(wq_values[1]), float(wq_values[2]), float(wq_values[3]))
+            wrel_Q = wq_Q / eq_Q
+            elbow_values.append(rotMat_to_euler(eq_Q.rotation_matrix))
+            wrist_values.append(rotMat_to_euler(wrel_Q.rotation_matrix))
             frames += 1
     return frames, frame_rate, elbow_values, wrist_values
 
@@ -142,4 +143,4 @@ def globRot_to_locRot(matA, matB):
 
 
 
-ascii_to_bvh("elbow_data.txt", "wrist_data.txt")
+ascii_to_bvh("elbow_data1.txt", "wrist_data1.txt")
