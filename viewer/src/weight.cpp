@@ -28,7 +28,13 @@ void Weight::createFromFile(string filename, vector<Weight> &VerticesWeights){
         }
 
         if (expected != indexVertex) {
+            if ((indexVertex == 0) || (expected == 0)){
+                std::cerr << "Your bvh file does not seem to have the expected number "
+                "of joints by the weights file." << endl;
+                exit(EXIT_FAILURE);
+            }
             std::cerr << "Unexpected element : " << expected << " should be " << indexVertex << endl;
+            exit(EXIT_FAILURE);
         }
 
         Weight w(file, numberJoints, indicesJoints);
