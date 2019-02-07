@@ -41,8 +41,10 @@ Joint* Joint::createFromFile(std::string fileName) {
  */
 void Joint::parser_hierarchy(ifstream& file, string& buf) {
 	file >> buf;
+	cerr << "QUPO? " << buf << endl;
 	if (buf!=kHierarchy) {
 		cerr << "Could not load .BVH file : missing HIERARCHY keyword"<<endl;
+		exit(EXIT_FAILURE);
 	}
 }
 

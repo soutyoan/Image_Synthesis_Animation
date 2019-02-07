@@ -231,7 +231,9 @@ void glShaderWindow::openWeightsForSkeleton(){
 
 void glShaderWindow::openWeights(){
     VerticesWeights.clear();
-    Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
+    // Weight::createFromFile(weightsName.toStdString(), VerticesWeights);
+    vector<trimesh::point> jointPosition = skeleton->exportMiddleArticulations();
+    Weight::createRigidWeights(modelMesh->vertices, jointPosition, VerticesWeights);
     std::cerr << "CREATED FROM FILE " << VerticesWeights.size() << "frame " << FRAME << endl;
     vector<QMatrix4x4> offsetMatrices;
     skeleton->animate(FRAME);
