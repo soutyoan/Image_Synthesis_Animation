@@ -8,7 +8,6 @@
 // Buttons/sliders for User interface:
 #include <QGroupBox>
 #include <QRadioButton>
-#include <QLabel>
 // Layouts for User interface
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -437,7 +436,7 @@ QWidget *glShaderWindow::makeAuxWindow()
     frameSlider->setSliderPosition(FRAME);
     connect(frameSlider,SIGNAL(valueChanged(int)),this,SLOT(changeFrame(int)));
     QLabel* frameLabel = new QLabel("Go to frame =");
-    QLabel* frameLabelValue = new QLabel();
+    frameLabelValue = new QLabel();
     frameLabelValue->setNum(FRAME);
     connect(frameSlider,SIGNAL(valueChanged(int)),frameLabelValue,SLOT(setNum(int)));
     QHBoxLayout *hBoxframe= new QHBoxLayout;
@@ -1456,6 +1455,8 @@ void glShaderWindow::render()
             } else {
                 FRAME++;
             }
+            frameSlider->setSliderPosition(FRAME);
+            frameLabelValue->setNum(FRAME);
         }
         skeleton->animate(FRAME);
 

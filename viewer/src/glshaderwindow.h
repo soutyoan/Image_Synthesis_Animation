@@ -18,6 +18,7 @@
 #include <QMouseEvent>
 #include <QTimer>
 #include <QSlider>
+#include <QLabel>
 
 #include <unistd.h>
 #include <time.h>
@@ -124,7 +125,8 @@ private:
     void fillValuesFromJoints(Joint* current, const vector<trimesh::point>& _vert);
     QSlider *articulationInfluenceSlider;
     QSlider *frameSlider;
-    bool updateSlider = false; 
+    QLabel* frameLabelValue; 
+    bool updateSlider = false;
 
     clock_t tStart;
 
