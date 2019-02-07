@@ -84,12 +84,6 @@ void main( void )
         Cs = (F(cos_theta_d) * D(alpha, cos_theta_h) * G1(alpha, cos_theta_i) * G1(alpha, cos_theta_o) / (4 * cos_theta_i * cos_theta_o)) * vertColor;
      }
 
-     if (z_shadow < z_computed - EPS) {
-         // in shadow
-         fragColor = Ca;
-     } else {
-         // should not happen in theory
-         fragColor = Ca + Cd + Cs;
-     }
+     fragColor = Ca + Cd + Cs;
 
 }
