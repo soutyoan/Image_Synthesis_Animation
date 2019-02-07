@@ -17,6 +17,8 @@
 #include <QtGui/QScreen>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QSlider>
+#include <QLabel>
 
 #include <unistd.h>
 #include <time.h>
@@ -96,6 +98,7 @@ public slots:
     void updateEta(int etaSliderValue);
     void updateMaxBounds(int maxBoundsSliderValue);
     void updateArticulationInfluence(int currentArticulation);
+    void changeFrame(int frame);
 
 protected:
     void mousePressEvent(QMouseEvent *e);
@@ -120,6 +123,10 @@ private:
     void openWeights();
     void mouseToTrackball(QVector2D &in, QVector3D &out);
     void fillValuesFromJoints(Joint* current, const vector<trimesh::point>& _vert);
+    QSlider *articulationInfluenceSlider;
+    QSlider *frameSlider;
+    QLabel* frameLabelValue; 
+    bool updateSlider = false;
 
     clock_t tStart;
 

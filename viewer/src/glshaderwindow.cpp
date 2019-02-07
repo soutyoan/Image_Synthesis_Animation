@@ -8,8 +8,6 @@
 // Buttons/sliders for User interface:
 #include <QGroupBox>
 #include <QRadioButton>
-#include <QSlider>
-#include <QLabel>
 // Layouts for User interface
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -411,10 +409,8 @@ QWidget *glShaderWindow::makeAuxWindow()
     outer->addLayout(hboxMaxBounds);
     outer->addWidget(maxBoundsSlider);
 
-
-
     // Adding a button to see impact of every articulation
-    QSlider *articulationInfluenceSlider = new QSlider(Qt::Horizontal);
+    articulationInfluenceSlider = new QSlider(Qt::Horizontal);
     articulationInfluenceSlider->setTickPosition(QSlider::TicksBelow);
     articulationInfluenceSlider->setTickInterval(10);
     articulationInfluenceSlider->setMinimum(0);
@@ -430,6 +426,24 @@ QWidget *glShaderWindow::makeAuxWindow()
     hboxArticulationInfluence->addWidget(articulationInfluenceLabelValue);
     outer->addLayout(hboxArticulationInfluence);
     outer->addWidget(articulationInfluenceSlider);
+
+    // Adding a button to see impact of every articulation
+    frameSlider = new QSlider(Qt::Horizontal);
+    frameSlider->setTickPosition(QSlider::TicksBelow);
+    frameSlider->setTickInterval(50);
+    frameSlider->setMinimum(0);
+    frameSlider->setMaximum(100);
+    frameSlider->setSliderPosition(FRAME);
+    connect(frameSlider,SIGNAL(valueChanged(int)),this,SLOT(changeFrame(int)));
+    QLabel* frameLabel = new QLabel("Go to frame =");
+    frameLabelValue = new QLabel();
+    frameLabelValue->setNum(FRAME);
+    connect(frameSlider,SIGNAL(valueChanged(int)),frameLabelValue,SLOT(setNum(int)));
+    QHBoxLayout *hBoxframe= new QHBoxLayout;
+    hBoxframe->addWidget(frameLabel);
+    hBoxframe->addWidget(frameLabelValue);
+    outer->addLayout(hBoxframe);
+    outer->addWidget(frameSlider);
 
     auxWidget->setLayout(outer);
     return auxWidget;
@@ -650,7 +664,6 @@ void glShaderWindow::bindSceneToProgram()
 
 
     s_numPoints = skeleton->GLOBAL_INDEX-1;
-    cout <<"s_numPoints : "<<s_numPoints<<endl;
     // s_numPoints = 8;
 
     // int number = 100;
@@ -670,12 +683,7 @@ void glShaderWindow::bindSceneToProgram()
 
     skeleton->exportPositions(transform, _vert);
 
-    cout<<"Size of vector "<<_vert.size()<<endl;
-
     fillValuesFromJoints(skeleton, _vert);
-
-    cerr<<"s_numIndices = "<<s_numIndices<<endl;
-
 
     skeleton_vertexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     skeleton_vertexBuffer.bind();
@@ -783,6 +791,8 @@ void glShaderWindow::openSkeleton()
         openSkeletonFromBvh();
     }
     skeleton = Joint::createFromFile(skeletonName.toStdString());
+    articulationInfluenceSlider->setMaximum(Joint::list_names.size());
+    frameSlider->setMaximum(skeleton->_dofs[0].size()-1);
     cout << "Joint good"<<endl;
     bindSceneToProgram();
     initializeTransformForScene();
@@ -1408,6 +1418,16 @@ int get_indices_rendu_alternance(GLint* indices, int* shifts, int render_number)
     }
 }
 
+void glShaderWindow::changeFrame(int frame){
+    // We can't change the frame while we animate
+    if (getAnimating()){
+        return;
+    }
+    updateSlider = true;
+    FRAME = frame;
+    renderNow();
+}
+
 
 void glShaderWindow::render()
 {
@@ -1425,14 +1445,18 @@ void glShaderWindow::render()
     lightCoordMatrix.lookAt(lightPosition, m_center, QVector3D(0, 1.0, 0));
     lightPerspective = m_perspective;
 
-    if (getAnimating()){
-        if (FRAME + 1 >= skeleton->_dofs[0].size()){
-            FRAME = 0;
-            struct timespec start;
-            clock_gettime(CLOCK_MONOTONIC, &start);
-            timeLastFrame = start.tv_sec + start.tv_nsec/1000000000.0;
-        } else {
-            FRAME++;
+    if (getAnimating() || updateSlider){
+        if (!updateSlider){
+            if (FRAME + 1 >= skeleton->_dofs[0].size()){
+                FRAME = 0;
+                struct timespec start;
+                clock_gettime(CLOCK_MONOTONIC, &start);
+                timeLastFrame = start.tv_sec + start.tv_nsec/1000000000.0;
+            } else {
+                FRAME++;
+            }
+            frameSlider->setSliderPosition(FRAME);
+            frameLabelValue->setNum(FRAME);
         }
         skeleton->animate(FRAME);
 
@@ -1600,8 +1624,7 @@ void glShaderWindow::render()
     skeleton_program->setUniformValue("matrix", m_matrix[0]);
     skeleton_program->setUniformValue("perspective", m_perspective);
 
-
-    if (getAnimating()) {
+    if (getAnimating() || updateSlider){
         QMatrix4x4 transform;
         vector<trimesh::point> _vert;
         skeleton->exportPositions(transform, _vert);
@@ -1611,6 +1634,7 @@ void glShaderWindow::render()
         skeleton_vertexBuffer.write(0, s_vertices, s_numPoints*sizeof(trimesh::point));
         skeleton_indexBuffer.bind();
         skeleton_indexBuffer.write(0, s_indices, s_numIndices*sizeof(int));
+        updateSlider = false;
     }
     skeleton_vao.bind();
     glDrawElements(GL_LINES, s_numIndices, GL_UNSIGNED_INT, 0);
@@ -1627,27 +1651,6 @@ void glShaderWindow::calculateNewPosition(vector<QMatrix4x4>& transformMatrices,
         for (int j = 0; j < currentWeight.size(); j++){
             if (currentWeight.getWeight(j) != 0){
                 QVector3D tmpVec(current[0], current[1], current[2]);
-//                if (transformMatrices[j] != offsetMatrices[j]){
-//                    QMatrix4x4 hello1 = transformMatrices[j];
-//                    QMatrix4x4 hello2 = offsetMatrices[j];
-//                    std::cout << hello1(0, 0) << " " << hello2(0, 0) << endl;
-//                    std::cout << hello1(0, 1) << " " << hello2(0, 1) << endl;
-//                    std::cout << hello1(0, 2) << " " << hello2(0, 2) << endl;
-//                    std::cout << hello1(0, 3) << " " << hello2(0, 3) << endl;
-//                    std::cout << hello1(1, 0) << " " << hello2(1, 0) << endl;
-//                    std::cout << hello1(1, 1) << " " << hello2(1, 1) << endl;
-//                    std::cout << hello1(1, 2) << " " << hello2(1, 2) << endl;
-//                    std::cout << hello1(1, 3) << " " << hello2(1, 3) << endl;
-//                    std::cout << hello1(2, 0) << " " << hello2(2, 0) << endl;
-//                    std::cout << hello1(2, 1) << " " << hello2(2, 1) << endl;
-//                    std::cout << hello1(2, 2) << " " << hello2(2, 2) << endl;
-//                    std::cout << hello1(2, 3) << " " << hello2(2, 3) << endl;
-//                    std::cout << hello1(3, 0) << " " << hello2(3, 0) << endl;
-//                    std::cout << hello1(3, 1) << " " << hello2(3, 1) << endl;
-//                    std::cout << hello1(3, 2) << " " << hello2(3, 2) << endl;
-//                    std::cout << hello1(3, 3) << " " << hello2(3, 3) << endl;
-
-//                }
 
                 QVector3D wVec =  transformMatrices[j] * offsetMatrices[j].inverted() * tmpVec ;
                 newPoint += currentWeight.getWeight(j) * trimesh::point(wVec[0],
