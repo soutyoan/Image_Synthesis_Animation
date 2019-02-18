@@ -1,37 +1,19 @@
-# Image Synthesis Animation
+# Synthèse d'image et Animation - Rendu 2
 
-This is an Ensimag Project about Image Synthesis and Animation.
+Vous trouverez ici des sources partielles pour le rendu, uniquement le dossier viewer, pour
+cause de restrictions sur la taille du dossier à rendre. 
 
-The goal is to make a render as realistic and fast as possible.
+Les sources complètes sont disponibles sur github : 
+https://github.com/soutyoan/Image_Synthesis_Animation
 
-### How to compile the project for target myViewer
+Vous pouvez trouver l'équivalent de ce dossier de rendu, sur la branche release/rendu2, 
+disponible ici : 
+https://github.com/soutyoan/Image_Synthesis_Animation/tree/release/rendu2
+
+### Compiler le projet pour la target myViewer
 
 ```console
 me@machine:~$ qmake CONFIG+=myViewer
 me@machine:~$ make
 me@machine:~$ ./viewer/myViewer
 ```
-
-### TP and challenges - Image Synthesis
-
-- [x] TP1
-- [x] TP2
-- [x] TP3
-- [x] Intéractivité
-- [x] Shadow Mapping
-- [ ] Bounding Volume Hierarchy (see bvh branch)
-- [x] Rendu en alternance
-- [ ] Caustiques
-
-## Creating multiple targets with qmake
-
-We are currently using multiple target for test purposes.  
-- To change target :
- - Clean the folder by using the clean.sh file
- - Choose your target from one of the current available targets.
-   Current targets are :
-    1. myViewer (global)
-    2. parser (parser test)
-    3. tests (tests unitaires)
-
-    Execute : qmake CONFIG+=target
