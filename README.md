@@ -4,6 +4,14 @@ This is an Ensimag Project about Image Synthesis and Animation.
 
 The goal is to make a render as realistic and fast as possible.
 
+### How to compile the project for target myViewer
+
+```console
+me@machine:~$ qmake CONFIG+=myViewer
+me@machine:~$ make
+me@machine:~$ ./viewer/myViewer
+```
+
 ### TP and challenges - Image Synthesis
 
 - [x] TP1
