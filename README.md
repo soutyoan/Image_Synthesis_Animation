@@ -27,7 +27,3 @@ We are currently using multiple target for test purposes.
     3. tests (tests unitaires)
 
     Execute : qmake CONFIG+=target
-
-## TEAM MANAGEMENT 
-
-Trello : https://trello.com/b/ExPiGTbR/sia-maya
